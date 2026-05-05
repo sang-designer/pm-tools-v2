@@ -11,7 +11,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Users, UserCheck, RotateCw, Ban, UserX } from "lucide-react";
+import { RotateCw, Ban, UserX, Users } from "lucide-react";
+import { MailPlus } from "@/components/ui/icons/mail-plus";
+import { UserCheck } from "@/components/ui/icons/user-check";
 import { useState } from "react";
 import { Invite } from "@/lib/invite-types";
 import { toast } from "sonner";
@@ -46,7 +48,7 @@ export function InviteProgressTracker() {
 
       <div className="grid grid-cols-3 gap-2">
         <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-          <Users className="size-4 shrink-0 text-primary" />
+          <MailPlus className="size-4 shrink-0 text-primary" />
           <div>
             <p className="text-lg font-bold text-foreground">{totalSent}</p>
             <p className="text-[10px] text-muted-foreground">Sent</p>
