@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUserStats } from "@/hooks/use-user-stats";
-import { Trophy, Flame, Star } from "lucide-react";
+import { Trophy, Flame, Star, MapPin, ChevronDown, Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocationContext } from "@/lib/location-context";
 
 // Custom Progress component with purple gradient for gamified variant
 function PurpleProgress({ value = 0, className = "" }: { value?: number; className?: string }) {
@@ -20,8 +22,160 @@ function PurpleProgress({ value = 0, className = "" }: { value?: number; classNa
 }
 
 interface IdentityHeaderProps {
-  variant?: "default" | "gamified" | "minimal" | "community";
+  variant?: "default" | "gamified" | "minimal" | "community" | "efficiency2";
   className?: string;
+}
+
+const RECENT_CITIES = [
+  { id: "sf-bay", name: "San Francisco Bay Area", tasksCompleted: 156, lastVisited: "Today" },
+  { id: "oakland", name: "Oakland", tasksCompleted: 42, lastVisited: "2 days ago" },
+  { id: "san-jose", name: "San Jose", tasksCompleted: 28, lastVisited: "Last week" },
+];
+
+const ALL_LOCATIONS = [
+  { id: "sf-bay", name: "San Francisco Bay Area" },
+  { id: "oakland", name: "Oakland" },
+  { id: "san-jose", name: "San Jose" },
+  { id: "los-angeles", name: "Los Angeles" },
+  { id: "boston", name: "Boston" },
+  { id: "new-york", name: "New York Metro" },
+  { id: "austin", name: "Austin Metro" },
+];
+
+function LocationSelector({ currentLocation }: { currentLocation: string }) {
+  const locationContext = useLocationContext();
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(currentLocation);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const activeLocation = locationContext ? locationContext.selectedZone : selected;
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const isSearching = search.trim().length > 0;
+
+  const filteredRecent = RECENT_CITIES.filter(city =>
+    city.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const searchResults = ALL_LOCATIONS.filter(loc =>
+    loc.name.toLowerCase().includes(search.toLowerCase()) &&
+    !RECENT_CITIES.some(rc => rc.id === loc.id)
+  );
+
+  const handleSelect = (cityName: string) => {
+    setSelected(cityName);
+    if (locationContext) {
+      locationContext.switchZone(cityName);
+    }
+    setOpen(false);
+    setSearch("");
+  };
+
+  return (
+    <div className="relative inline-block" ref={containerRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-1.5 text-sm text-foreground font-medium hover:text-primary transition-colors rounded-md px-2 py-1 -mx-2 -my-1 hover:bg-muted/60"
+      >
+        <MapPin className="h-3.5 w-3.5 text-primary" />
+        <span>{activeLocation}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-2 w-72 bg-popover border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="p-2 border-b border-border">
+            <div className="flex items-center gap-2 px-2 py-1.5 bg-muted/50 rounded-md">
+              <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <input
+                type="text"
+                placeholder="Search locations..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          <div className="p-1.5 max-h-72 overflow-y-auto">
+            {/* Recently Visited */}
+            {filteredRecent.length > 0 && (
+              <>
+                <div className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                  Recently Visited
+                </div>
+                {filteredRecent.map((city) => (
+                  <button
+                    key={city.id}
+                    onClick={() => handleSelect(city.name)}
+                    className={cn(
+                      "flex items-center w-full gap-3 px-2 py-2 rounded-md text-left transition-colors",
+                      activeLocation === city.name ? "bg-primary/10" : "hover:bg-muted/60"
+                    )}
+                  >
+                    <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-foreground truncate">{city.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {city.tasksCompleted} tasks completed · {city.lastVisited}
+                      </div>
+                    </div>
+                    {activeLocation === city.name && (
+                      <Check className="h-4 w-4 text-primary shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* Search results from all locations */}
+            {isSearching && searchResults.length > 0 && (
+              <>
+                <div className="px-2 py-1.5 mt-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide border-t border-border pt-2">
+                  All Locations
+                </div>
+                {searchResults.map((loc) => (
+                  <button
+                    key={loc.id}
+                    onClick={() => handleSelect(loc.name)}
+                    className={cn(
+                      "flex items-center w-full gap-3 px-2 py-2 rounded-md text-left transition-colors",
+                      activeLocation === loc.name ? "bg-primary/10" : "hover:bg-muted/60"
+                    )}
+                  >
+                    <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-foreground truncate">{loc.name}</div>
+                    </div>
+                    {activeLocation === loc.name && (
+                      <Check className="h-4 w-4 text-primary shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {filteredRecent.length === 0 && searchResults.length === 0 && (
+              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                No locations found
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function PlacemakerIcon({ className }: { className?: string }) {
@@ -233,6 +387,53 @@ export function IdentityHeaderVariant({ variant = "default", className }: Identi
         </Card>
       );
 
+    case "efficiency2":
+      // Canvas-style minimal design for Task Efficiency 2
+      return (
+        <div className={cn("space-y-6", className)}>
+          {/* User Info */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={userStats.avatar} alt={userStats.name} />
+                <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-slate-400 to-gray-600 text-white">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold text-foreground">{userStats.name}</h2>
+                  <PlacemakerIcon className="h-5 w-5 text-slate-600" />
+                </div>
+                <p className="text-sm font-medium text-slate-600">{userStats.rank} • {userStats.streak} day streak</p>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <div className="text-2xl font-bold text-foreground">{userStats.totalPoints.toLocaleString()}</div>
+              <div className="text-sm text-muted-foreground">Total Points</div>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-3 bg-muted/30 rounded-lg">
+              <div className="text-lg font-bold text-foreground">{userStats.weeklyProgress}</div>
+              <div className="text-xs text-muted-foreground">This Week</div>
+            </div>
+            <div className="text-center p-3 bg-muted/30 rounded-lg">
+              <div className="text-lg font-bold text-foreground">{locationStats.totalLocations}</div>
+              <div className="text-xs text-muted-foreground">Verified</div>
+            </div>
+            <div className="text-center p-3 bg-muted/30 rounded-lg">
+              <div className="text-lg font-bold text-slate-600">{Math.round(locationStats.regionHealth * 100)}%</div>
+              <div className="text-xs text-muted-foreground">Accuracy</div>
+            </div>
+          </div>
+        </div>
+      );
+
     default:
       // Default variant (existing implementation)
       return (
@@ -251,9 +452,10 @@ export function IdentityHeaderVariant({ variant = "default", className }: Identi
                 <PlacemakerIcon className="h-4 w-4 text-gray-600" />
               </div>
               <p className="text-sm font-medium text-gray-600">{userStats.rank}</p>
-              <p className="text-sm text-muted-foreground max-w-md">
-                You&apos;re currently helping us fix places near {locationStats.homeZone}
-              </p>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <span>You&apos;re currently helping us fix places near</span>
+                <LocationSelector currentLocation={locationStats.homeZone} />
+              </div>
             </div>
           </div>
 

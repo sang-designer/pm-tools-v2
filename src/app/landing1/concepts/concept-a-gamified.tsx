@@ -32,18 +32,18 @@ export function ConceptAGamified() {
           
           {/* Additional Gamified Content */}
           <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
-            {/* XP Progress Card */}
+            {/* Task Progress Card */}
             <div className="p-4 sm:p-6 bg-card border rounded-lg">
               <div className="text-center space-y-3">
-                <div className="text-sm text-muted-foreground">Total Experience</div>
+                <div className="text-sm text-muted-foreground">Tasks Remaining Today</div>
                 <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                  4,250 XP
+                  17 tasks
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  1,750 XP to next rank
+                  8 completed this session
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600 h-2 rounded-full shadow-sm" style={{ width: '67%' }}></div>
+                  <div className="bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-600 h-2 rounded-full shadow-sm" style={{ width: '32%' }}></div>
                 </div>
               </div>
             </div>
@@ -55,8 +55,8 @@ export function ConceptAGamified() {
                   <div className="text-sm font-medium text-foreground">
                     Weekly Challenge
                   </div>
-                  <div className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">
-                    +1000 XP
+                  <div className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 px-2 py-1 rounded">
+                    Special Badge
                   </div>
                 </div>
                 
@@ -67,10 +67,10 @@ export function ConceptAGamified() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">8/25</span>
+                    <span className="font-medium">8/25 venues</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600 h-2 rounded-full shadow-sm" style={{ width: '32%' }}></div>
+                    <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-violet-600 h-2 rounded-full shadow-sm" style={{ width: '32%' }}></div>
                   </div>
                 </div>
               </div>

@@ -98,15 +98,15 @@ export const POINTS = {
   STREAK_BONUS: 20,
   NEW_AREA: 15,
   STREAK_THRESHOLD: 3,
-  DAILY_TASK_BONUS: 25, // Bonus XP for tasks 9-10
+  DAILY_TASK_BONUS: 25, // Bonus XP for tasks 6-7
 } as const;
 
 export interface DailyProgress {
   date: string; // YYYY-MM-DD format
   completedVenues: string[]; // Array of venue IDs completed today
   count: number; // Number of venues completed today
-  goalReached: boolean; // Whether 8+ tasks completed
-  bonusEarned: boolean; // Whether bonus tasks (9-10) completed
+  goalReached: boolean; // Whether 5+ tasks completed
+  bonusEarned: boolean; // Whether bonus tasks (6-7) completed
 }
 
 const LEVEL_NAMES: Record<number, string> = {
@@ -213,8 +213,8 @@ export function updateDailyProgress(
     ...current,
     completedVenues: [...current.completedVenues, venueId],
     count: newCount,
-    goalReached: newCount >= 8,
-    bonusEarned: newCount >= 8, // Bonus starts at 8 tasks
+    goalReached: newCount >= 5,
+    bonusEarned: newCount >= 5, // Bonus starts at 5 tasks
   };
 }
 

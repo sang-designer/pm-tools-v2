@@ -49,7 +49,7 @@ export function QuestView() {
 
   // Handle daily goal celebrations
   useEffect(() => {
-    // Check if daily goal (8 tasks) was just reached - this is now the bonus threshold
+    // Check if daily goal (5 tasks) was just reached - this is now the bonus threshold
     if (goalReached && !prevGoalReached.current) {
       setShowDailyGoalCelebration("goal");
     }

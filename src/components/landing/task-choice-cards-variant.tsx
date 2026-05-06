@@ -3,8 +3,9 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Target, TrendingUp, Users, Award, Star } from "lucide-react";
+import { Zap, Target, TrendingUp, Users, Award, Star, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useUserStats } from "@/hooks/use-user-stats";
 import { cn } from "@/lib/utils";
 
 // Custom Progress component with purple gradient for gamified variant
@@ -20,12 +21,13 @@ function PurpleProgress({ value = 0, className = "" }: { value?: number; classNa
 }
 
 interface TaskChoiceCardsProps {
-  variant?: "default" | "gamified" | "efficiency" | "community";
+  variant?: "default" | "gamified" | "efficiency" | "community" | "efficiency2";
   className?: string;
 }
 
 export function TaskChoiceCardsVariant({ variant = "default", className }: TaskChoiceCardsProps) {
   const router = useRouter();
+  const { userStats } = useUserStats();
 
   const handleHighImpactClick = () => {
     router.push("/?mode=classic");
@@ -42,9 +44,9 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
         <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-6", className)}>
           {/* High Impact Card - Gamified */}
           <Card className="group relative cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/50">
-            {/* XP Reward Badge */}
-            <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground font-medium">
-              +50 XP
+            {/* Tasks Available Badge */}
+            <Badge className="absolute top-4 right-4 bg-violet-500 text-white font-medium">
+              12 tasks
             </Badge>
             
             <CardHeader className="pb-3">
@@ -65,7 +67,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                   {/* Difficulty indicators */}
                   <div className="flex items-center gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`h-3 w-3 ${i < 4 ? 'text-primary fill-current' : 'text-muted'}`} />
+                      <Star key={i} className={`h-3 w-3 ${i < 4 ? 'text-amber-500 fill-current' : 'text-muted'}`} />
                     ))}
                     <span className="text-xs text-muted-foreground ml-1">Expert Level</span>
                   </div>
@@ -80,21 +82,21 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                     <Award className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Deep venue verification</span>
                   </div>
-                  <Badge variant="secondary" className="text-xs">+15 XP</Badge>
+                  <Badge variant="secondary" className="text-xs">4 left</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Award className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Complex data validation</span>
                   </div>
-                  <Badge variant="secondary" className="text-xs">+20 XP</Badge>
+                  <Badge variant="secondary" className="text-xs">5 left</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Award className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Quality improvements</span>
                   </div>
-                  <Badge variant="secondary" className="text-xs">+15 XP</Badge>
+                  <Badge variant="secondary" className="text-xs">3 left</Badge>
                 </div>
               </div>
               
@@ -109,17 +111,17 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
 
           {/* Quick Daily Card - Gamified */}
           <Card className="group relative cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/50">
-            {/* Quick XP Badge */}
-            <Badge className="absolute top-4 right-4 bg-secondary text-secondary-foreground font-medium">
-              +5-15 XP
+            {/* Tasks Available Badge */}
+            <Badge className="absolute top-4 right-4 bg-teal-500 text-white font-medium">
+              23 tasks
             </Badge>
             
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-secondary rounded-lg">
-                      <Zap className="h-5 w-5 text-secondary-foreground" />
+                    <div className="p-2 bg-teal-600 rounded-lg">
+                      <Zap className="h-5 w-5 text-white" />
                     </div>
                     <CardTitle className="text-xl font-bold text-foreground">
                       Daily Missions
@@ -131,8 +133,8 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                   
                   {/* Speed indicators */}
                   <div className="flex items-center gap-1">
-                    <Zap className="h-3 w-3 text-primary" />
-                    <Zap className="h-3 w-3 text-primary" />
+                    <Zap className="h-3 w-3 text-teal-600" />
+                    <Zap className="h-3 w-3 text-teal-600" />
                     <Zap className="h-3 w-3 text-muted" />
                     <span className="text-xs text-muted-foreground ml-1">Fast Track</span>
                   </div>
@@ -147,21 +149,21 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                     <Zap className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Quick confirmations</span>
                   </div>
-                  <Badge variant="secondary" className="text-xs">+5 XP</Badge>
+                  <Badge variant="secondary" className="text-xs">8 left</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Location spotchecks</span>
                   </div>
-                  <Badge variant="secondary" className="text-xs">+10 XP</Badge>
+                  <Badge variant="secondary" className="text-xs">10 left</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">My World map view</span>
                   </div>
-                  <Badge variant="secondary" className="text-xs">+15 XP</Badge>
+                  <Badge variant="secondary" className="text-xs">5 left</Badge>
                 </div>
               </div>
               
@@ -180,36 +182,70 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
     case "efficiency":
       return (
         <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-4", className)}>
-          {/* High Impact Card - Efficiency */}
+          {/* Venue Specific Card - Efficiency */}
           <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-gray-900">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  <CardTitle className="text-lg font-semibold">High Impact Tasks</CardTitle>
-                </div>
+                <CardTitle className="text-lg font-semibold">Venue Specific Tasks</CardTitle>
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>Venue-based verification</span>
-                <Badge variant="outline" className="text-xs">High Value</Badge>
+              <div className="text-sm text-muted-foreground">
+                Venue-based verification
               </div>
             </CardHeader>
 
             <CardContent className="pt-0 space-y-4">
-              <div className="grid grid-cols-3 gap-2 text-xs text-center">
-                <div className="p-2 bg-muted/50 rounded">
-                  <div className="font-medium">3</div>
-                  <div className="text-muted-foreground">Pending</div>
-                </div>
-                <div className="p-2 bg-muted/50 rounded">
-                  <div className="font-medium">15m</div>
-                  <div className="text-muted-foreground">Avg Time</div>
-                </div>
-                <div className="p-2 bg-muted/50 rounded">
-                  <div className="font-medium">High</div>
-                  <div className="text-muted-foreground">Impact</div>
-                </div>
+              <div className="space-y-1">
+                <button
+                  className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
+                  onClick={() => router.push("/?mode=classic&filter=hours")}
+                >
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Confirm business hours</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">12 nearby</Badge>
+                </button>
+                <button
+                  className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
+                  onClick={() => router.push("/?mode=classic&filter=locations")}
+                >
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Verify locations</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">8 nearby</Badge>
+                </button>
+                <button
+                  className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
+                  onClick={() => router.push("/?mode=classic&filter=contact")}
+                >
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Update contact info</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">5 nearby</Badge>
+                </button>
+                <button
+                  className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
+                  onClick={() => router.push("/?mode=classic&filter=photos")}
+                >
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Add missing photos</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">4 nearby</Badge>
+                </button>
+                <button
+                  className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
+                  onClick={() => router.push("/?mode=classic&filter=menu")}
+                >
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Review menu details</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">3 nearby</Badge>
+                </button>
               </div>
               
               <Button 
@@ -221,36 +257,36 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
             </CardContent>
           </Card>
 
-          {/* Quick Daily Card - Efficiency */}
-          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30">
+          {/* Daily Quick Tasks Card - Efficiency */}
+          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 flex flex-col">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Zap className="h-5 w-5 text-slate-600" />
-                  <CardTitle className="text-lg font-semibold">Quick Tasks</CardTitle>
-                </div>
+                <CardTitle className="text-lg font-semibold">Daily Quick Tasks</CardTitle>
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>Map-based micro-tasks</span>
-                <Badge variant="outline" className="text-xs">Quick Wins</Badge>
+              <div className="text-sm text-muted-foreground">
+                Map-based micro-tasks · 5-10 min each
               </div>
             </CardHeader>
 
-            <CardContent className="pt-0 space-y-4">
-              <div className="grid grid-cols-3 gap-2 text-xs text-center">
-                <div className="p-2 bg-muted/50 rounded">
-                  <div className="font-medium">12</div>
-                  <div className="text-muted-foreground">Available</div>
+            <CardContent className="pt-0 space-y-4 flex flex-col flex-1">
+              {/* Streak encouragement */}
+              {userStats && userStats.streak > 0 && (
+                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30">
+                  <span className="text-lg">🔥</span>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-foreground">{userStats.streak}-day streak!</div>
+                    <div className="text-xs text-muted-foreground">Keep it going — complete a task today</div>
+                  </div>
                 </div>
-                <div className="p-2 bg-muted/50 rounded">
-                  <div className="font-medium">3m</div>
-                  <div className="text-muted-foreground">Avg Time</div>
-                </div>
-                <div className="p-2 bg-muted/50 rounded">
-                  <div className="font-medium">7 left</div>
-                  <div className="text-muted-foreground">To Goal</div>
-                </div>
+              )}
+
+              <div className="flex justify-center flex-1 items-center">
+                <img
+                  src="/illustrations/quick-tasks-community.png"
+                  alt="Community collaboration"
+                  className="h-40 w-auto opacity-90"
+                />
               </div>
               
               <Button 
@@ -262,6 +298,75 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
               </Button>
             </CardContent>
           </Card>
+        </div>
+      );
+
+    case "efficiency2":
+      // Task Efficiency 2 - High Impact card with improved layout
+      return (
+        <div className={cn("flex gap-6", className)}>
+          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-gray-900 flex-1">
+            <CardHeader className="pb-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <CardTitle className="text-lg font-bold text-foreground">High Impact Tasks</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Venue-based verification</span>
+                    <Badge variant="outline" className="text-xs bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-400">
+                      High Value
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0 space-y-8">
+              {/* Tightly grouped stats - left aligned */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-foreground">Current Queue</h4>
+                <div className="flex gap-8">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-foreground">5</div>
+                    <div className="text-xs text-muted-foreground">Pending</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-foreground">15m</div>
+                    <div className="text-xs text-muted-foreground">Avg Time</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-slate-600">High</div>
+                    <div className="text-xs text-muted-foreground">Impact</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Compact, right-aligned CTA */}
+              <div className="flex justify-end">
+                <Button 
+                  className="px-6"
+                  onClick={handleHighImpactClick}
+                >
+                  Start Tasks
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Stats Panel */}
+          <div className="flex flex-col gap-4 w-48">
+            <div className="text-center p-4 bg-slate-50/80 dark:bg-slate-900/30 rounded-xl border border-slate-200/60 dark:border-slate-700/40">
+              <div className="text-2xl font-bold text-foreground">12</div>
+              <div className="text-xs text-muted-foreground">This Week</div>
+            </div>
+            <div className="text-center p-4 bg-slate-50/80 dark:bg-slate-900/30 rounded-xl border border-slate-200/60 dark:border-slate-700/40">
+              <div className="text-2xl font-bold text-foreground">156</div>
+              <div className="text-xs text-muted-foreground">Verified</div>
+            </div>
+            <div className="text-center p-4 bg-slate-50/80 dark:bg-slate-900/30 rounded-xl border border-slate-200/60 dark:border-slate-700/40">
+              <div className="text-2xl font-bold text-slate-600">94%</div>
+              <div className="text-xs text-muted-foreground">Accuracy</div>
+            </div>
+          </div>
         </div>
       );
 

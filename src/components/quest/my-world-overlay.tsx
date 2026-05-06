@@ -17,8 +17,8 @@ export function MyWorldOverlay({ onClose }: MyWorldOverlayProps) {
   const completedCount = venueProgress.length;
   const { count: dailyCount, goal, goalReached } = useDailyProgress();
 
-  // Determine daily task progress - always show out of 8 for main goal
-  const currentGoal = goal; // Always 8 for main display
+  // Determine daily task progress - always show out of 5 for main goal
+  const currentGoal = goal; // Always 5 for main display
   const dailyProgress = Math.min((dailyCount / currentGoal) * 100, 100);
   const getDailyTaskStatus = () => {
     if (goalReached) return "Bonus Active! 🚀";

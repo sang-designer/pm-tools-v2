@@ -3,7 +3,13 @@
 import { useGame } from "@/lib/game-context";
 import { TASK_LABELS } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { MapPin, X, CheckCircle2, ChevronLeft } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MapPin, X, CheckCircle2, ChevronLeft, MoreVertical, Search, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PinPosition } from "./quest-map";
 import { playYesSound, playNoSound, playNotSureSound } from "@/lib/sounds";
@@ -127,13 +133,45 @@ function CompletedCard({
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-foreground">{venue.name}</h3>
-        <button
-          onClick={() => setSelectedVenueId(null)}
-          className="rounded-full p-2 hover:bg-accent sm:p-1"
-          aria-label="Close"
-        >
-          <X className="size-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="rounded-full p-2 hover:bg-accent sm:p-1"
+              aria-label="More options"
+            >
+              <MoreVertical className="size-3.5 text-muted-foreground" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[160px]">
+              <DropdownMenuItem
+                onClick={() => {
+                  const searchQuery = encodeURIComponent(`${venue.name} ${venue.address}`);
+                  window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
+                }}
+                className="gap-2"
+              >
+                <Search className="size-4" />
+                Search Web
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  // TODO: Navigate to edit history page
+                  window.open('/edit-history', '_blank');
+                }}
+                className="gap-2"
+              >
+                <Clock className="size-4" />
+                Edit History
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <button
+            onClick={() => setSelectedVenueId(null)}
+            className="rounded-full p-2 hover:bg-accent sm:p-1"
+            aria-label="Close"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
       </div>
       <p className="mt-0.5 text-xs text-muted-foreground">{venue.address}</p>
       <div className="mt-3 flex items-center gap-2 rounded-lg bg-green-50 p-2.5 dark:bg-green-950/40">
@@ -220,13 +258,45 @@ function TaskCardInner({
           <h3 className="text-sm font-semibold text-foreground">{venue.name}</h3>
           <p className="text-xs text-muted-foreground">{venue.address}</p>
         </div>
-        <button
-          onClick={() => setSelectedVenueId(null)}
-          className="rounded-full p-2 transition-colors hover:bg-accent sm:p-1"
-          aria-label="Close task"
-        >
-          <X className="size-3.5 text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="rounded-full p-2 transition-colors hover:bg-accent sm:p-1"
+              aria-label="More options"
+            >
+              <MoreVertical className="size-3.5 text-muted-foreground" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[160px]">
+              <DropdownMenuItem
+                onClick={() => {
+                  const searchQuery = encodeURIComponent(`${venue.name} ${venue.address}`);
+                  window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
+                }}
+                className="gap-2"
+              >
+                <Search className="size-4" />
+                Search Web
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  // TODO: Navigate to edit history page
+                  window.open('/edit-history', '_blank');
+                }}
+                className="gap-2"
+              >
+                <Clock className="size-4" />
+                Edit History
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <button
+            onClick={() => setSelectedVenueId(null)}
+            className="rounded-full p-2 transition-colors hover:bg-accent sm:p-1"
+            aria-label="Close task"
+          >
+            <X className="size-3.5 text-muted-foreground" />
+          </button>
+        </div>
       </div>
 
       <motion.div

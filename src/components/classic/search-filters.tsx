@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,10 @@ interface SearchFiltersProps {
   pendingCounts?: Record<string, number>;
   filterOpen?: boolean;
   onFilterOpenChange?: (open: boolean) => void;
+  appliedFilters?: FilterState;
 }
 
-export function SearchFilters({ needsReviewOnly = false, onNeedsReviewChange, onFiltersChange, onSearchChange, pendingCounts, filterOpen: filterOpenProp, onFilterOpenChange }: SearchFiltersProps) {
+export function SearchFilters({ needsReviewOnly = false, onNeedsReviewChange, onFiltersChange, onSearchChange, pendingCounts, filterOpen: filterOpenProp, onFilterOpenChange, appliedFilters }: SearchFiltersProps) {
   const [filterOpenInternal, setFilterOpenInternal] = useState(false);
   const filterOpen = filterOpenProp ?? filterOpenInternal;
   const setFilterOpen = onFilterOpenChange ?? setFilterOpenInternal;
@@ -37,6 +38,13 @@ export function SearchFilters({ needsReviewOnly = false, onNeedsReviewChange, on
   const [locationOpen, setLocationOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState("San Francisco");
   const [locationInput, setLocationInput] = useState("");
+
+  // Sync external applied filters into internal state
+  useEffect(() => {
+    if (appliedFilters && appliedFilters.selected.size > 0) {
+      setFilters(appliedFilters);
+    }
+  }, [appliedFilters]);
 
   const handleApply = useCallback((next: FilterState) => {
     setFilters(next);

@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { useUserStats } from "@/hooks/use-user-stats";
+import { useLocationContext } from "@/lib/location-context";
 import { 
   MapPin, 
   TrendingUp, 
@@ -36,11 +38,198 @@ interface LocationIntelligenceCardProps {
   className?: string;
 }
 
+interface LocationStats {
+  regionHealth: number;
+  homeZone: string;
+  totalLocations: number;
+  verifiedCount: number;
+  pendingCount: number;
+  recentActivity: string;
+  topContributors: Array<{ name: string; contributions: number }>;
+  weeklyStats: { locationsAdded: number; verificationsCompleted: number; issuesResolved: number };
+  regionChallenges: Array<{ title: string; description: string; priority: string }>;
+}
+
+function CommunityHealthVariant({ locationStats, className }: { locationStats: LocationStats; className?: string }) {
+  const [completedHover, setCompletedHover] = useState(false);
+  const [remainingHover, setRemainingHover] = useState(false);
+
+  return (
+    <div className={cn("space-y-6", className)}>
+      <Card className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/20 dark:to-gray-900/20 overflow-hidden">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-lg font-semibold text-slate-700 dark:text-slate-300">
+              Community Health
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-2xl font-bold text-slate-600">
+                {Math.round(locationStats.regionHealth * 100)}%
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {locationStats.homeZone} Health Score
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-semibold">{locationStats.totalLocations.toLocaleString()}</div>
+              <div className="text-sm text-muted-foreground">total places</div>
+            </div>
+          </div>
+
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600 transition-all duration-500 ease-out"
+              style={{ width: `${Math.min(100, Math.max(0, locationStats.regionHealth * 100))}%` }}
+            />
+          </div>
+
+          {/* Tasks done vs tasks remaining */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Completed - celebration on hover */}
+            <div
+              className="relative p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 transition-all duration-300 cursor-default overflow-hidden"
+              style={{
+                transform: completedHover ? 'scale(1.03)' : 'scale(1)',
+                boxShadow: completedHover ? '0 4px 20px rgba(34, 197, 94, 0.25)' : 'none',
+              }}
+              onMouseEnter={() => setCompletedHover(true)}
+              onMouseLeave={() => setCompletedHover(false)}
+            >
+              {/* Confetti burst */}
+              {completedHover && (
+                <div className="absolute inset-0 pointer-events-none overflow-visible">
+                  {Array.from({ length: 24 }).map((_, i) => {
+                    const colors = ['#22c55e', '#eab308', '#ec4899', '#8b5cf6', '#f97316', '#06b6d4', '#ef4444', '#10b981'];
+                    const color = colors[i % colors.length];
+                    const angle = (i / 24) * 360;
+                    const distance = 40 + (i % 5) * 8;
+                    const x = Math.cos((angle * Math.PI) / 180) * distance;
+                    const y = Math.sin((angle * Math.PI) / 180) * distance;
+                    const size = 4 + (i % 3) * 2;
+                    const delay = (i % 6) * 40;
+                    const isRound = i % 3 !== 0;
+                    return (
+                      <span
+                        key={i}
+                        className="absolute left-1/2 top-1/2 animate-[confetti-pop_600ms_ease-out_forwards]"
+                        style={{
+                          width: `${size}px`,
+                          height: isRound ? `${size}px` : `${size * 2.5}px`,
+                          borderRadius: isRound ? '50%' : '2px',
+                          backgroundColor: color,
+                          animationDelay: `${delay}ms`,
+                          opacity: 0,
+                          // @ts-expect-error CSS custom properties
+                          '--confetti-x': `${x}px`,
+                          '--confetti-y': `${y}px`,
+                          '--confetti-rot': `${angle + 180}deg`,
+                        }}
+                      />
+                    );
+                  })}
+                  <style>{`
+                    @keyframes confetti-pop {
+                      0% { opacity: 1; transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+                      40% { opacity: 1; }
+                      100% { opacity: 0; transform: translate(calc(-50% + var(--confetti-x)), calc(-50% + var(--confetti-y))) scale(1) rotate(var(--confetti-rot)); }
+                    }
+                  `}</style>
+                </div>
+              )}
+              <div className={`text-xl font-bold text-foreground transition-transform duration-300 ${completedHover ? 'scale-110 origin-left' : ''}`}>
+                {locationStats.verifiedCount.toLocaleString()}
+              </div>
+              <div className="text-xs text-muted-foreground">Tasks completed</div>
+            </div>
+
+            {/* Remaining - urgency nudge on hover */}
+            <div
+              className="relative p-3 rounded-lg bg-muted/60 border border-border flex items-center justify-between transition-all duration-300 cursor-pointer overflow-hidden"
+              style={{
+                transform: remainingHover ? 'scale(1.03)' : 'scale(1)',
+                borderColor: remainingHover ? 'rgb(249, 115, 22)' : undefined,
+                backgroundColor: remainingHover ? 'rgb(255, 247, 237)' : undefined,
+              }}
+              onMouseEnter={() => setRemainingHover(true)}
+              onMouseLeave={() => setRemainingHover(false)}
+            >
+              {/* Pulsing ring effect */}
+              {remainingHover && (
+                <span className="absolute inset-0 rounded-lg border-2 border-orange-300 animate-ping opacity-30" />
+              )}
+              <div>
+                <div className={`text-xl font-bold text-foreground transition-all duration-300 ${remainingHover ? 'text-orange-700' : ''}`}>
+                  {locationStats.pendingCount}
+                </div>
+                <div className={`text-xs transition-all duration-300 ${remainingHover ? 'text-orange-600 font-medium' : 'text-muted-foreground'}`}>
+                  {remainingHover ? 'They need you!' : 'Tasks remaining'}
+                </div>
+              </div>
+              <button className={`text-xs font-medium underline underline-offset-2 transition-all duration-300 ${remainingHover ? 'text-orange-700 decoration-orange-400 translate-x-0.5' : 'text-foreground decoration-muted-foreground/50'}`}>
+                Help out →
+              </button>
+            </div>
+          </div>
+          
+          <div className="text-sm text-muted-foreground">
+            {locationStats.recentActivity}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Regional Challenges */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-lg font-semibold">Area Needs Your Support</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {locationStats.regionChallenges.map((challenge, index) => (
+            <div key={index} className="space-y-2">
+              <div className="flex items-start gap-3">
+                <div className={`w-2 h-2 rounded-full mt-2 ${
+                  challenge.priority === 'high' 
+                    ? 'bg-red-500' 
+                    : challenge.priority === 'medium'
+                    ? 'bg-orange-500'
+                    : 'bg-yellow-500'
+                }`} />
+                <div className="flex-1">
+                  <div className="font-medium">{challenge.title}</div>
+                  <div className="text-sm text-muted-foreground">{challenge.description}</div>
+                </div>
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs ${
+                    challenge.priority === 'high' 
+                      ? 'border-red-200 text-red-700 bg-red-50' 
+                      : challenge.priority === 'medium'
+                      ? 'border-orange-200 text-orange-700 bg-orange-50'
+                      : 'border-yellow-200 text-yellow-700 bg-yellow-50'
+                  }`}
+                >
+                  {challenge.priority}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function LocationIntelligenceCardVariant({ 
   variant = "default", 
   className 
 }: LocationIntelligenceCardProps) {
-  const { locationStats, isLoading, error } = useUserStats();
+  const { locationStats: hookLocationStats, isLoading, error } = useUserStats();
+  const locationContext = useLocationContext();
 
   if (isLoading) {
     return (
@@ -57,7 +246,7 @@ export function LocationIntelligenceCardVariant({
     );
   }
 
-  if (error || !locationStats) {
+  if (error || !hookLocationStats) {
     return (
       <Card className={cn("", className)}>
         <CardContent className="p-6 text-center text-muted-foreground">
@@ -66,6 +255,8 @@ export function LocationIntelligenceCardVariant({
       </Card>
     );
   }
+
+  const locationStats = locationContext ? locationContext.locationStats : hookLocationStats;
 
   // Variant-specific rendering
   switch (variant) {
@@ -99,7 +290,7 @@ export function LocationIntelligenceCardVariant({
                     {index === 0 && <Badge className="text-xs bg-yellow-100 text-yellow-800">👑 Legend</Badge>}
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-primary">{contributor.contributions}</div>
+                    <div className="font-bold text-foreground">{contributor.contributions}</div>
                     <div className="text-xs text-muted-foreground">verified</div>
                   </div>
                 </div>
@@ -112,11 +303,11 @@ export function LocationIntelligenceCardVariant({
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-purple-600" />
+                  <Target className="h-5 w-5 text-violet-600" />
                   <CardTitle className="text-lg font-semibold">Weekly Challenge</CardTitle>
                 </div>
-                <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
-                  +500 XP Bonus
+                <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                  Special Badge
                 </Badge>
               </div>
             </CardHeader>
@@ -135,16 +326,16 @@ export function LocationIntelligenceCardVariant({
               </div>
               
               <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="text-center p-2 bg-purple-50 dark:bg-purple-900/30 rounded">
-                  <div className="font-bold text-purple-600">{locationStats.weeklyStats.locationsAdded}</div>
+                <div className="text-center p-2 bg-violet-50 dark:bg-violet-900/30 rounded">
+                  <div className="font-bold text-violet-600">{locationStats.weeklyStats.locationsAdded}</div>
                   <div className="text-muted-foreground">Added</div>
                 </div>
-                <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/30 rounded">
-                  <div className="font-bold text-blue-600">{locationStats.weeklyStats.verificationsCompleted}</div>
+                <div className="text-center p-2 bg-teal-50 dark:bg-teal-900/30 rounded">
+                  <div className="font-bold text-teal-600">{locationStats.weeklyStats.verificationsCompleted}</div>
                   <div className="text-muted-foreground">Verified</div>
                 </div>
-                <div className="text-center p-2 bg-green-50 dark:bg-green-900/30 rounded">
-                  <div className="font-bold text-green-600">{locationStats.weeklyStats.issuesResolved}</div>
+                <div className="text-center p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded">
+                  <div className="font-bold text-emerald-600">{locationStats.weeklyStats.issuesResolved}</div>
                   <div className="text-muted-foreground">Fixed</div>
                 </div>
               </div>
@@ -203,84 +394,7 @@ export function LocationIntelligenceCardVariant({
       );
 
     case "community":
-      return (
-        <div className={cn("space-y-6", className)}>
-          {/* Community Health */}
-          <Card className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/20 dark:to-gray-900/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-slate-600" />
-                <CardTitle className="text-lg font-semibold text-slate-700 dark:text-slate-300">
-                  Community Health
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-2xl font-bold text-slate-600">
-                    {Math.round(locationStats.regionHealth * 100)}%
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {locationStats.homeZone} Health Score
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg font-semibold">{locationStats.totalLocations.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground">total places</div>
-                </div>
-              </div>
-
-              <Progress value={locationStats.regionHealth * 100} className="h-2" />
-              
-              <div className="text-sm text-muted-foreground">
-                {locationStats.recentActivity}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Regional Challenges */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-orange-600" />
-                <CardTitle className="text-lg font-semibold">Area Needs Your Support</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {locationStats.regionChallenges.map((challenge, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-start gap-3">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      challenge.priority === 'high' 
-                        ? 'bg-red-500' 
-                        : challenge.priority === 'medium'
-                        ? 'bg-orange-500'
-                        : 'bg-yellow-500'
-                    }`} />
-                    <div className="flex-1">
-                      <div className="font-medium">{challenge.title}</div>
-                      <div className="text-sm text-muted-foreground">{challenge.description}</div>
-                    </div>
-                    <Badge 
-                      variant="outline" 
-                      className={`text-xs ${
-                        challenge.priority === 'high' 
-                          ? 'border-red-200 text-red-700 bg-red-50' 
-                          : challenge.priority === 'medium'
-                          ? 'border-orange-200 text-orange-700 bg-orange-50'
-                          : 'border-yellow-200 text-yellow-700 bg-yellow-50'
-                      }`}
-                    >
-                      {challenge.priority}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      );
+      return <CommunityHealthVariant locationStats={locationStats} className={className} />;
 
     default:
       // Default variant (existing implementation)

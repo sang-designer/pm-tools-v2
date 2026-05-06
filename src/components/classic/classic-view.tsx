@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserProfileCard } from "@/components/user-profile-card";
 import { VenueList } from "./venue-list";
 import { VenueTable } from "./venue-table";
@@ -88,11 +88,20 @@ export function ClassicView({
   const { showTrigger, triggerMessage, dismissTrigger } = useInviteTrigger();
   const { venues, selectedVenueId, setSelectedVenueId, getVenueState } = useGame();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isLgDown = useIsLgDown();
 
   const [appliedFilters, setAppliedFilters] = useState<FilterState>({ selected: new Set() });
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
+
+  // Apply filter from URL param (e.g. ?filter=hours)
+  useEffect(() => {
+    const filterParam = searchParams.get("filter");
+    if (filterParam) {
+      setAppliedFilters({ selected: new Set([filterParam]) });
+    }
+  }, [searchParams]);
 
   const pendingCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -438,6 +447,7 @@ export function ClassicView({
           pendingCounts={pendingCounts}
           filterOpen={filterOpen}
           onFilterOpenChange={setFilterOpen}
+          appliedFilters={appliedFilters}
         />
       </motion.div>
 

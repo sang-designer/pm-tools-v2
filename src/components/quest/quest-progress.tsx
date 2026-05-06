@@ -29,8 +29,8 @@ export function useDailyProgress() {
   if (!dailyProgress) {
     return { 
       count: 0, 
-      goal: 8, 
-      maxGoal: 10, 
+      goal: 5, 
+      maxGoal: 7, 
       goalReached: false, 
       bonusEarned: false,
       showBonusGoal: false,
@@ -38,14 +38,14 @@ export function useDailyProgress() {
     };
   }
   
-  // Always show progress out of 8 for the main goal
-  const currentGoal = 8;
+  // Always show progress out of 5 for the main goal
+  const currentGoal = 5;
   const pct = Math.min((dailyProgress.count / currentGoal) * 100, 100);
   
   return {
     count: dailyProgress.count,
-    goal: 8,
-    maxGoal: 10,
+    goal: 5,
+    maxGoal: 7,
     goalReached: dailyProgress.goalReached,
     bonusEarned: dailyProgress.bonusEarned,
     showBonusGoal: false, // Don't show bonus goal in main display
@@ -63,10 +63,10 @@ export function QuestProgress({ onMyWorldToggle }: QuestProgressProps) {
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (pct / 100) * circumference;
 
-  // Always show progress out of 8 for the main display
-  const currentGoal = goal; // Always 8
+  // Always show progress out of 5 for the main display
+  const currentGoal = goal; // Always 5
   const progressColor = goalReached 
-    ? "#10b981" // Green for bonus mode (8+ tasks)
+    ? "#10b981" // Green for bonus mode (5+ tasks)
     : "#3333FF"; // Blue for normal progress
 
   const getStatusText = () => {

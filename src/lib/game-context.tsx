@@ -112,7 +112,7 @@ function reducer(state: FullState, action: Action): FullState {
       if (allTasksHandled && venue) {
         updatedDailyProgress = updateDailyProgress(state.dailyProgress, action.venueId);
         
-        // Award bonus points for tasks 8+ (bonus starts immediately when goal is reached)
+        // Award bonus points for tasks 5+ (bonus starts immediately when goal is reached)
         if (updatedDailyProgress.count >= 8) {
           dailyBonusPoints = POINTS.DAILY_TASK_BONUS;
         }
