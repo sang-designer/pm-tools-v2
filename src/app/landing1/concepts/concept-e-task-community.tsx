@@ -10,9 +10,12 @@ import { IdentityHeaderVariant } from "@/components/landing/identity-header-vari
 import { TaskChoiceCardsVariant } from "@/components/landing/task-choice-cards-variant";
 import { LocationIntelligenceCardVariant } from "@/components/landing/location-intelligence-card-variant";
 import { useUserStats } from "@/hooks/use-user-stats";
-import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, ImageOff, MapPinPlus, ListChecks, UserPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LocationProvider, useLocationContext } from "@/lib/location-context";
+import { InviteModal } from "@/components/invite/invite-modal";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -39,6 +42,7 @@ const slideInRight = {
 
 function ExploreVenuesSection() {
   const [showAll, setShowAll] = useState(false);
+  const router = useRouter();
   const locationContext = useLocationContext();
   const selectedZone = locationContext?.selectedZone || "San Francisco Bay Area";
 
@@ -46,52 +50,52 @@ function ExploreVenuesSection() {
     setShowAll(false);
   }, [selectedZone]);
 
-  const venuesByLocation: Record<string, Array<{ name: string; category: string; status: string; tasksAvailable: number; image: string }>> = {
+  const venuesByLocation: Record<string, Array<{ id: string; name: string; category: string; status: string; tasksAvailable: number; image: string }>> = {
     "San Francisco Bay Area": [
-      { name: "The Daily Grind", category: "Coffee Shop", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop" },
-      { name: "Sunset Yoga Studio", category: "Fitness", status: "Updated", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1545389336-cf090694435e?w=400&h=300&fit=crop" },
-      { name: "Verde Mexican Grill", category: "Restaurant", status: "New", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&h=300&fit=crop" },
-      { name: "Main Street Books", category: "Bookstore", status: "Needs Review", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=300&fit=crop" },
-      { name: "Bay Brew Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop" },
-      { name: "FitZone Gym", category: "Fitness", status: "Needs Review", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop" },
-      { name: "Sakura Sushi", category: "Restaurant", status: "New", tasksAvailable: 5, image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&h=300&fit=crop" },
-      { name: "Urban Outfitters", category: "Retail", status: "Updated", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop" },
+      { id: "the-daily-grind", name: "The Daily Grind", category: "Coffee Shop", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop" },
+      { id: "sunset-yoga-studio", name: "Sunset Yoga Studio", category: "Fitness", status: "Updated", tasksAvailable: 2, image: "" },
+      { id: "verde-mexican-grill", name: "Verde Mexican Grill", category: "Restaurant", status: "New", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&h=300&fit=crop" },
+      { id: "main-street-books", name: "Main Street Books", category: "Bookstore", status: "Needs Review", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=300&fit=crop" },
+      { id: "bay-brew-coffee", name: "Bay Brew Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop" },
+      { id: "fitzone-gym", name: "FitZone Gym", category: "Fitness", status: "Needs Review", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop" },
+      { id: "sakura-sushi", name: "Sakura Sushi", category: "Restaurant", status: "New", tasksAvailable: 5, image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&h=300&fit=crop" },
+      { id: "urban-outfitters", name: "Urban Outfitters", category: "Retail", status: "Updated", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop" },
     ],
     "Oakland": [
-      { name: "Highwire Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop" },
-      { name: "Lake Chalet", category: "Restaurant", status: "Updated", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop" },
-      { name: "Temescal Alley Barber", category: "Services", status: "Needs Review", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=300&fit=crop" },
-      { name: "Pizzaiolo", category: "Restaurant", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop" },
-      { name: "Mua Oakland", category: "Bar & Lounge", status: "New", tasksAvailable: 5, image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop" },
-      { name: "Standard & Strange", category: "Retail", status: "Updated", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop" },
+      { id: "highwire-coffee", name: "Highwire Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop" },
+      { id: "lake-chalet", name: "Lake Chalet", category: "Restaurant", status: "Updated", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop" },
+      { id: "temescal-alley-barber", name: "Temescal Alley Barber", category: "Services", status: "Needs Review", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=300&fit=crop" },
+      { id: "pizzaiolo", name: "Pizzaiolo", category: "Restaurant", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop" },
+      { id: "mua-oakland", name: "Mua Oakland", category: "Bar & Lounge", status: "New", tasksAvailable: 5, image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop" },
+      { id: "standard-strange", name: "Standard & Strange", category: "Retail", status: "Updated", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop" },
     ],
     "San Jose": [
-      { name: "Chromatic Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&h=300&fit=crop" },
-      { name: "San Pedro Square Market", category: "Food Hall", status: "Updated", tasksAvailable: 6, image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop" },
-      { name: "Flames Eatery", category: "Restaurant", status: "Needs Review", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&h=300&fit=crop" },
-      { name: "The Gym SJ", category: "Fitness", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop" },
-      { name: "Santana Row Books", category: "Bookstore", status: "New", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=300&fit=crop" },
-      { name: "Falafel's Drive-In", category: "Restaurant", status: "Updated", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&h=300&fit=crop" },
-      { name: "Recycle Bookstore", category: "Bookstore", status: "Needs Review", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1526243741027-444d633d7365?w=400&h=300&fit=crop" },
+      { id: "chromatic-coffee", name: "Chromatic Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=400&h=300&fit=crop" },
+      { id: "san-pedro-square-market", name: "San Pedro Square Market", category: "Food Hall", status: "Updated", tasksAvailable: 6, image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop" },
+      { id: "flames-eatery", name: "Flames Eatery", category: "Restaurant", status: "Needs Review", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&h=300&fit=crop" },
+      { id: "the-gym-sj", name: "The Gym SJ", category: "Fitness", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop" },
+      { id: "santana-row-books", name: "Santana Row Books", category: "Bookstore", status: "New", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=300&fit=crop" },
+      { id: "falafels-drive-in", name: "Falafel's Drive-In", category: "Restaurant", status: "Updated", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&h=300&fit=crop" },
+      { id: "recycle-bookstore", name: "Recycle Bookstore", category: "Bookstore", status: "Needs Review", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1526243741027-444d633d7365?w=400&h=300&fit=crop" },
     ],
     "Los Angeles": [
-      { name: "Verve Coffee Roasters", category: "Coffee Shop", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop" },
-      { name: "Gjusta", category: "Bakery & Deli", status: "Updated", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop" },
-      { name: "Grand Central Market", category: "Food Hall", status: "New", tasksAvailable: 7, image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop" },
-      { name: "Runyon Canyon Trailhead", category: "Recreation", status: "Needs Review", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" },
-      { name: "The Last Bookstore", category: "Bookstore", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1526243741027-444d633d7365?w=400&h=300&fit=crop" },
-      { name: "Sugarfish by Sushi Nozawa", category: "Restaurant", status: "Updated", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&h=300&fit=crop" },
-      { name: "Barry's Bootcamp WeHo", category: "Fitness", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop" },
-      { name: "Amoeba Music", category: "Retail", status: "Needs Review", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=300&fit=crop" },
+      { id: "verve-coffee-roasters", name: "Verve Coffee Roasters", category: "Coffee Shop", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop" },
+      { id: "gjusta", name: "Gjusta", category: "Bakery & Deli", status: "Updated", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop" },
+      { id: "grand-central-market", name: "Grand Central Market", category: "Food Hall", status: "New", tasksAvailable: 7, image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop" },
+      { id: "runyon-canyon-trailhead", name: "Runyon Canyon Trailhead", category: "Recreation", status: "Needs Review", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" },
+      { id: "the-last-bookstore", name: "The Last Bookstore", category: "Bookstore", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1526243741027-444d633d7365?w=400&h=300&fit=crop" },
+      { id: "sugarfish-sushi-nozawa", name: "Sugarfish by Sushi Nozawa", category: "Restaurant", status: "Updated", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&h=300&fit=crop" },
+      { id: "barrys-bootcamp-weho", name: "Barry's Bootcamp WeHo", category: "Fitness", status: "New", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop" },
+      { id: "amoeba-music", name: "Amoeba Music", category: "Retail", status: "Needs Review", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=300&fit=crop" },
     ],
     "Boston": [
-      { name: "George Howell Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop" },
-      { name: "Neptune Oyster", category: "Restaurant", status: "Updated", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop" },
-      { name: "Brattle Book Shop", category: "Bookstore", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=300&fit=crop" },
-      { name: "Tatte Bakery & Cafe", category: "Bakery", status: "Needs Review", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=400&h=300&fit=crop" },
-      { name: "Charles River Canoe & Kayak", category: "Recreation", status: "New", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop" },
-      { name: "Row 34", category: "Restaurant", status: "Updated", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop" },
-      { name: "Trillium Brewing", category: "Brewery", status: "New", tasksAvailable: 5, image: "https://images.unsplash.com/photo-1559526324-593bc073d938?w=400&h=300&fit=crop" },
+      { id: "george-howell-coffee", name: "George Howell Coffee", category: "Coffee Shop", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop" },
+      { id: "neptune-oyster", name: "Neptune Oyster", category: "Restaurant", status: "Updated", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop" },
+      { id: "brattle-book-shop", name: "Brattle Book Shop", category: "Bookstore", status: "New", tasksAvailable: 2, image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=300&fit=crop" },
+      { id: "tatte-bakery-cafe", name: "Tatte Bakery & Cafe", category: "Bakery", status: "Needs Review", tasksAvailable: 4, image: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=400&h=300&fit=crop" },
+      { id: "charles-river-canoe-kayak", name: "Charles River Canoe & Kayak", category: "Recreation", status: "New", tasksAvailable: 1, image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop" },
+      { id: "row-34", name: "Row 34", category: "Restaurant", status: "Updated", tasksAvailable: 3, image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop" },
+      { id: "trillium-brewing", name: "Trillium Brewing", category: "Brewery", status: "New", tasksAvailable: 5, image: "https://images.unsplash.com/photo-1559526324-593bc073d938?w=400&h=300&fit=crop" },
     ],
   };
 
@@ -121,7 +125,7 @@ function ExploreVenuesSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <AnimatePresence initial={false}>
-          {visibleVenues.map((venue, index) => (
+          {visibleVenues.map((venue) => (
             <motion.div
               key={venue.name}
               initial={{ opacity: 0, height: 0 }}
@@ -135,18 +139,27 @@ function ExploreVenuesSection() {
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Card 
+                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/venue/${venue.id}`)}
+                >
                   <div className="flex gap-3 p-3">
                     <motion.div
                       className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted"
                       whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <img
-                        src={venue.image}
-                        alt={venue.name}
-                        className="h-full w-full object-cover"
-                      />
+                      {venue.image ? (
+                        <img
+                          src={venue.image}
+                          alt={venue.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center bg-muted/80 border border-dashed border-border rounded-lg">
+                          <ImageOff className="h-5 w-5 text-muted-foreground/60" />
+                        </div>
+                      )}
                     </motion.div>
                     
                     <div className="flex-1 min-w-0">
@@ -163,14 +176,14 @@ function ExploreVenuesSection() {
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">{venue.category}</p>
                       
-                      <motion.button
+                      <motion.span
                         className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline transition-colors group"
                         whileHover={{ x: 3 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <span>Start Tasks ({venue.tasksAvailable})</span>
                         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                      </motion.button>
+                      </motion.span>
                     </div>
                   </div>
                 </Card>
@@ -322,7 +335,7 @@ function YourLocalCommunityCard() {
     <motion.div variants={slideInRight}>
       <Card className="overflow-hidden">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold">Your Local Community</CardTitle>
+          <CardTitle className="text-lg font-semibold">Local Leaderboard</CardTitle>
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -477,33 +490,24 @@ function YourLocalCommunityCard() {
   );
 }
 
-function QuickActionsCard() {
-  const [clickedAction, setClickedAction] = useState<string | null>(null);
+function QuickLinksCard() {
+  const [inviteOpen, setInviteOpen] = useState(false);
 
-  const actions = [
+  const links = [
     {
-      title: "Resume Last Session",
-      description: "Continue where you left off",
-      tasks: 3,
-      accent: "bg-gradient-to-r from-orange-400 to-amber-400",
+      title: "Add New Place",
+      icon: MapPinPlus,
+      href: "/add-place",
     },
     {
-      title: "Nearby Quick Tasks",
-      description: "8 locations within 1 mile",
-      tasks: 8,
-      accent: "bg-gradient-to-r from-emerald-400 to-teal-400",
+      title: "My Suggestions",
+      icon: ListChecks,
+      href: "/my-contributions",
     },
     {
-      title: "High Priority Items",
-      description: "3 urgent verifications",
-      tasks: 3,
-      accent: "bg-gradient-to-r from-rose-400 to-pink-400",
-    },
-    {
-      title: "Your Specialties",
-      description: "Restaurant data updates",
-      tasks: 5,
-      accent: "bg-gradient-to-r from-violet-400 to-purple-400",
+      title: "Invite Friends",
+      icon: UserPlus,
+      action: () => setInviteOpen(true),
     },
   ];
 
@@ -511,52 +515,45 @@ function QuickActionsCard() {
     <motion.div variants={slideInRight}>
       <Card className="border-0 shadow-md bg-gradient-to-br from-white via-slate-50/80 to-gray-100/60 dark:from-gray-900 dark:via-gray-900/80 dark:to-gray-800/60 overflow-hidden">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+          <CardTitle className="text-lg font-semibold">Quick Links</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
-          {actions.map((action, index) => (
-            <motion.button
-              key={action.title}
-              className="flex items-center w-full gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted/60 group relative overflow-hidden"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + index * 0.08 }}
-              whileHover={{ x: 6, transition: { duration: 0.2 } }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => {
-                setClickedAction(action.title);
-                setTimeout(() => setClickedAction(null), 600);
-              }}
-            >
-              {clickedAction === action.title && (
-                <motion.div
-                  className="absolute inset-0 bg-primary/5 rounded-lg"
-                  initial={{ scale: 0, opacity: 1 }}
-                  animate={{ scale: 3, opacity: 0 }}
-                  transition={{ duration: 0.6 }}
-                />
-              )}
+          {links.map((link, index) => {
+            const Icon = link.icon;
+            const content = (
               <motion.div
-                className={`h-2 w-2 rounded-full ${action.accent} shrink-0`}
-                animate={clickedAction === action.title ? { scale: [1, 1.8, 1] } : {}}
-                transition={{ duration: 0.3 }}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium group-hover:text-primary transition-colors">
-                  {action.title}
-                </div>
-                <div className="text-xs text-muted-foreground">{action.description}</div>
-              </div>
-              <motion.span
-                className="text-xs font-semibold text-muted-foreground tabular-nums shrink-0"
-                whileHover={{ scale: 1.1 }}
+                className="flex items-center w-full gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted/60 group cursor-pointer"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + index * 0.08 }}
+                whileHover={{ x: 6, transition: { duration: 0.2 } }}
+                whileTap={{ scale: 0.97 }}
               >
-                {action.tasks} tasks
-              </motion.span>
-            </motion.button>
-          ))}
+                <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                <span className="text-sm font-medium group-hover:text-primary transition-colors">
+                  {link.title}
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 ml-auto text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-0.5" />
+              </motion.div>
+            );
+
+            if (link.href) {
+              return (
+                <Link key={link.title} href={link.href}>
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <div key={link.title} onClick={link.action}>
+                {content}
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
+      <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} />
     </motion.div>
   );
 }
@@ -610,7 +607,7 @@ function ConceptEContent() {
               animate="visible"
             >
               <YourLocalCommunityCard />
-              <QuickActionsCard />
+              <QuickLinksCard />
             </motion.div>
           </div>
         </motion.div>

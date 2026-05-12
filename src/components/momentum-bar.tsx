@@ -177,12 +177,12 @@ export function MomentumBar() {
   }, [level]);
 
   // Hide MomentumBar on dashboard pages
-  if (pathname === '/dashboard' || pathname === '/mock-data-demo' || pathname === '/landing1') {
+  if (pathname === '/dashboard' || pathname === '/mock-data-demo') {
     return null;
   }
 
   return (
-    <div className="fixed right-6 top-[72px] z-[60] sm:top-[76px]">
+    <div className="fixed right-6 top-[72px] z-40 sm:top-[76px]">
       {/* Floating rewards above the trigger */}
       <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2">
         <AnimatePresence>

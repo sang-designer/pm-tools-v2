@@ -22,7 +22,7 @@ function PurpleProgress({ value = 0, className = "" }: { value?: number; classNa
 }
 
 interface IdentityHeaderProps {
-  variant?: "default" | "gamified" | "minimal" | "community" | "efficiency2";
+  variant?: "default" | "gamified" | "minimal" | "community" | "efficiency2" | "new-user";
   className?: string;
 }
 
@@ -205,14 +205,12 @@ export function IdentityHeaderVariant({ variant = "default", className }: Identi
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-between p-6 bg-card border rounded-lg animate-pulse">
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-600" />
-          <div className="space-y-2">
-            <div className="h-5 w-32 bg-muted rounded" />
-            <div className="h-4 w-20 bg-muted rounded" />
-            <div className="h-3 w-64 bg-muted rounded" />
-          </div>
+      <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6 bg-card border rounded-lg animate-pulse">
+        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shrink-0" />
+        <div className="space-y-2">
+          <div className="h-5 w-32 bg-muted rounded" />
+          <div className="h-4 w-20 bg-muted rounded" />
+          <div className="h-3 w-48 sm:w-64 bg-muted rounded" />
         </div>
       </div>
     );
@@ -434,39 +432,120 @@ export function IdentityHeaderVariant({ variant = "default", className }: Identi
         </div>
       );
 
-    default:
-      // Default variant (existing implementation)
+    case "new-user":
       return (
-        <div className={cn("flex items-center justify-between p-6 bg-card border rounded-lg", className)}>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={userStats.avatar} alt={userStats.name} />
-              <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-blue-400 to-purple-600 text-white">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold text-foreground">{userStats.name}</h2>
-                <PlacemakerIcon className="h-4 w-4 text-gray-600" />
+        <Card className={cn("", className)}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16 ring-2 ring-primary/20">
+                  <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=face" alt="Maya Rodriguez" />
+                  <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-teal-400 to-emerald-600 text-white">
+                    MR
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-foreground">Maya Rodriguez</h2>
+                    <Badge variant="secondary" className="text-[10px] px-1.5">Newcomer</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Welcome! Start contributing to your local community.
+                  </p>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                    <span>{locationStats.homeZone}</span>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm font-medium text-gray-600">{userStats.rank}</p>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <span>You&apos;re currently helping us fix places near</span>
-                <LocationSelector currentLocation={locationStats.homeZone} />
+
+              <div className="hidden sm:flex gap-8 text-right">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Proposed</p>
+                  <p className="text-2xl font-bold text-foreground">0</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Approved</p>
+                  <p className="text-2xl font-bold text-foreground">0</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+
+    default:
+      return (
+        <div className={cn("p-4 sm:p-6 bg-card border rounded-lg", className)}>
+          {/* Desktop layout */}
+          <div className="hidden sm:flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={userStats.avatar} alt={userStats.name} />
+                <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-blue-400 to-purple-600 text-white">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-semibold text-foreground">{userStats.name}</h2>
+                  <PlacemakerIcon className="h-4 w-4 text-gray-600" />
+                </div>
+                <p className="text-sm font-medium text-gray-600">{userStats.rank}</p>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <span>You&apos;re currently helping us fix places near</span>
+                  <LocationSelector currentLocation={locationStats.homeZone} />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-12 text-right">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Proposed</p>
+                <p className="text-2xl font-bold text-foreground">{userStats.proposedCount}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Approved</p>
+                <p className="text-2xl font-bold text-foreground">{userStats.approvedCount}</p>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-12 text-right">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Proposed</p>
-              <p className="text-2xl font-bold text-foreground">{userStats.proposedCount}</p>
+          {/* Mobile layout */}
+          <div className="sm:hidden">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 shrink-0">
+                <AvatarImage src={userStats.avatar} alt={userStats.name} />
+                <AvatarFallback className="text-sm font-semibold bg-gradient-to-br from-blue-400 to-purple-600 text-white">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-base font-semibold text-foreground truncate">{userStats.name}</h2>
+                  <PlacemakerIcon className="h-4 w-4 text-gray-600 shrink-0" />
+                </div>
+                <p className="text-sm font-medium text-gray-600">{userStats.rank}</p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Approved</p>
-              <p className="text-2xl font-bold text-foreground">{userStats.approvedCount}</p>
+
+            <div className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
+              <span>You&apos;re currently helping us fix places near</span>
+              <LocationSelector currentLocation={locationStats.homeZone} />
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-md bg-muted/40 px-3 py-2.5 text-center">
+                <p className="text-2xl font-bold text-foreground">{userStats.proposedCount}</p>
+                <p className="text-xs text-muted-foreground">Proposed</p>
+              </div>
+              <div className="rounded-md bg-muted/40 px-3 py-2.5 text-center">
+                <p className="text-2xl font-bold text-foreground">{userStats.approvedCount}</p>
+                <p className="text-xs text-muted-foreground">Approved</p>
+              </div>
             </div>
           </div>
         </div>

@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import { UserProfileCard } from "@/components/user-profile-card";
 import { VenueList } from "./venue-list";
 import { VenueTable } from "./venue-table";
 import { SearchFilters } from "./search-filters";
 import { MapPanel } from "./map-panel";
 import { LeaderboardDrawer } from "./leaderboard-drawer";
-import { InviteButton } from "@/components/invite/invite-button";
 import { FilterState, FILTER_GROUPS } from "./filter-drawer";
 import { InviteModal } from "@/components/invite/invite-modal";
 import { RewardBanner } from "@/components/invite/reward-banner";
@@ -19,15 +17,8 @@ import { useGame } from "@/lib/game-context";
 import { useIsLgDown } from "@/hooks/use-responsive";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { PanelTopOpen, PanelTopClose, X, ArrowRight, Search, SlidersHorizontal, List, Map } from "lucide-react";
+import { X, ArrowRight, Search, SlidersHorizontal, List, Map, Home, ChevronRight } from "lucide-react";
 
-const PROFILE_COLLAPSED_KEY = "placemaker-profile-collapsed";
 
 const staggerItem = {
   hidden: { opacity: 0, y: 20 },
@@ -79,12 +70,9 @@ export function ClassicView({
     setInternalInvite(open);
     onExternalInviteChange?.(open);
   }, [onExternalInviteChange]);
-  const [viewMode, setViewMode] = useState<"map" | "list">("map");
-  const [mobileViewMode, setMobileViewMode] = useState<"list" | "map">("map");
+  const [viewMode, setViewMode] = useState<"map" | "list">("list");
+  const [mobileViewMode, setMobileViewMode] = useState<"list" | "map">("list");
   const [needsReviewOnly, setNeedsReviewOnly] = useState(false);
-  const [profileCollapsed, setProfileCollapsed] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
-  const [profileHeight, setProfileHeight] = useState<number>(0);
   const { showTrigger, triggerMessage, dismissTrigger } = useInviteTrigger();
   const { venues, selectedVenueId, setSelectedVenueId, getVenueState } = useGame();
   const router = useRouter();
@@ -176,28 +164,6 @@ export function ClassicView({
   const selectedVenue = selectedVenueId
     ? filteredVenues.find((v) => v.id === selectedVenueId) ?? venues.find((v) => v.id === selectedVenueId)
     : null;
-
-  useEffect(() => {
-    setProfileCollapsed(localStorage.getItem(PROFILE_COLLAPSED_KEY) === "true");
-  }, []);
-
-  useEffect(() => {
-    const el = profileRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      setProfileHeight(entry.contentRect.height);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const toggleProfile = useCallback(() => {
-    setProfileCollapsed((prev) => {
-      const next = !prev;
-      localStorage.setItem(PROFILE_COLLAPSED_KEY, String(next));
-      return next;
-    });
-  }, []);
 
   const animate = staggerEntrance ? "visible" : undefined;
   const initial = staggerEntrance ? "hidden" : undefined;
@@ -331,104 +297,36 @@ export function ClassicView({
 
   // ─── Desktop layout (unchanged) / Mobile list view ────────────────────
   return (
-    <div className="relative px-4 py-4 sm:px-8 lg:px-12">
-      <RewardBanner />
-
-      <motion.div
-        variants={staggerItem}
-        custom={0}
-        initial={initial}
-        animate={animate}
-      >
-        <motion.div
-          animate={{
-            height: profileCollapsed ? 0 : profileHeight,
-            opacity: profileCollapsed ? 0 : 1,
-          }}
-          transition={{
-            height: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
-            opacity: { duration: 0.2, ease: "easeOut" },
-          }}
-          style={{ overflow: "clip" }}
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 mb-4">
+        <a 
+          href="/" 
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <div ref={profileRef}>
-            <h1 className="mb-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-              Welcome, Sang
-            </h1>
-            <div className="mb-6 flex flex-col gap-6 lg:flex-row lg:items-start" data-guide="profile">
-              <div className="min-w-0 flex-1">
-                <UserProfileCard />
-              </div>
-              <div className="flex w-full shrink-0 flex-col lg:w-[304px]">
-                <div className="lg:px-4">
-                  <h3 className="my-1 text-base font-medium text-foreground">Quick Links</h3>
-                </div>
-                <nav className="flex flex-1 gap-4 lg:flex-col lg:gap-1.5 lg:px-4" aria-label="Quick links">
-                  <a href="/add-place" className="min-h-[44px] flex items-center text-sm text-primary hover:underline sm:min-h-0">Add a new place</a>
-                  <a href="/my-contributions" className="min-h-[44px] flex items-center text-sm text-primary hover:underline sm:min-h-0">My suggestions</a>
-                  <button onClick={() => setLeaderboardOpen(true)} className="min-h-[44px] flex items-center text-sm text-primary hover:underline text-left sm:min-h-0">Leaderboard</button>
-                  <div>
-                    <InviteButton variant="inline" onClick={() => setInviteOpen(true)} />
-                  </div>
-                </nav>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
+          <Home className="h-3.5 w-3.5" />
+          Home
+        </a>
+        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-sm font-medium text-foreground">Venue Management</span>
+      </div>
+
+      <RewardBanner />
 
       <motion.div
         variants={staggerItem}
         custom={1}
         initial={initial}
         animate={animate}
-        className="mb-4 flex items-center justify-between"
+        className="mb-6 flex items-center justify-between"
       >
         <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <button
-                    onClick={toggleProfile}
-                    className="group inline-flex size-10 items-center justify-center rounded-lg border border-border/60 bg-card text-muted-foreground shadow-sm transition-all hover:border-border hover:bg-accent hover:text-foreground hover:shadow active:scale-95 sm:size-8"
-                  />
-                }
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {profileCollapsed ? (
-                    <motion.span
-                      key="open"
-                      className="inline-flex"
-                      initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
-                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                      exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    >
-                      <PanelTopOpen className="size-4" />
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="close"
-                      className="inline-flex"
-                      initial={{ opacity: 0, scale: 0.5, rotate: 90 }}
-                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                      exit={{ opacity: 0, scale: 0.5, rotate: -90 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    >
-                      <PanelTopClose className="size-4" />
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                {profileCollapsed ? "Show profile" : "Hide profile"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            Foursquare Places
+            Active Tasks
           </h2>
+          <Badge variant="secondary" className="text-xs font-medium">
+            {pendingCounts.total} pending
+          </Badge>
         </div>
       </motion.div>
 
@@ -437,7 +335,7 @@ export function ClassicView({
         custom={2}
         initial={initial}
         animate={animate}
-        className="mb-4"
+        className="mb-6"
       >
         <SearchFilters
           needsReviewOnly={needsReviewOnly}
@@ -448,6 +346,7 @@ export function ClassicView({
           filterOpen={filterOpen}
           onFilterOpenChange={setFilterOpen}
           appliedFilters={appliedFilters}
+          viewMode={viewMode}
         />
       </motion.div>
 
@@ -460,20 +359,18 @@ export function ClassicView({
       >
         {viewMode === "map" ? (
           <div
-            className={`flex flex-col gap-4 lg:flex-row lg:gap-0 ${
-              profileCollapsed
-                ? "h-[calc(100dvh-180px)] lg:h-[calc(100vh-180px)]"
-                : "h-[calc(100dvh-340px)] lg:h-[calc(100vh-340px)]"
-            }`}
+            className="flex flex-col gap-6 lg:flex-row lg:gap-6 h-[calc(100dvh-240px)] lg:h-[calc(100vh-240px)]"
             style={{ minHeight: "400px" }}
           >
             {(!isLgDown || mobileViewMode === "list") && (
-              <div className="h-full w-full shrink-0 lg:w-[476px]" data-guide="venue-list">
-                <VenueList venues={filteredVenues} />
+              <div className="h-full w-full shrink-0 lg:w-[480px]" data-guide="venue-list">
+                <div className="h-full rounded-xl border border-border/40 bg-card/50 shadow-sm overflow-hidden">
+                  <VenueList venues={filteredVenues} />
+                </div>
               </div>
             )}
             {(!isLgDown || mobileViewMode === "map") && (
-              <div className="flex-1 overflow-hidden rounded-2xl relative z-0" data-guide="map">
+              <div className="flex-1 overflow-hidden rounded-xl border border-border/40 bg-card/50 shadow-sm relative z-0" data-guide="map">
                 <MapPanel venues={filteredVenues} />
 
                 <AnimatePresence>
@@ -525,8 +422,8 @@ export function ClassicView({
             )}
           </div>
         ) : (
-          <div style={{ minHeight: "400px" }}>
-            <p className="mb-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-border/40 bg-card/50 shadow-sm p-6" style={{ minHeight: "400px" }}>
+            <p className="mb-6 text-sm text-muted-foreground">
               Click on a place below to start voting on other users&apos; edits, or provide feedback about a specific place by using the search bar above.
             </p>
             <VenueTable venues={filteredVenues} />

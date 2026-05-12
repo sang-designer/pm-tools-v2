@@ -30,11 +30,11 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
   const { userStats } = useUserStats();
 
   const handleHighImpactClick = () => {
-    router.push("/?mode=classic");
+    router.push("/places");
   };
 
   const handleQuickDailyClick = () => {
-    router.push("/?mode=quest");
+    router.push("/places-daily-tasks");
   };
 
   // Variant-specific rendering
@@ -181,7 +181,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
 
     case "efficiency":
       return (
-        <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-4", className)}>
+        <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-4 items-start", className)}>
           {/* Venue Specific Card - Efficiency */}
           <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-gray-900">
             <CardHeader className="pb-4">
@@ -198,7 +198,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
               <div className="space-y-1">
                 <button
                   className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
-                  onClick={() => router.push("/?mode=classic&filter=hours")}
+                  onClick={() => router.push("/places?filter=hours")}
                 >
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -208,7 +208,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                 </button>
                 <button
                   className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
-                  onClick={() => router.push("/?mode=classic&filter=locations")}
+                  onClick={() => router.push("/places?filter=locations")}
                 >
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -218,7 +218,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                 </button>
                 <button
                   className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
-                  onClick={() => router.push("/?mode=classic&filter=contact")}
+                  onClick={() => router.push("/places?filter=contact")}
                 >
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -228,7 +228,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                 </button>
                 <button
                   className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
-                  onClick={() => router.push("/?mode=classic&filter=photos")}
+                  onClick={() => router.push("/places?filter=photos")}
                 >
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -238,7 +238,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                 </button>
                 <button
                   className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
-                  onClick={() => router.push("/?mode=classic&filter=menu")}
+                  onClick={() => router.push("/places?filter=menu")}
                 >
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -258,7 +258,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
           </Card>
 
           {/* Daily Quick Tasks Card - Efficiency */}
-          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 flex flex-col">
+          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold">Daily Quick Tasks</CardTitle>
@@ -269,7 +269,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
               </div>
             </CardHeader>
 
-            <CardContent className="pt-0 space-y-4 flex flex-col flex-1">
+            <CardContent className="pt-0 space-y-4">
               {/* Streak encouragement */}
               {userStats && userStats.streak > 0 && (
                 <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30">
@@ -280,14 +280,6 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
                   </div>
                 </div>
               )}
-
-              <div className="flex justify-center flex-1 items-center">
-                <img
-                  src="/illustrations/quick-tasks-community.png"
-                  alt="Community collaboration"
-                  className="h-40 w-auto opacity-90"
-                />
-              </div>
               
               <Button 
                 variant="outline"

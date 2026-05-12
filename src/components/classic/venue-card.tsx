@@ -4,6 +4,8 @@ import { Venue } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { MapPin, ArrowRight } from "lucide-react";
 
 interface VenueCardProps {
   venue: Venue;
@@ -22,28 +24,45 @@ export function VenueCard({ venue, isSelected, onClick, onMouseEnter, onMouseLea
   };
 
   return (
-    <button
+    <motion.button
       onClick={handleClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
       className={cn(
-        "w-full rounded-2xl border bg-card p-4 text-left transition-all hover:shadow-md",
+        "w-full rounded-xl border bg-card/50 backdrop-blur p-4 text-left transition-all hover:shadow-lg group",
+        "bg-gradient-to-br from-white via-slate-50/80 to-gray-100/60 dark:from-gray-900 dark:via-gray-900/80 dark:to-gray-800/60",
         isSelected
-          ? "border-primary bg-primary/5 shadow-md ring-1 ring-primary/20"
-          : "border-border"
+          ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/30"
+          : "border-border/40 hover:border-primary/30"
       )}
     >
-      <div className="mb-1 text-base font-medium text-foreground">{venue.name}</div>
-      <p className="mb-3 text-sm text-muted-foreground">{venue.address}</p>
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+            <div className="font-semibold text-foreground text-base truncate">{venue.name}</div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{venue.address}</p>
+        </div>
+        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 ml-2" />
+      </div>
+      
       {!venue.globallyCompleted && venue.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {venue.tags.map((tag) => (
-            <Badge key={tag} variant="secondary">
+            <Badge 
+              key={tag} 
+              variant="secondary" 
+              className="text-xs font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+            >
               {tag}
             </Badge>
           ))}
         </div>
       )}
-    </button>
+    </motion.button>
   );
 }

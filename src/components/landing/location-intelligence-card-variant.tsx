@@ -16,8 +16,7 @@ import {
   Clock,
   Award,
   Target,
-  Activity,
-  Heart
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

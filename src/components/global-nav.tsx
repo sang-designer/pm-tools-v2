@@ -61,27 +61,32 @@ interface GlobalNavProps {
 }
 
 export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeaderboard, onOpenInvite }: GlobalNavProps) {
-  const tabs = ["Home", "Contribute"];
+  const tabs = ["Home", "Places", "Contribute"];
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [contributeOpen, setContributeOpen] = useState(false);
+  const [placesOpen, setPlacesOpen] = useState(false);
   const [dryRun, setDryRun] = useState(false);
   const contributeRef = useRef<HTMLDivElement>(null);
+  const placesRef = useRef<HTMLDivElement>(null);
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (!contributeOpen) return;
+    if (!contributeOpen && !placesOpen) return;
     function handleClick(e: MouseEvent) {
-      if (contributeRef.current && !contributeRef.current.contains(e.target as Node)) {
+      if (contributeOpen && contributeRef.current && !contributeRef.current.contains(e.target as Node)) {
         setContributeOpen(false);
+      }
+      if (placesOpen && placesRef.current && !placesRef.current.contains(e.target as Node)) {
+        setPlacesOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [contributeOpen]);
+  }, [contributeOpen, placesOpen]);
 
   return (
     <>
@@ -167,6 +172,41 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                         Best Practices
                         <ExternalLink className="size-3.5 text-muted-foreground" />
                       </a>
+                    </div>
+                  )}
+                </div>
+              ) : tab === "Places" ? (
+                <div key={tab} className="relative" ref={placesRef}>
+                  <button
+                    className={cn(
+                      "flex h-16 items-center justify-center gap-1 px-4 text-sm transition-colors sm:px-6",
+                      tab === activeTab
+                        ? "border-b-2 border-foreground font-semibold text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setPlacesOpen((p) => !p)}
+                    aria-expanded={placesOpen}
+                    aria-haspopup="true"
+                  >
+                    {tab}
+                    <ChevronDown className={`size-3.5 transition-transform ${placesOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {placesOpen && (
+                    <div className="absolute left-0 top-full z-50 mt-0 w-56 rounded-lg border border-border bg-background py-2 shadow-lg">
+                      <Link
+                        href="/places"
+                        className="flex h-11 items-center px-4 text-sm text-foreground transition-colors hover:bg-accent"
+                        onClick={() => setPlacesOpen(false)}
+                      >
+                        Venue Specific Tasks
+                      </Link>
+                      <Link
+                        href="/places-daily-tasks"
+                        className="flex h-11 items-center px-4 text-sm text-foreground transition-colors hover:bg-accent"
+                        onClick={() => setPlacesOpen(false)}
+                      >
+                        Daily Tasks
+                      </Link>
                     </div>
                   )}
                 </div>

@@ -28,9 +28,10 @@ interface SearchFiltersProps {
   filterOpen?: boolean;
   onFilterOpenChange?: (open: boolean) => void;
   appliedFilters?: FilterState;
+  viewMode?: "map" | "list";
 }
 
-export function SearchFilters({ needsReviewOnly = false, onNeedsReviewChange, onFiltersChange, onSearchChange, pendingCounts, filterOpen: filterOpenProp, onFilterOpenChange, appliedFilters }: SearchFiltersProps) {
+export function SearchFilters({ needsReviewOnly = false, onNeedsReviewChange, onFiltersChange, onSearchChange, pendingCounts, filterOpen: filterOpenProp, onFilterOpenChange, appliedFilters, viewMode = "map" }: SearchFiltersProps) {
   const [filterOpenInternal, setFilterOpenInternal] = useState(false);
   const filterOpen = filterOpenProp ?? filterOpenInternal;
   const setFilterOpen = onFilterOpenChange ?? setFilterOpenInternal;
@@ -92,94 +93,97 @@ export function SearchFilters({ needsReviewOnly = false, onNeedsReviewChange, on
 
   return (
     <>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="relative w-full sm:w-[468px] sm:shrink-0">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-          <Input
-            placeholder="Search for places"
-            className="pl-9"
-            aria-label="Search for places"
-            onChange={(e) => onSearchChange?.(e.target.value)}
-          />
-        </div>
-        <Popover open={locationOpen} onOpenChange={setLocationOpen}>
-          <PopoverTrigger>
-            <button
-              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:shrink-0 sm:gap-6"
-              aria-label="Select city"
-              aria-haspopup="listbox"
-            >
-              <span className="text-foreground">{selectedCity}</span>
-              <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 sm:w-64" align="start">
-            <div className="p-2">
-              <Input
-                placeholder="Enter location"
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                className="h-9"
-                autoFocus
+      <div className="rounded-xl border border-border/40 bg-card/50 backdrop-blur p-4 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-[468px] sm:shrink-0">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input
+              placeholder="Search for places"
+              className="pl-9 border-border/40 bg-background/50 backdrop-blur"
+              aria-label="Search for places"
+              onChange={(e) => onSearchChange?.(e.target.value)}
+            />
+          </div>
+          <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+            <PopoverTrigger>
+              <button
+                className="flex h-10 w-full items-center justify-between rounded-md border border-border/40 bg-background/50 backdrop-blur px-3 text-sm transition-colors hover:bg-accent hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:shrink-0 sm:gap-6"
+                aria-label="Select city"
+                aria-haspopup="listbox"
+              >
+                <span className="text-foreground font-medium">{selectedCity}</span>
+                <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 sm:w-64" align="start">
+              <div className="p-2">
+                <Input
+                  placeholder="Enter location"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  className="h-9"
+                  autoFocus
+                />
+              </div>
+              <button
+                className="flex w-full items-center gap-2.5 border-b border-border px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-accent"
+                onClick={handleUseMyLocation}
+              >
+                <MapPin className="size-4 text-muted-foreground" />
+                Use my location
+              </button>
+              <div className="max-h-48 overflow-y-auto py-1">
+                {filteredCities.map((city) => (
+                  <button
+                    key={city}
+                    className="flex w-full items-center px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
+                    onClick={() => {
+                      setSelectedCity(city);
+                      setLocationOpen(false);
+                      setLocationInput("");
+                    }}
+                  >
+                    {city}
+                  </button>
+                ))}
+                {filteredCities.length === 0 && (
+                  <p className="px-3 py-2 text-sm text-muted-foreground">No results</p>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+          {viewMode === "map" && (
+            <label className="flex items-center gap-3 whitespace-nowrap">
+              <span className="text-sm font-medium text-foreground">Show only places needing your review</span>
+              <Switch
+                checked={needsReviewOnly}
+                onCheckedChange={onNeedsReviewChange}
+                aria-label="Toggle review filter"
               />
-            </div>
-            <button
-              className="flex w-full items-center gap-2.5 border-b border-border px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-accent"
-              onClick={handleUseMyLocation}
-            >
-              <MapPin className="size-4 text-muted-foreground" />
-              Use my location
-            </button>
-            <div className="max-h-48 overflow-y-auto py-1">
-              {filteredCities.map((city) => (
+            </label>
+          )}
+          {activeChips.length > 0 && (
+            <div className="hidden items-center gap-2 sm:ml-auto sm:flex">
+              {visibleChips.map((chip) => (
                 <button
-                  key={city}
-                  className="flex w-full items-center px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
-                  onClick={() => {
-                    setSelectedCity(city);
-                    setLocationOpen(false);
-                    setLocationInput("");
-                  }}
+                  key={chip.groupKey}
+                  onClick={() => handleRemoveChip(chip.groupKey)}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
                 >
-                  {city}
+                  {chip.label}
+                  {chip.childCount != null && (
+                    <span className="text-primary/70">({chip.childCount})</span>
+                  )}
+                  <X className="size-3.5 text-primary/70 transition-colors group-hover:text-primary" />
                 </button>
               ))}
-              {filteredCities.length === 0 && (
-                <p className="px-3 py-2 text-sm text-muted-foreground">No results</p>
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
-        <label className="flex items-center gap-2 whitespace-nowrap">
-          <span className="text-xs font-medium text-foreground sm:text-sm">Show only places needing your review</span>
-          <Switch
-            checked={needsReviewOnly}
-            onCheckedChange={onNeedsReviewChange}
-            aria-label="Toggle review filter"
-          />
-        </label>
-        {activeChips.length > 0 && (
-          <div className="hidden items-center gap-2 sm:ml-auto sm:flex">
-            {visibleChips.map((chip) => (
-              <button
-                key={chip.groupKey}
-                onClick={() => handleRemoveChip(chip.groupKey)}
-                className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-              >
-                {chip.label}
-                {chip.childCount != null && (
-                  <span className="text-muted-foreground">({chip.childCount})</span>
-                )}
-                <X className="size-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
-              </button>
-            ))}
-            {overflowChips.length > 0 && (
-              <Popover open={moreOpen} onOpenChange={setMoreOpen}>
-                <PopoverTrigger>
-                  <button className="inline-flex items-center rounded-full border border-dashed border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                    +{overflowChips.length} more
-                  </button>
-                </PopoverTrigger>
+              {overflowChips.length > 0 && (
+                <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+                  <PopoverTrigger>
+                    <button className="inline-flex items-center rounded-full border border-dashed border-primary/40 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10">
+                      +{overflowChips.length} more
+                    </button>
+                  </PopoverTrigger>
                 <PopoverContent align="end" className="w-64 p-2">
                   <p className="mb-2 px-1 text-xs font-medium text-muted-foreground">Applied filters</p>
                   <div className="flex flex-col gap-1">
@@ -210,14 +214,15 @@ export function SearchFilters({ needsReviewOnly = false, onNeedsReviewChange, on
             </button>
           </div>
         )}
-        <Button
-          variant="outline"
-          className={`hidden gap-2 sm:inline-flex ${activeChips.length === 0 ? "sm:ml-auto" : ""} border-border text-foreground`}
-          onClick={() => setFilterOpen(true)}
-        >
-          <Settings2 className="size-4" aria-hidden="true" />
-          Filter
-        </Button>
+          <Button
+            variant="outline"
+            className="gap-2 border-border/40 bg-background/50 hover:bg-primary/10 hover:border-primary/30 hover:text-primary sm:ml-auto"
+            onClick={() => setFilterOpen(true)}
+          >
+            <Settings2 className="size-4" aria-hidden="true" />
+            Filter
+          </Button>
+        </div>
       </div>
 
       <FilterDrawer

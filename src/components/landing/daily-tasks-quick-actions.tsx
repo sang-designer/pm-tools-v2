@@ -259,7 +259,7 @@ export function DailyTasksQuickActions() {
 
   const handleContinueToHighImpact = () => {
     // Navigate to high impact tasks or "done" state
-    window.location.href = "/?mode=classic";
+    window.location.href = "/places";
   };
 
   const handleDoMore = () => {

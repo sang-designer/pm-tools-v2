@@ -13,6 +13,7 @@ export const PHOTO_SETS: Record<string, string[]> = {
     "https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=480&h=320&fit=crop",
     "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=480&h=320&fit=crop",
   ],
+  "sunset-yoga-studio": [],
   v2: [
     "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=480&h=320&fit=crop",
     "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=480&h=320&fit=crop",
@@ -45,6 +46,8 @@ export function PhotoGallery({ venueId }: { venueId?: string }) {
   const visibleCount = 6;
   const canPrev = offset > 0;
   const canNext = offset + visibleCount < photos.length;
+
+  if (photos.length === 0) return null;
 
   return (
     <div className="relative flex h-48 w-full overflow-x-auto snap-x snap-mandatory sm:overflow-hidden">

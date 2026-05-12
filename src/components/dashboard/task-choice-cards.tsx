@@ -9,11 +9,11 @@ export function TaskChoiceCards() {
   const router = useRouter();
 
   const handleHighImpactClick = () => {
-    router.push("/?mode=classic");
+    router.push("/places");
   };
 
   const handleQuickDailyClick = () => {
-    router.push("/?mode=quest");
+    router.push("/places-daily-tasks");
   };
 
   return (
