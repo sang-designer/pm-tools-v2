@@ -22,7 +22,7 @@ import {
   LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
@@ -64,7 +64,6 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
   const tabs = ["Home", "Places", "Contribute"];
   const { theme, setTheme } = useTheme();
   const router = useRouter();
-  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [contributeOpen, setContributeOpen] = useState(false);
@@ -323,21 +322,6 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
 
                   <Separator className="my-2" />
 
-                  {pathname !== '/dashboard' && (
-                    <>
-                      <div className="flex flex-col">
-                        <button 
-                          className="px-5 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
-                          onClick={() => router.push('/dashboard')}
-                        >
-                          Dashboard
-                        </button>
-                      </div>
-
-                      <Separator className="my-2" />
-                    </>
-                  )}
-
                   <div className="px-5">
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Settings
@@ -457,7 +441,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                 onClick={() => setMenuOpen(false)}
               >
                 <ArrowRight className="size-4 text-muted-foreground" />
-                My suggestions
+                My Contributions
               </Link>
               {onOpenLeaderboard && (
                 <button

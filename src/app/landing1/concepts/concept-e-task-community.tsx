@@ -500,7 +500,7 @@ function QuickLinksCard() {
       href: "/add-place",
     },
     {
-      title: "My Suggestions",
+      title: "My Contributions",
       icon: ListChecks,
       href: "/my-contributions",
     },

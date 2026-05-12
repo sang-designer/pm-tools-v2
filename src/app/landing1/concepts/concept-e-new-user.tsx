@@ -484,7 +484,7 @@ function QuickLinksCard() {
 
   const links = [
     { title: "Add New Place", icon: MapPinPlus, href: "/add-place" },
-    { title: "My Suggestions", icon: ListChecks, href: "/my-contributions" },
+    { title: "My Contributions", icon: ListChecks, href: "/my-contributions" },
     { title: "Invite Friends", icon: UserPlus, action: () => setInviteOpen(true) },
   ];
 
