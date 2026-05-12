@@ -320,14 +320,14 @@ function CommunityStatsToggleNewUser({ weeklyLocationsAdded }: { weeklyLocations
 
   const stats = {
     weekly: [
-      { label: "Active contributors", value: "23" },
-      { label: "New members", value: "5" },
-      { label: "Places updated", value: String(weeklyLocationsAdded) },
+      { label: "Active contributors", value: "—" },
+      { label: "New members", value: "—" },
+      { label: "Places updated", value: "—" },
     ],
     monthly: [
-      { label: "Active contributors", value: "87" },
-      { label: "New members", value: "18" },
-      { label: "Places updated", value: "94" },
+      { label: "Active contributors", value: "—" },
+      { label: "New members", value: "—" },
+      { label: "Places updated", value: "—" },
     ],
   };
 

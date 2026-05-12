@@ -448,7 +448,7 @@ export function IdentityHeaderVariant({ variant = "default", className }: Identi
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl font-semibold text-foreground">Maya Rodriguez</h2>
-                    <Badge variant="secondary" className="text-[10px] px-1.5">Newcomer</Badge>
+                    <Badge variant="secondary" className="text-[10px] px-1.5">Apprentice</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Welcome! Start contributing to your local community.
