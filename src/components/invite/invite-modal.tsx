@@ -20,6 +20,7 @@ import { toast } from "sonner";
 interface InviteModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onInviteSent?: () => void;
 }
 
 function isValidEmail(email: string) {
@@ -27,7 +28,7 @@ function isValidEmail(email: string) {
 }
 
 
-export function InviteModal({ open, onOpenChange }: InviteModalProps) {
+export function InviteModal({ open, onOpenChange, onInviteSent }: InviteModalProps) {
   const { sendBulkInvites, referralLink } = useInvite();
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState("");
@@ -68,6 +69,7 @@ export function InviteModal({ open, onOpenChange }: InviteModalProps) {
     toast.success(`${emails.length} invite${emails.length > 1 ? "s" : ""} sent!`);
     setEmails([]);
     setEmailInput("");
+    onInviteSent?.();
     onOpenChange(false);
   };
 

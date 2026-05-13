@@ -75,6 +75,7 @@ function WelcomeOnboardingCard() {
       id: "quick-task",
       title: "Complete a quick task",
       icon: Zap,
+      href: "/places-daily-tasks",
     },
     {
       id: "invite-friend",
@@ -119,7 +120,6 @@ function WelcomeOnboardingCard() {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     if (step.action) step.action();
-                    setCompleted((prev) => ({ ...prev, [step.id]: true }));
                   }}
                 >
                   {isDone ? (
@@ -137,7 +137,7 @@ function WelcomeOnboardingCard() {
 
               if (step.href) {
                 return (
-                  <Link key={step.id} href={step.href} onClick={() => setCompleted((prev) => ({ ...prev, [step.id]: true }))}>
+                  <Link key={step.id} href={step.href}>
                     {itemContent}
                   </Link>
                 );
@@ -195,7 +195,7 @@ function WelcomeOnboardingCard() {
           )}
         </CardContent>
       </Card>
-      <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} />
+      <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} onInviteSent={() => setCompleted((prev) => ({ ...prev, "invite-friend": true }))} />
     </motion.div>
   );
 }

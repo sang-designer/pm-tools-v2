@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useUserStats } from "@/hooks/use-user-stats";
 import { useLocationContext } from "@/lib/location-context";
 import { 
@@ -52,6 +53,7 @@ interface LocationStats {
 function CommunityHealthVariant({ locationStats, className }: { locationStats: LocationStats; className?: string }) {
   const [completedHover, setCompletedHover] = useState(false);
   const [remainingHover, setRemainingHover] = useState(false);
+  const router = useRouter();
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -155,6 +157,7 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
               }}
               onMouseEnter={() => setRemainingHover(true)}
               onMouseLeave={() => setRemainingHover(false)}
+              onClick={() => router.push('/places')}
             >
               {/* Pulsing ring effect */}
               {remainingHover && (
