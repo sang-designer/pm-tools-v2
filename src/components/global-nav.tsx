@@ -22,7 +22,6 @@ import {
   LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
@@ -63,7 +62,6 @@ interface GlobalNavProps {
 export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeaderboard, onOpenInvite }: GlobalNavProps) {
   const tabs = ["Home", "Places", "Contribute"];
   const { theme, setTheme } = useTheme();
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [contributeOpen, setContributeOpen] = useState(false);

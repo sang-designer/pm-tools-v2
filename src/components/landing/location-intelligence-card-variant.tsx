@@ -68,7 +68,7 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-2xl font-bold text-slate-600">
+              <div className="text-2xl font-bold text-foreground">
                 {Math.round(locationStats.regionHealth * 100)}%
               </div>
               <div className="text-sm text-muted-foreground">
@@ -94,8 +94,8 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
             <div
               className="relative p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 transition-all duration-300 cursor-default overflow-hidden"
               style={{
-                transform: completedHover ? 'scale(1.03)' : 'scale(1)',
-                boxShadow: completedHover ? '0 4px 20px rgba(34, 197, 94, 0.25)' : 'none',
+                transform: 'scale(1)',
+                boxShadow: completedHover ? '0 2px 8px rgba(34, 197, 94, 0.15)' : 'none',
               }}
               onMouseEnter={() => setCompletedHover(true)}
               onMouseLeave={() => setCompletedHover(false)}
@@ -141,7 +141,7 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
                   `}</style>
                 </div>
               )}
-              <div className={`text-xl font-bold text-foreground transition-transform duration-300 ${completedHover ? 'scale-110 origin-left' : ''}`}>
+              <div className="text-xl font-bold text-foreground">
                 {locationStats.verifiedCount.toLocaleString()}
               </div>
               <div className="text-xs text-muted-foreground">Tasks completed</div>
@@ -151,7 +151,7 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
             <div
               className="relative p-3 rounded-lg bg-muted/60 border border-border flex items-center justify-between transition-all duration-300 cursor-pointer overflow-hidden"
               style={{
-                transform: remainingHover ? 'scale(1.03)' : 'scale(1)',
+                transform: remainingHover ? 'scale(1.01)' : 'scale(1)',
                 borderColor: remainingHover ? 'rgb(249, 115, 22)' : undefined,
                 backgroundColor: remainingHover ? 'rgb(255, 247, 237)' : undefined,
               }}
@@ -183,45 +183,6 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
         </CardContent>
       </Card>
 
-      {/* Regional Challenges */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-lg font-semibold">Area Needs Your Support</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {locationStats.regionChallenges.map((challenge, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-start gap-3">
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  challenge.priority === 'high' 
-                    ? 'bg-red-500' 
-                    : challenge.priority === 'medium'
-                    ? 'bg-orange-500'
-                    : 'bg-yellow-500'
-                }`} />
-                <div className="flex-1">
-                  <div className="font-medium">{challenge.title}</div>
-                  <div className="text-sm text-muted-foreground">{challenge.description}</div>
-                </div>
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs ${
-                    challenge.priority === 'high' 
-                      ? 'border-red-200 text-red-700 bg-red-50' 
-                      : challenge.priority === 'medium'
-                      ? 'border-orange-200 text-orange-700 bg-orange-50'
-                      : 'border-yellow-200 text-yellow-700 bg-yellow-50'
-                  }`}
-                >
-                  {challenge.priority}
-                </Badge>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
     </div>
   );
 }

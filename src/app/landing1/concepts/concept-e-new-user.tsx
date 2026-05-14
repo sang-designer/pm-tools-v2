@@ -315,7 +315,7 @@ function ExploreVenuesSectionNewUser() {
   );
 }
 
-function CommunityStatsToggleNewUser({ weeklyLocationsAdded }: { weeklyLocationsAdded: number }) {
+function CommunityStatsToggleNewUser() {
   const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
 
   const stats = {
@@ -350,7 +350,7 @@ function CommunityStatsToggleNewUser({ weeklyLocationsAdded }: { weeklyLocations
         {currentStats.map((stat) => (
           <div key={stat.label} className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{stat.label}</span>
-            <span className="text-sm font-bold text-foreground">{stat.value}</span>
+            <span className="text-sm text-muted-foreground">{stat.value}</span>
           </div>
         ))}
       </div>
@@ -471,7 +471,7 @@ function NewUserCommunityCard() {
 
           <Separator />
 
-          <CommunityStatsToggleNewUser weeklyLocationsAdded={locationStats.weeklyStats.locationsAdded} />
+          <CommunityStatsToggleNewUser />
         </CardContent>
       </Card>
       <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} />
