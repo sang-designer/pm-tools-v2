@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,8 +27,37 @@ import {
   Trash2,
   MapPin,
   Search,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+export interface EpwItem {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  countryCode: string;
+  zip: string;
+}
+
+export const MOCK_EPWS: EpwItem[] = [
+  { id: "epw-1", name: "Peet's Coffee & Tea", address: "2 Theater Square", city: "Orinda", state: "CA", countryCode: "US", zip: "94563" },
+  { id: "epw-2", name: "Zachary's Chicago Pizza", address: "3110 Crow Canyon Pl", city: "San Ramon", state: "CA", countryCode: "US", zip: "94583" },
+  { id: "epw-3", name: "La Boulangerie", address: "1228 Broadway", city: "Oakland", state: "CA", countryCode: "US", zip: "94612" },
+  { id: "epw-4", name: "Summit Bank", address: "401 Grand Ave", city: "Oakland", state: "CA", countryCode: "US", zip: "94610" },
+  { id: "epw-5", name: "Golden Dragon Restaurant", address: "832 Webster St", city: "Oakland", state: "CA", countryCode: "US", zip: "94607" },
+  { id: "epw-6", name: "Peet's Coffee", address: "4050 Piedmont Ave", city: "Oakland", state: "CA", countryCode: "US", zip: "94611" },
+  { id: "epw-7", name: "Blue Bottle Coffee", address: "4270 Broadway", city: "Oakland", state: "CA", countryCode: "US", zip: "94611" },
+  { id: "epw-8", name: "Trader Joe's", address: "5727 College Ave", city: "Oakland", state: "CA", countryCode: "US", zip: "94618" },
+  { id: "epw-9", name: "La Piazza Ristorante", address: "15 Moraga Way", city: "Orinda", state: "CA", countryCode: "US", zip: "94563" },
+  { id: "epw-10", name: "Safeway", address: "3496 Mt Diablo Blvd", city: "Lafayette", state: "CA", countryCode: "US", zip: "94549" },
+  { id: "epw-11", name: "Blue Bottle Coffee", address: "315 Linden St", city: "San Francisco", state: "CA", countryCode: "US", zip: "94102" },
+  { id: "epw-12", name: "Philz Coffee", address: "549 Castro St", city: "San Francisco", state: "CA", countryCode: "US", zip: "94114" },
+  { id: "epw-13", name: "Sushi Ran", address: "107 Caledonia St", city: "Sausalito", state: "CA", countryCode: "US", zip: "94965" },
+  { id: "epw-14", name: "La Boulange de Walnut Creek", address: "1501 Mt Diablo Blvd", city: "Walnut Creek", state: "CA", countryCode: "US", zip: "94596" },
+  { id: "epw-15", name: "Pete's Hardware", address: "2162 Chestnut St", city: "San Francisco", state: "CA", countryCode: "US", zip: "94123" },
+];
 
 const CHAINS = [
   { name: "McDonald's", icon: "🍟", color: "bg-red-500" },
@@ -71,6 +100,125 @@ const US_STATES = [
   "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
 ];
+
+const POSTAL_CODE_LOOKUP: Record<string, { region: string; locality: string }> = {
+  "10001": { region: "NY", locality: "New York" },
+  "10002": { region: "NY", locality: "New York" },
+  "10003": { region: "NY", locality: "New York" },
+  "90210": { region: "CA", locality: "Beverly Hills" },
+  "90001": { region: "CA", locality: "Los Angeles" },
+  "94002": { region: "CA", locality: "Belmont" },
+  "94010": { region: "CA", locality: "Burlingame" },
+  "94014": { region: "CA", locality: "Daly City" },
+  "94025": { region: "CA", locality: "Menlo Park" },
+  "94040": { region: "CA", locality: "Mountain View" },
+  "94041": { region: "CA", locality: "Mountain View" },
+  "94043": { region: "CA", locality: "Mountain View" },
+  "94061": { region: "CA", locality: "Redwood City" },
+  "94063": { region: "CA", locality: "Redwood City" },
+  "94065": { region: "CA", locality: "Redwood City" },
+  "94086": { region: "CA", locality: "Sunnyvale" },
+  "94087": { region: "CA", locality: "Sunnyvale" },
+  "94089": { region: "CA", locality: "Sunnyvale" },
+  "94102": { region: "CA", locality: "San Francisco" },
+  "94103": { region: "CA", locality: "San Francisco" },
+  "94104": { region: "CA", locality: "San Francisco" },
+  "94105": { region: "CA", locality: "San Francisco" },
+  "94107": { region: "CA", locality: "San Francisco" },
+  "94108": { region: "CA", locality: "San Francisco" },
+  "94109": { region: "CA", locality: "San Francisco" },
+  "94110": { region: "CA", locality: "San Francisco" },
+  "94111": { region: "CA", locality: "San Francisco" },
+  "94112": { region: "CA", locality: "San Francisco" },
+  "94114": { region: "CA", locality: "San Francisco" },
+  "94115": { region: "CA", locality: "San Francisco" },
+  "94116": { region: "CA", locality: "San Francisco" },
+  "94117": { region: "CA", locality: "San Francisco" },
+  "94118": { region: "CA", locality: "San Francisco" },
+  "94121": { region: "CA", locality: "San Francisco" },
+  "94122": { region: "CA", locality: "San Francisco" },
+  "94123": { region: "CA", locality: "San Francisco" },
+  "94124": { region: "CA", locality: "San Francisco" },
+  "94127": { region: "CA", locality: "San Francisco" },
+  "94131": { region: "CA", locality: "San Francisco" },
+  "94132": { region: "CA", locality: "San Francisco" },
+  "94133": { region: "CA", locality: "San Francisco" },
+  "94134": { region: "CA", locality: "San Francisco" },
+  "94301": { region: "CA", locality: "Palo Alto" },
+  "94304": { region: "CA", locality: "Palo Alto" },
+  "94306": { region: "CA", locality: "Palo Alto" },
+  "94401": { region: "CA", locality: "San Mateo" },
+  "94402": { region: "CA", locality: "San Mateo" },
+  "94403": { region: "CA", locality: "San Mateo" },
+  "94501": { region: "CA", locality: "Alameda" },
+  "94536": { region: "CA", locality: "Fremont" },
+  "94538": { region: "CA", locality: "Fremont" },
+  "94539": { region: "CA", locality: "Fremont" },
+  "94541": { region: "CA", locality: "Hayward" },
+  "94544": { region: "CA", locality: "Hayward" },
+  "94546": { region: "CA", locality: "Castro Valley" },
+  "94549": { region: "CA", locality: "Lafayette" },
+  "94556": { region: "CA", locality: "Moraga" },
+  "94563": { region: "CA", locality: "Orinda" },
+  "94566": { region: "CA", locality: "Pleasanton" },
+  "94568": { region: "CA", locality: "Dublin" },
+  "94577": { region: "CA", locality: "San Leandro" },
+  "94583": { region: "CA", locality: "San Ramon" },
+  "94588": { region: "CA", locality: "Pleasanton" },
+  "94595": { region: "CA", locality: "Walnut Creek" },
+  "94596": { region: "CA", locality: "Walnut Creek" },
+  "94597": { region: "CA", locality: "Walnut Creek" },
+  "94598": { region: "CA", locality: "Walnut Creek" },
+  "94601": { region: "CA", locality: "Oakland" },
+  "94602": { region: "CA", locality: "Oakland" },
+  "94605": { region: "CA", locality: "Oakland" },
+  "94606": { region: "CA", locality: "Oakland" },
+  "94607": { region: "CA", locality: "Oakland" },
+  "94608": { region: "CA", locality: "Emeryville" },
+  "94609": { region: "CA", locality: "Oakland" },
+  "94610": { region: "CA", locality: "Oakland" },
+  "94611": { region: "CA", locality: "Oakland" },
+  "94612": { region: "CA", locality: "Oakland" },
+  "94618": { region: "CA", locality: "Oakland" },
+  "94619": { region: "CA", locality: "Oakland" },
+  "94621": { region: "CA", locality: "Oakland" },
+  "94702": { region: "CA", locality: "Berkeley" },
+  "94703": { region: "CA", locality: "Berkeley" },
+  "94704": { region: "CA", locality: "Berkeley" },
+  "94705": { region: "CA", locality: "Berkeley" },
+  "94706": { region: "CA", locality: "Albany" },
+  "94707": { region: "CA", locality: "Berkeley" },
+  "94708": { region: "CA", locality: "Berkeley" },
+  "94709": { region: "CA", locality: "Berkeley" },
+  "94710": { region: "CA", locality: "Berkeley" },
+  "94720": { region: "CA", locality: "Berkeley" },
+  "94801": { region: "CA", locality: "Richmond" },
+  "94804": { region: "CA", locality: "Richmond" },
+  "94901": { region: "CA", locality: "San Rafael" },
+  "94903": { region: "CA", locality: "San Rafael" },
+  "94941": { region: "CA", locality: "Mill Valley" },
+  "94965": { region: "CA", locality: "Sausalito" },
+  "60601": { region: "IL", locality: "Chicago" },
+  "60602": { region: "IL", locality: "Chicago" },
+  "77001": { region: "TX", locality: "Houston" },
+  "75201": { region: "TX", locality: "Dallas" },
+  "85001": { region: "AZ", locality: "Phoenix" },
+  "19101": { region: "PA", locality: "Philadelphia" },
+  "78201": { region: "TX", locality: "San Antonio" },
+  "92101": { region: "CA", locality: "San Diego" },
+  "95101": { region: "CA", locality: "San Jose" },
+  "95113": { region: "CA", locality: "San Jose" },
+  "32801": { region: "FL", locality: "Orlando" },
+  "33101": { region: "FL", locality: "Miami" },
+  "98101": { region: "WA", locality: "Seattle" },
+  "80201": { region: "CO", locality: "Denver" },
+  "02101": { region: "MA", locality: "Boston" },
+  "97201": { region: "OR", locality: "Portland" },
+  "37201": { region: "TN", locality: "Nashville" },
+  "20001": { region: "DC", locality: "Washington" },
+  "30301": { region: "GA", locality: "Atlanta" },
+  "89101": { region: "NV", locality: "Las Vegas" },
+};
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
@@ -193,7 +341,13 @@ function AddedHoursEntry({ entry, onRemove }: { entry: HoursEntry; onRemove: () 
   );
 }
 
-export function AddPlaceForm() {
+interface AddPlaceFormProps {
+  onQueryChange?: (query: { name: string; address: string }) => void;
+  selectedEpw?: EpwItem | null;
+  onEpwApplied?: () => void;
+}
+
+export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPlaceFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -204,7 +358,8 @@ export function AddPlaceForm() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [country] = useState("United States");
+  const [country, setCountry] = useState("United States");
+  const [postalLookupStatus, setPostalLookupStatus] = useState<"idle" | "loading" | "found" | "not_found">("idle");
 
   const [isChain, setIsChain] = useState(false);
   const [isInside, setIsInside] = useState(false);
@@ -234,6 +389,23 @@ export function AddPlaceForm() {
   const [pinLat, setPinLat] = useState(37.7749);
   const [pinLng, setPinLng] = useState(-122.4194);
 
+  useEffect(() => {
+    onQueryChange?.({ name, address });
+  }, [name, address, onQueryChange]);
+
+  useEffect(() => {
+    if (!selectedEpw) return;
+    setName(selectedEpw.name);
+    setAddress(selectedEpw.address);
+    setCity(selectedEpw.city);
+    setState(selectedEpw.state);
+    setPostalCode(selectedEpw.zip);
+    setCountry(selectedEpw.countryCode === "US" ? "United States" : selectedEpw.countryCode);
+    setPostalLookupStatus("found");
+    toast.success("EPW applied", { description: `Filled fields from "${selectedEpw.name}"` });
+    onEpwApplied?.();
+  }, [selectedEpw, onEpwApplied]);
+
   const canAddHours = draftDays.length > 0 && (draftIs24h || (draftOpen.trim() !== "" && draftClose.trim() !== ""));
 
   const addHoursEntry = useCallback(() => {
@@ -251,6 +423,26 @@ export function AddPlaceForm() {
 
   const removeHoursEntry = useCallback((id: string) => {
     setHours((prev) => prev.filter((h) => h.id !== id));
+  }, []);
+
+  const handlePostalCodeChange = useCallback((value: string) => {
+    setPostalCode(value);
+    setPostalLookupStatus("idle");
+
+    const trimmed = value.trim();
+    if (trimmed.length >= 5) {
+      setPostalLookupStatus("loading");
+      setTimeout(() => {
+        const result = POSTAL_CODE_LOOKUP[trimmed];
+        if (result) {
+          setState(result.region);
+          setCity(result.locality);
+          setPostalLookupStatus("found");
+        } else {
+          setPostalLookupStatus("not_found");
+        }
+      }, 400);
+    }
   }, []);
 
   const toggleAttribute = useCallback((attr: string) => {
@@ -309,6 +501,66 @@ export function AddPlaceForm() {
             </Select>
           </FormField>
 
+          <FormField label="Country" required>
+            <Select value={country} onValueChange={(v) => setCountry(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="United States">United States</SelectItem>
+                <SelectItem value="Canada">Canada</SelectItem>
+                <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                <SelectItem value="Australia">Australia</SelectItem>
+                <SelectItem value="Germany">Germany</SelectItem>
+                <SelectItem value="France">France</SelectItem>
+                <SelectItem value="Japan">Japan</SelectItem>
+                <SelectItem value="Mexico">Mexico</SelectItem>
+                <SelectItem value="Brazil">Brazil</SelectItem>
+                <SelectItem value="India">India</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <FormField label="Postal Code" required>
+              <div className="relative">
+                <Input
+                  placeholder="Zip / Postal code"
+                  value={postalCode}
+                  onChange={(e) => handlePostalCodeChange(e.target.value)}
+                />
+                {postalLookupStatus === "loading" && (
+                  <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                )}
+              </div>
+              {postalLookupStatus === "found" && (
+                <p className="text-xs text-green-800" role="status">Region and locality populated from postal code</p>
+              )}
+              {postalLookupStatus === "not_found" && (
+                <p className="text-xs text-muted-foreground" role="status">Postal code not recognized — enter region and locality manually</p>
+              )}
+            </FormField>
+            <FormField label="Region (State)">
+              <Select value={state} onValueChange={(v) => setState(v ?? "")}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="State" />
+                </SelectTrigger>
+                <SelectContent>
+                  {US_STATES.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+            <FormField label="Locality (City)" required>
+              <Input
+                placeholder="City"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </FormField>
+          </div>
+
           <FormField label="Address" required>
             <Input
               placeholder="Street address"
@@ -323,39 +575,6 @@ export function AddPlaceForm() {
               value={crossStreet}
               onChange={(e) => setCrossStreet(e.target.value)}
             />
-          </FormField>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <FormField label="Locality (City)" required>
-              <Input
-                placeholder="City"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-            </FormField>
-            <FormField label="Region (State)">
-              <Select value={state} onValueChange={(v) => setState(v ?? "")}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="State" />
-                </SelectTrigger>
-                <SelectContent>
-                  {US_STATES.map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-            <FormField label="Postal Code" required>
-              <Input
-                placeholder="Zip"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-              />
-            </FormField>
-          </div>
-
-          <FormField label="Country" required>
-            <Input value={country} disabled />
           </FormField>
 
           <div className="space-y-2">

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { GlobalNav } from "@/components/global-nav";
-import { AddPlaceForm } from "@/components/add-place/add-place-form";
+import { AddPlaceForm, EpwItem } from "@/components/add-place/add-place-form";
+import { RecommendedPlacesCard } from "@/components/add-place/recommended-places-card";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,6 +15,20 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 
 export default function AddPlacePage() {
   const router = useRouter();
+  const [formQuery, setFormQuery] = useState<{ name: string; address: string }>({ name: "", address: "" });
+  const [selectedEpw, setSelectedEpw] = useState<EpwItem | null>(null);
+
+  const handleQueryChange = useCallback((query: { name: string; address: string }) => {
+    setFormQuery(query);
+  }, []);
+
+  const handleEpwSelect = useCallback((epw: EpwItem) => {
+    setSelectedEpw(epw);
+  }, []);
+
+  const handleEpwApplied = useCallback(() => {
+    setSelectedEpw(null);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -40,11 +56,19 @@ export default function AddPlacePage() {
           </div>
 
           <div className="flex flex-col gap-8 xl:flex-row xl:gap-10">
-            <div className="min-w-0 flex-1 xl:max-w-3xl">
-              <AddPlaceForm />
+            <div className="min-w-0 flex-1 xl:max-w-[845px]">
+              <AddPlaceForm
+                onQueryChange={handleQueryChange}
+                selectedEpw={selectedEpw}
+                onEpwApplied={handleEpwApplied}
+              />
             </div>
             <aside className="shrink-0 xl:w-[340px]">
-              <div className="sticky top-20">
+              <div className="sticky top-20 space-y-4">
+                <RecommendedPlacesCard
+                  query={formQuery}
+                  onSelect={handleEpwSelect}
+                />
                 <Card className="bg-muted/40">
                   <CardContent className="pt-6">
                     <p className="text-sm text-foreground">
