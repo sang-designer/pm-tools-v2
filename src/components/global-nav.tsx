@@ -195,7 +195,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                         className="flex h-11 items-center px-4 text-sm text-foreground transition-colors hover:bg-accent"
                         onClick={() => setPlacesOpen(false)}
                       >
-                        Venue Specific Tasks
+                        Place Specific Tasks
                       </Link>
                       <Link
                         href="/places-daily-tasks"

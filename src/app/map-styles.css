@@ -2,6 +2,7 @@
 .quest-pin {
   background: none !important;
   border: none !important;
+  overflow: visible !important;
 }
 
 .quest-tooltip {

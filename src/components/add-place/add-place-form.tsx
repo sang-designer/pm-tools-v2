@@ -28,6 +28,9 @@ import {
   MapPin,
   Search,
   Loader2,
+  Upload,
+  X,
+  ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -389,6 +392,40 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
   const [pinLat, setPinLat] = useState(37.7749);
   const [pinLng, setPinLng] = useState(-122.4194);
 
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoProcessing, setPhotoProcessing] = useState(false);
+
+  const handlePhotoSelect = useCallback((file: File) => {
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setPhotoProcessing(true);
+    setTimeout(() => {
+      setPhotoProcessing(false);
+    }, 2000);
+  }, []);
+
+  const handlePhotoDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      handlePhotoSelect(file);
+    }
+  }, [handlePhotoSelect]);
+
+  const handlePhotoInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handlePhotoSelect(file);
+    }
+  }, [handlePhotoSelect]);
+
+  const clearPhoto = useCallback(() => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    setPhotoProcessing(false);
+  }, []);
+
   useEffect(() => {
     onQueryChange?.({ name, address });
   }, [name, address, onQueryChange]);
@@ -470,13 +507,98 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Details */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
+        <CardContent className="space-y-5 pt-6">
+          {/* Quick Start with Photo */}
+          <div className="rounded-lg border border-dashed border-border p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                <Upload className="size-4 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Quick Start with Photo
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(Optional)</span>
+                </h3>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Upload a photo of the storefront, menu, or receipt to auto-fill venue name, category, address, and phone.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3">
+              {!photoFile ? (
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handlePhotoDrop}
+                  className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 px-6 py-6 transition-colors hover:border-primary/40 hover:bg-muted/50"
+                >
+                  <Upload className="mb-2 size-6 text-muted-foreground/60" />
+                  <p className="text-sm text-muted-foreground">
+                    Drag and drop an image here, or
+                  </p>
+                  <label className="mt-3 cursor-pointer">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent">
+                      + Choose Photo
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoInput}
+                      className="sr-only"
+                    />
+                  </label>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-lg border border-border">
+                  <div className="flex items-center gap-4 p-4">
+                    {photoPreview && (
+                      <img
+                        src={photoPreview}
+                        alt="Uploaded preview"
+                        className="size-20 shrink-0 rounded-md border border-border object-cover"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <ImageIcon className="size-4 shrink-0 text-muted-foreground" />
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {photoFile.name}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {(photoFile.size / 1024).toFixed(0)} KB
+                      </p>
+                      {photoProcessing ? (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="size-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          <span className="text-xs text-primary">Analyzing image...</span>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-xs text-green-800">
+                          Ready — fill in the details below or let suggestions guide you
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearPhoto}
+                      className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center gap-2">
             <MapPin className="size-5 text-primary" />
-            Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
+            <h3 className="text-lg font-semibold tracking-tight">Details</h3>
+          </div>
+
           <FormField label="Place name" required>
             <Input
               placeholder="e.g. Blue Bottle Coffee"

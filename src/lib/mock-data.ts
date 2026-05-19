@@ -1,4 +1,4 @@
-import { Venue, Task } from "./types";
+import { Venue, Task, EpwItem } from "./types";
 
 function task(id: string, venueId: string, type: Task["type"], question: string, options?: string[]): Task {
   return { id, type, question, options, venueId };
@@ -1069,7 +1069,7 @@ export const MOCK_VENUES: Venue[] = [
   },
 ];
 
-const VERACITY_RATINGS = [1, 3, 4, 5, 6, 2, 3, 1, 5, 4, 2, 7, 3, 1, 4, 5, 2, 6, 3, 1, 4, 2, 5, 3, 7, 1, 4, 2, 6, 3, 5, 4, 6, 3, 7, 2, 5, 4, 3, 6, 4];
+const VERACITY_RATINGS = [1, 3, 4, 5, 5, 2, 3, 1, 5, 4, 2, 5, 3, 1, 4, 5, 2, 5, 3, 1, 4, 2, 5, 3, 5, 1, 4, 2, 5, 3, 5, 4, 5, 3, 5, 2, 5, 4, 3, 5, 4];
 MOCK_VENUES.forEach((v, i) => { v.veracityRating = VERACITY_RATINGS[i % VERACITY_RATINGS.length]; });
 
 export const INITIAL_COMPLETED_VENUES = [
@@ -1590,7 +1590,7 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     pendingCount: 142,
     verifiedCount: 2705,
     regionHealth: 0.85,
-    recentActivity: "3 venues verified today",
+    recentActivity: "3 places verified today",
     topContributors: [
       { name: "Sam Taylor", contributions: 89 },
       { name: "Maria Rodriguez", contributions: 67 },
@@ -1632,7 +1632,7 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     pendingCount: 87,
     verifiedCount: 1156,
     regionHealth: 0.79,
-    recentActivity: "5 venues verified today",
+    recentActivity: "5 places verified today",
     topContributors: [
       { name: "Sam Taylor", contributions: 42 },
       { name: "Kenji Watanabe", contributions: 36 },
@@ -1669,7 +1669,7 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     pendingCount: 105,
     verifiedCount: 1771,
     regionHealth: 0.82,
-    recentActivity: "2 venues verified today",
+    recentActivity: "2 places verified today",
     topContributors: [
       { name: "Sam Taylor", contributions: 28 },
       { name: "Rajesh Kumar", contributions: 52 },
@@ -1711,7 +1711,7 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     pendingCount: 287,
     verifiedCount: 3869,
     regionHealth: 0.78,
-    recentActivity: "12 venues verified today",
+    recentActivity: "12 places verified today",
     topContributors: [
       { name: "Carlos Mendoza", contributions: 134 },
       { name: "Jenny Park", contributions: 98 },
@@ -1741,7 +1741,7 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     pendingCount: 445,
     verifiedCount: 5178,
     regionHealth: 0.72,
-    recentActivity: "8 venues verified today",
+    recentActivity: "8 places verified today",
     topContributors: [
       { name: "Ashley Brown", contributions: 156 },
       { name: "David Liu", contributions: 123 },
@@ -1776,7 +1776,7 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     pendingCount: 45,
     verifiedCount: 1189,
     regionHealth: 0.92,
-    recentActivity: "5 venues verified today",
+    recentActivity: "5 places verified today",
     topContributors: [
       { name: "Tyler Williams", contributions: 67 },
       { name: "Emma Davis", contributions: 45 },
@@ -1801,7 +1801,7 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     pendingCount: 134,
     verifiedCount: 1853,
     regionHealth: 0.81,
-    recentActivity: "4 venues verified today",
+    recentActivity: "4 places verified today",
     topContributors: [
       { name: "Patrick Sullivan", contributions: 78 },
       { name: "Mei-Ling Zhang", contributions: 62 },
@@ -1864,3 +1864,21 @@ export const getUserById = (id: string): UserStats | undefined => {
 export const getLocationStatsByZone = (zone: string): LocationStats | undefined => {
   return MOCK_LOCATION_PROFILES.find(location => location.homeZone === zone);
 };
+
+export const MOCK_EPWS: EpwItem[] = [
+  { id: "epw-1", name: "Peet's Coffee & Tea", address: "2 Theater Square", city: "Orinda", state: "CA", countryCode: "US", zip: "94563" },
+  { id: "epw-2", name: "Zachary's Chicago Pizza", address: "3110 Crow Canyon Pl", city: "San Ramon", state: "CA", countryCode: "US", zip: "94583" },
+  { id: "epw-3", name: "La Boulangerie", address: "1228 Broadway", city: "Oakland", state: "CA", countryCode: "US", zip: "94612" },
+  { id: "epw-4", name: "Summit Bank", address: "401 Grand Ave", city: "Oakland", state: "CA", countryCode: "US", zip: "94610" },
+  { id: "epw-5", name: "Golden Dragon Restaurant", address: "832 Webster St", city: "Oakland", state: "CA", countryCode: "US", zip: "94607" },
+  { id: "epw-6", name: "Peet's Coffee", address: "4050 Piedmont Ave", city: "Oakland", state: "CA", countryCode: "US", zip: "94611" },
+  { id: "epw-7", name: "Blue Bottle Coffee", address: "4270 Broadway", city: "Oakland", state: "CA", countryCode: "US", zip: "94611" },
+  { id: "epw-8", name: "Trader Joe's", address: "5727 College Ave", city: "Oakland", state: "CA", countryCode: "US", zip: "94618" },
+  { id: "epw-9", name: "La Piazza Ristorante", address: "15 Moraga Way", city: "Orinda", state: "CA", countryCode: "US", zip: "94563" },
+  { id: "epw-10", name: "Safeway", address: "3496 Mt Diablo Blvd", city: "Lafayette", state: "CA", countryCode: "US", zip: "94549" },
+  { id: "epw-11", name: "Blue Bottle Coffee", address: "315 Linden St", city: "San Francisco", state: "CA", countryCode: "US", zip: "94102" },
+  { id: "epw-12", name: "Philz Coffee", address: "549 Castro St", city: "San Francisco", state: "CA", countryCode: "US", zip: "94114" },
+  { id: "epw-13", name: "Sushi Ran", address: "107 Caledonia St", city: "Sausalito", state: "CA", countryCode: "US", zip: "94965" },
+  { id: "epw-14", name: "La Boulange de Walnut Creek", address: "1501 Mt Diablo Blvd", city: "Walnut Creek", state: "CA", countryCode: "US", zip: "94596" },
+  { id: "epw-15", name: "Pete's Hardware", address: "2162 Chestnut St", city: "San Francisco", state: "CA", countryCode: "US", zip: "94123" },
+];

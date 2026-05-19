@@ -132,14 +132,14 @@ export function QuestView() {
   // or immediately after skipping all tasks on a venue
   // Block auto-advance while celebration is showing
   useEffect(() => {
-    if (!selectedVenueId && !showMyWorld && !showCelebration) {
+    if (!selectedVenueId && !showMyWorld && !showCelebration && !showDailyGoalCelebration) {
       const delay = lastPointsAwarded ? 600 : 0;
       const timer = setTimeout(() => {
         handleNextVenue();
       }, delay);
       return () => clearTimeout(timer);
     }
-  }, [lastPointsAwarded, selectedVenueId, showMyWorld, showCelebration, handleNextVenue]);
+  }, [lastPointsAwarded, selectedVenueId, showMyWorld, showCelebration, showDailyGoalCelebration, handleNextVenue]);
 
   const handleToggleMyWorld = useCallback(() => {
     setShowMyWorld((prev) => {
@@ -170,7 +170,7 @@ export function QuestView() {
       <QuestMap ref={mapRef} showAllCompleted={showMyWorld} />
       <RewardBanner />
 
-      {!showMyWorld && <TaskCard pinPosition={pinPos} />}
+      {!showMyWorld && !showDailyGoalCelebration && <TaskCard pinPosition={pinPos} />}
       {!showMyWorld && <QuestProgress onMyWorldToggle={handleToggleMyWorld} />}
 
       <StreakBanner

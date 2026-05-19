@@ -186,7 +186,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
           <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-gray-900">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Venue Specific Tasks</CardTitle>
+                <CardTitle className="text-lg font-semibold">Place Specific Tasks</CardTitle>
               </div>
               
               <div className="text-sm text-muted-foreground">

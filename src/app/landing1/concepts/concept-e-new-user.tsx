@@ -181,7 +181,7 @@ function WelcomeOnboardingCard() {
                 <Link href="/places" className="w-full">
                   <Button className="w-full flex items-center gap-2 justify-center">
                     <Map className="h-4 w-4" />
-                    <span>Venue Specific Tasks</span>
+                    <span>Place Specific Tasks</span>
                   </Button>
                 </Link>
                 <Link href="/places-daily-tasks" className="w-full">
@@ -251,8 +251,8 @@ function ExploreVenuesSectionNewUser() {
     <motion.div className="space-y-4" variants={fadeUp}>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Explore New Venues</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Curate new places in your area</p>
+          <h2 className="text-lg font-semibold text-foreground">Contribute to Places</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Help places in your area</p>
         </div>
         <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-1">
           {venues.length} nearby
@@ -320,14 +320,14 @@ function CommunityStatsToggleNewUser() {
 
   const stats = {
     weekly: [
-      { label: "Active contributors", value: "—" },
-      { label: "New members", value: "—" },
-      { label: "Places updated", value: "—" },
+      { label: "Active contributors", value: "142" },
+      { label: "New members", value: "38" },
+      { label: "Places updated", value: "1,247" },
     ],
     monthly: [
-      { label: "Active contributors", value: "—" },
-      { label: "New members", value: "—" },
-      { label: "Places updated", value: "—" },
+      { label: "Active contributors", value: "589" },
+      { label: "New members", value: "156" },
+      { label: "Places updated", value: "5,832" },
     ],
   };
 
@@ -460,7 +460,6 @@ function NewUserCommunityCard() {
             </p>
             <Button
               variant="outline"
-              size="sm"
               className="mt-3"
               onClick={() => setInviteOpen(true)}
             >

@@ -236,3 +236,13 @@ export interface VenueWoe {
   reasons: string;
   comments: string;
 }
+
+export interface EpwItem {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  countryCode: string;
+  zip: string;
+}

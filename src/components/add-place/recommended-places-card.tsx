@@ -47,7 +47,7 @@ export function RecommendedPlacesCard({ query, onSelect }: RecommendedPlacesCard
           Suggested Places
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          From our dataset — click to auto-fill
+          Click to auto-fill
         </p>
       </CardHeader>
       <CardContent className="pt-0">

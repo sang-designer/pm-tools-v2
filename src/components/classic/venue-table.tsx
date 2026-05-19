@@ -24,6 +24,14 @@ import {
 
 const ROWS_PER_PAGE = 15;
 
+const VERACITY_COLORS: Record<number, string> = {
+  1: "border-transparent bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400",
+  2: "border-transparent bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400",
+  3: "border-transparent bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400",
+  4: "border-transparent bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400",
+  5: "border-transparent bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400",
+};
+
 function VenueRow({ venue }: { venue: Venue }) {
   const router = useRouter();
 
@@ -41,9 +49,13 @@ function VenueRow({ venue }: { venue: Venue }) {
         <span className="text-sm text-foreground">{venue.address}</span>
       </td>
       <td className="px-4 py-3">
-        <span className="text-sm tabular-nums text-foreground">
-          {venue.veracityRating ?? "–"}
-        </span>
+        {venue.veracityRating ? (
+          <Badge variant="outline" className={`tabular-nums ${VERACITY_COLORS[venue.veracityRating] ?? ""}`}>
+            {venue.veracityRating}
+          </Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground">–</span>
+        )}
       </td>
       <td className="px-4 py-3">
         <div className="flex flex-wrap gap-1.5">
@@ -118,7 +130,7 @@ export function VenueTable({ venues: venuesProp }: { venues?: Venue[] }) {
                 Address
               </th>
               <th className="px-4 py-2 text-sm font-medium text-muted-foreground">
-                <ColumnHeader tooltip="How accurate the venue data is">
+                <ColumnHeader tooltip="A score from 1 to 5 measuring how truthful a claim is, where 1 is completely false and 5 is completely true.">
                   Veracity Rating
                 </ColumnHeader>
               </th>

@@ -107,9 +107,9 @@ function ExploreVenuesSection() {
     <motion.div className="space-y-4" variants={fadeUp}>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Explore New Venues</h2>
+          <h2 className="text-lg font-semibold text-foreground">Contribute to Places</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Curate new places in your area
+            Help places in your area
           </p>
         </div>
         <motion.div
@@ -282,6 +282,7 @@ function YourLocalCommunityCard() {
   const { locationStats: hookLocationStats, userStats, isLoading } = useUserStats();
   const locationContext = useLocationContext();
   const [expanded, setExpanded] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   if (isLoading || !hookLocationStats || !userStats) {
     return <Card className="animate-pulse"><CardContent className="p-6 h-96" /></Card>;
@@ -478,6 +479,14 @@ function YourLocalCommunityCard() {
                 </motion.div>
               ))}
             </div>
+            <Button
+              variant="outline"
+              className="w-full mt-3"
+              onClick={() => setInviteOpen(true)}
+            >
+              <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+              Invite Friends
+            </Button>
           </motion.div>
 
           <Separator />
@@ -486,6 +495,7 @@ function YourLocalCommunityCard() {
           <CommunityStatsToggle weeklyLocationsAdded={locationStats.weeklyStats.locationsAdded} />
         </CardContent>
       </Card>
+      <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} />
     </motion.div>
   );
 }
