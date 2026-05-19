@@ -151,7 +151,7 @@ function WelcomeOnboardingCard() {
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{completedCount} of 3 complete</span>
-                <span>Unlock your profile rank</span>
+                <span>Unlock your placemaker rank</span>
               </div>
               <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
                 <motion.div

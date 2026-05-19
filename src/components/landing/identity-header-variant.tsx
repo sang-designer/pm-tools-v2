@@ -40,6 +40,7 @@ const ALL_LOCATIONS = [
   { id: "boston", name: "Boston" },
   { id: "new-york", name: "New York Metro" },
   { id: "austin", name: "Austin Metro" },
+  { id: "mountain-house", name: "Mountain House" },
 ];
 
 function LocationSelector({ currentLocation }: { currentLocation: string }) {

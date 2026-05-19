@@ -1837,6 +1837,27 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
       },
     ],
   },
+  {
+    homeZone: "Mountain House",
+    totalLocations: 312,
+    pendingCount: 308,
+    verifiedCount: 4,
+    regionHealth: 0.01,
+    recentActivity: "No activity yet",
+    topContributors: [],
+    weeklyStats: {
+      locationsAdded: 0,
+      verificationsCompleted: 0,
+      issuesResolved: 0,
+    },
+    regionChallenges: [
+      {
+        title: "Brand New Region",
+        description: "This community has no active contributors yet — be the first!",
+        priority: "high",
+      },
+    ],
+  },
 ];
 
 // Current active user and location (can be changed for testing)

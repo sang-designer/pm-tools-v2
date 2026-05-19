@@ -32,7 +32,7 @@ export default function AddPlacePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <GlobalNav activeTab="Home" />
+      <GlobalNav activeTab="Contribute" />
       <main className="flex-1" role="main">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
           <div className="mb-8 flex items-center gap-3">
