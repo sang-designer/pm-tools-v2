@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useUserStats } from "@/hooks/use-user-stats";
+import { useIsMobile } from "@/hooks/use-responsive";
 import { Trophy, Flame, Star, MapPin, ChevronDown, Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocationContext } from "@/lib/location-context";
@@ -49,10 +51,12 @@ function LocationSelector({ currentLocation }: { currentLocation: string }) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(currentLocation);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const activeLocation = locationContext ? locationContext.selectedZone : selected;
 
   useEffect(() => {
+    if (isMobile) return;
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -60,7 +64,7 @@ function LocationSelector({ currentLocation }: { currentLocation: string }) {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isMobile]);
 
   const isSearching = search.trim().length > 0;
 
@@ -82,6 +86,87 @@ function LocationSelector({ currentLocation }: { currentLocation: string }) {
     setSearch("");
   };
 
+  const locationList = (
+    <>
+      <div className="p-2 border-b border-border">
+        <div className="flex items-center gap-2 px-2 py-1.5 bg-muted/50 rounded-md">
+          <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <input
+            type="text"
+            placeholder="Search locations..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            autoFocus={!isMobile}
+          />
+        </div>
+      </div>
+
+      <div className="p-1.5 max-h-72 overflow-y-auto sm:max-h-72 max-sm:max-h-[60vh]">
+        {filteredRecent.length > 0 && (
+          <>
+            <div className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+              Recently Visited
+            </div>
+            {filteredRecent.map((city) => (
+              <button
+                key={city.id}
+                onClick={() => handleSelect(city.name)}
+                className={cn(
+                  "flex items-center w-full gap-3 px-2 py-2.5 sm:py-2 rounded-md text-left transition-colors",
+                  activeLocation === city.name ? "bg-primary/10" : "hover:bg-muted/60 active:bg-muted"
+                )}
+              >
+                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-foreground truncate">{city.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {city.tasksCompleted} tasks completed · {city.lastVisited}
+                  </div>
+                </div>
+                {activeLocation === city.name && (
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                )}
+              </button>
+            ))}
+          </>
+        )}
+
+        {isSearching && searchResults.length > 0 && (
+          <>
+            <div className="px-2 py-1.5 mt-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide border-t border-border pt-2">
+              All Locations
+            </div>
+            {searchResults.map((loc) => (
+              <button
+                key={loc.id}
+                onClick={() => handleSelect(loc.name)}
+                className={cn(
+                  "flex items-center w-full gap-3 px-2 py-2.5 sm:py-2 rounded-md text-left transition-colors",
+                  activeLocation === loc.name ? "bg-primary/10" : "hover:bg-muted/60 active:bg-muted"
+                )}
+              >
+                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-foreground truncate">{loc.name}</div>
+                </div>
+                {activeLocation === loc.name && (
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                )}
+              </button>
+            ))}
+          </>
+        )}
+
+        {filteredRecent.length === 0 && searchResults.length === 0 && (
+          <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+            No locations found
+          </div>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div className="relative inline-block" ref={containerRef}>
       <button
@@ -93,87 +178,23 @@ function LocationSelector({ currentLocation }: { currentLocation: string }) {
         <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
 
-      {open && (
+      {/* Desktop: absolute dropdown */}
+      {!isMobile && open && (
         <div className="absolute top-full left-0 mt-2 w-72 bg-popover border border-border rounded-lg shadow-lg z-50 overflow-hidden">
-          <div className="p-2 border-b border-border">
-            <div className="flex items-center gap-2 px-2 py-1.5 bg-muted/50 rounded-md">
-              <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-              <input
-                type="text"
-                placeholder="Search locations..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                autoFocus
-              />
-            </div>
-          </div>
-
-          <div className="p-1.5 max-h-72 overflow-y-auto">
-            {/* Recently Visited */}
-            {filteredRecent.length > 0 && (
-              <>
-                <div className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                  Recently Visited
-                </div>
-                {filteredRecent.map((city) => (
-                  <button
-                    key={city.id}
-                    onClick={() => handleSelect(city.name)}
-                    className={cn(
-                      "flex items-center w-full gap-3 px-2 py-2 rounded-md text-left transition-colors",
-                      activeLocation === city.name ? "bg-primary/10" : "hover:bg-muted/60"
-                    )}
-                  >
-                    <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">{city.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {city.tasksCompleted} tasks completed · {city.lastVisited}
-                      </div>
-                    </div>
-                    {activeLocation === city.name && (
-                      <Check className="h-4 w-4 text-primary shrink-0" />
-                    )}
-                  </button>
-                ))}
-              </>
-            )}
-
-            {/* Search results from all locations */}
-            {isSearching && searchResults.length > 0 && (
-              <>
-                <div className="px-2 py-1.5 mt-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide border-t border-border pt-2">
-                  All Locations
-                </div>
-                {searchResults.map((loc) => (
-                  <button
-                    key={loc.id}
-                    onClick={() => handleSelect(loc.name)}
-                    className={cn(
-                      "flex items-center w-full gap-3 px-2 py-2 rounded-md text-left transition-colors",
-                      activeLocation === loc.name ? "bg-primary/10" : "hover:bg-muted/60"
-                    )}
-                  >
-                    <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">{loc.name}</div>
-                    </div>
-                    {activeLocation === loc.name && (
-                      <Check className="h-4 w-4 text-primary shrink-0" />
-                    )}
-                  </button>
-                ))}
-              </>
-            )}
-
-            {filteredRecent.length === 0 && searchResults.length === 0 && (
-              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
-                No locations found
-              </div>
-            )}
-          </div>
+          {locationList}
         </div>
+      )}
+
+      {/* Mobile: bottom sheet */}
+      {isMobile && (
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetContent side="bottom" className="px-0 pb-0 rounded-t-2xl">
+            <SheetHeader className="px-5 pb-2">
+              <SheetTitle className="text-left">Switch Location</SheetTitle>
+            </SheetHeader>
+            {locationList}
+          </SheetContent>
+        </Sheet>
       )}
     </div>
   );

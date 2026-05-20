@@ -350,7 +350,7 @@ function CommunityStatsToggleNewUser() {
         {currentStats.map((stat) => (
           <div key={stat.label} className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{stat.label}</span>
-            <span className="text-sm text-muted-foreground">{stat.value}</span>
+            <span className="text-sm font-bold text-foreground">{stat.value}</span>
           </div>
         ))}
       </div>

@@ -11,6 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { InviteProgressTracker } from "./invite-progress-tracker";
 import { useInvite } from "@/lib/invite-context";
 import { useIsMobile } from "@/hooks/use-responsive";
@@ -143,9 +149,18 @@ export function InviteModal({ open, onOpenChange, onInviteSent }: InviteModalPro
                 className="flex-1 text-xs"
                 onFocus={(e) => e.target.select()}
               />
-              <Button variant="outline" size="icon" className="shrink-0" onClick={copyLink} aria-label="Copy link">
-                {copied ? <Check className="size-4 text-green-500" /> : <Copy className="size-4" />}
-              </Button>
+              <TooltipProvider>
+                <Tooltip open={copied ? true : undefined}>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="shrink-0" onClick={copyLink} aria-label="Copy link">
+                      {copied ? <Check className="size-4 text-green-500" /> : <Copy className="size-4" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {copied ? "Copied!" : "Copy link"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             {isMobile && supportsNativeShare ? (
