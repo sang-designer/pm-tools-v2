@@ -349,150 +349,192 @@ function YourLocalCommunityCard() {
         </CardHeader>
         
         <CardContent className="space-y-5">
-          {/* Top Contributors */}
-          <div className="space-y-2.5">
-            <AnimatePresence mode="popLayout">
-              {visibleContributors.map((contributor, index) => (
-                <motion.div
-                  key={contributor.name}
-                  layout
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
-                  transition={{ duration: 0.35, delay: index * 0.05 }}
-                >
-                  <motion.div
-                    className="flex items-center justify-between rounded-lg p-1.5 -mx-1.5 transition-colors"
-                    whileHover={{ backgroundColor: "rgba(0,0,0,0.03)", x: 4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <motion.div whileHover={{ scale: 1.15 }} transition={{ type: "spring", stiffness: 400 }}>
-                        <Avatar className="h-9 w-9">
-                          <AvatarImage src={getAvatarSrc(contributor.name, index)} />
-                          <AvatarFallback className="text-xs bg-muted text-muted-foreground">
-                            {contributor.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                      </motion.div>
-                      <div>
-                        <div className="text-sm font-medium flex items-center gap-2">
-                          {contributor.name}
-                          {contributor.name === userStats.name && (
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">You</Badge>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {contributor.contributions} places verified
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {index === 0 && (
-                        <motion.svg
-                          className="h-4 w-4 text-amber-500"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
-                          transition={{ duration: 1.5, delay: 0.5, repeat: Infinity, repeatDelay: 4 }}
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </motion.svg>
-                      )}
-                      <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-
-          {canExpand && (
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setExpanded(!expanded)}
-                className="w-full text-xs text-muted-foreground h-7"
-              >
-                <motion.span
-                  key={expanded ? "less" : "more"}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center"
-                >
-                  {expanded ? (
-                    <>Show less <ChevronUp className="h-3.5 w-3.5 ml-1" /></>
-                  ) : (
-                    <>See more ({Math.min(allContributors.length, 15) - 5} more) <ChevronDown className="h-3.5 w-3.5 ml-1" /></>
-                  )}
-                </motion.span>
-              </Button>
-            </motion.div>
-          )}
-
-          <Separator />
-
-          {/* Friends Contributions */}
-          <motion.div
-            className="space-y-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Friends Activity
-            </h3>
-            <div className="space-y-2.5">
-              {friends.map((friend, index) => (
-                <motion.div
-                  key={friend.name}
-                  className="flex items-center justify-between rounded-md p-1 -mx-1"
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  whileHover={{ backgroundColor: "rgba(0,0,0,0.02)", x: 3, transition: { duration: 0.15 } }}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <motion.div whileHover={{ scale: 1.2, rotate: 5 }} transition={{ type: "spring", stiffness: 400 }}>
-                      <Avatar className="h-7 w-7">
-                        <AvatarImage src={friendAvatarStyles[index]} />
-                        <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
-                          {friend.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                    </motion.div>
-                    <div>
-                      <div className="text-xs font-medium">{friend.name}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {friend.contributions} verified
-                      </div>
-                    </div>
-                  </div>
-                  <motion.span
-                    className="text-[11px] text-muted-foreground"
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
-                  >
-                    {friend.lastActive}
-                  </motion.span>
-                </motion.div>
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              className="w-full mt-3"
-              onClick={() => setInviteOpen(true)}
+          {allContributors.length === 0 ? (
+            <motion.div
+              className="flex flex-col items-center text-center py-6 px-4 space-y-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
             >
-              <UserPlus className="h-3.5 w-3.5 mr-1.5" />
-              Invite Friends
-            </Button>
-          </motion.div>
+              <motion.div
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+              >
+                <MapPinPlus className="h-7 w-7 text-primary" />
+              </motion.div>
+              <div className="space-y-1.5">
+                <p className="text-sm font-semibold">Be the first contributor!</p>
+                <p className="text-xs text-muted-foreground leading-relaxed max-w-[240px]">
+                  {locationStats.homeZone} has {locationStats.pendingCount} places waiting to be verified. Start now and claim the #1 spot.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 w-full">
+                <Link href="/tasks">
+                  <Button size="sm" variant="secondary" className="w-full">
+                    <ListChecks className="h-3.5 w-3.5 mr-1.5" />
+                    Start Verifying Places
+                  </Button>
+                </Link>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setInviteOpen(true)}
+                >
+                  <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                  Invite Friends to Join
+                </Button>
+              </div>
+            </motion.div>
+          ) : (
+            <>
+              {/* Top Contributors */}
+              <div className="space-y-2.5">
+                <AnimatePresence mode="popLayout">
+                  {visibleContributors.map((contributor, index) => (
+                    <motion.div
+                      key={contributor.name}
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+                      transition={{ duration: 0.35, delay: index * 0.05 }}
+                    >
+                      <motion.div
+                        className="flex items-center justify-between rounded-lg p-1.5 -mx-1.5 transition-colors"
+                        whileHover={{ backgroundColor: "rgba(0,0,0,0.03)", x: 4 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <motion.div whileHover={{ scale: 1.15 }} transition={{ type: "spring", stiffness: 400 }}>
+                            <Avatar className="h-9 w-9">
+                              <AvatarImage src={getAvatarSrc(contributor.name, index)} />
+                              <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+                                {contributor.name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                          </motion.div>
+                          <div>
+                            <div className="text-sm font-medium flex items-center gap-2">
+                              {contributor.name}
+                              {contributor.name === userStats.name && (
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">You</Badge>
+                              )}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {contributor.contributions} places verified
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {index === 0 && (
+                            <motion.svg
+                              className="h-4 w-4 text-amber-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                              animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
+                              transition={{ duration: 1.5, delay: 0.5, repeat: Infinity, repeatDelay: 4 }}
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </motion.svg>
+                          )}
+                          <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
 
-          <Separator />
+              {canExpand && (
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setExpanded(!expanded)}
+                    className="w-full text-xs text-muted-foreground h-7"
+                  >
+                    <motion.span
+                      key={expanded ? "less" : "more"}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center"
+                    >
+                      {expanded ? (
+                        <>Show less <ChevronUp className="h-3.5 w-3.5 ml-1" /></>
+                      ) : (
+                        <>See more ({Math.min(allContributors.length, 15) - 5} more) <ChevronDown className="h-3.5 w-3.5 ml-1" /></>
+                      )}
+                    </motion.span>
+                  </Button>
+                </motion.div>
+              )}
 
-          {/* Community Stats */}
-          <CommunityStatsToggle weeklyLocationsAdded={locationStats.weeklyStats.locationsAdded} />
+              <Separator />
+
+              {/* Friends Contributions */}
+              <motion.div
+                className="space-y-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Friends Activity
+                </h3>
+                <div className="space-y-2.5">
+                  {friends.map((friend, index) => (
+                    <motion.div
+                      key={friend.name}
+                      className="flex items-center justify-between rounded-md p-1 -mx-1"
+                      initial={{ opacity: 0, x: -15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + index * 0.1 }}
+                      whileHover={{ backgroundColor: "rgba(0,0,0,0.02)", x: 3, transition: { duration: 0.15 } }}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <motion.div whileHover={{ scale: 1.2, rotate: 5 }} transition={{ type: "spring", stiffness: 400 }}>
+                          <Avatar className="h-7 w-7">
+                            <AvatarImage src={friendAvatarStyles[index]} />
+                            <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                              {friend.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                        </motion.div>
+                        <div>
+                          <div className="text-xs font-medium">{friend.name}</div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {friend.contributions} verified
+                          </div>
+                        </div>
+                      </div>
+                      <motion.span
+                        className="text-[11px] text-muted-foreground"
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
+                      >
+                        {friend.lastActive}
+                      </motion.span>
+                    </motion.div>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full mt-3"
+                  onClick={() => setInviteOpen(true)}
+                >
+                  <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                  Invite Friends
+                </Button>
+              </motion.div>
+
+              <Separator />
+
+              {/* Community Stats */}
+              <CommunityStatsToggle weeklyLocationsAdded={locationStats.weeklyStats.locationsAdded} />
+            </>
+          )}
         </CardContent>
       </Card>
       <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} />
