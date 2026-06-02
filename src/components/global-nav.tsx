@@ -159,6 +159,13 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                       >
                         My Contributions
                       </Link>
+                      <Link
+                        href="/leaderboard"
+                        className="flex h-11 items-center px-4 text-sm text-foreground transition-colors hover:bg-accent"
+                        onClick={() => setContributeOpen(false)}
+                      >
+                        Leaderboard
+                      </Link>
                       <a
                         href="https://docs.foursquare.com/data-products/docs/placemaker-best-practices"
                         target="_blank"
@@ -441,15 +448,14 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                 <ArrowRight className="size-4 text-muted-foreground" />
                 My Contributions
               </Link>
-              {onOpenLeaderboard && (
-                <button
-                  className="flex h-11 items-center gap-3 rounded-lg px-3 text-sm text-foreground transition-colors hover:bg-accent"
-                  onClick={() => { setMenuOpen(false); onOpenLeaderboard(); }}
-                >
-                  <Trophy className="size-4 text-muted-foreground" />
-                  Leaderboard
-                </button>
-              )}
+              <Link
+                href="/leaderboard"
+                className="flex h-11 items-center gap-3 rounded-lg px-3 text-sm text-foreground transition-colors hover:bg-accent"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Trophy className="size-4 text-muted-foreground" />
+                Leaderboard
+              </Link>
               {onOpenInvite && (
                 <button
                   className="flex h-11 items-center gap-3 rounded-lg px-3 text-sm text-foreground transition-colors hover:bg-accent"
