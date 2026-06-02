@@ -7,13 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdentityHeaderVariant } from "@/components/landing/identity-header-variant";
 import { LocationIntelligenceCardVariant } from "@/components/landing/location-intelligence-card-variant";
 import { useUserStats } from "@/hooks/use-user-stats";
+import { MOCK_GLOBAL_LEADERBOARD } from "@/lib/mock-data";
 import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
+  Globe,
   ImageOff,
   MapPinPlus,
   ListChecks,
@@ -363,6 +366,7 @@ function NewUserCommunityCard() {
   const locationContext = useLocationContext();
   const [expanded, setExpanded] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [leaderboardTab, setLeaderboardTab] = useState<string>("local");
 
   if (isLoading || !hookLocationStats || !userStats) {
     return <Card className="animate-pulse"><CardContent className="p-6 h-96" /></Card>;
@@ -391,57 +395,179 @@ function NewUserCommunityCard() {
     <motion.div variants={slideInRight}>
       <Card className="overflow-hidden">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold">Local Leaderboard</CardTitle>
-          <Badge variant="outline" className="text-[10px] w-fit mt-1">
-            {locationStats.homeZone}
-          </Badge>
+          <CardTitle className="text-lg font-semibold">Leaderboard</CardTitle>
+          <Tabs value={leaderboardTab} onValueChange={(val) => setLeaderboardTab(val as string)}>
+            <TabsList variant="line" className="w-fit">
+              <TabsTrigger value="local" className="px-3 py-1.5 text-sm font-medium">
+                Local
+              </TabsTrigger>
+              <TabsTrigger value="global" className="px-3 py-1.5 text-sm font-medium">
+                <Globe className="h-3.5 w-3.5 mr-1" />
+                Global
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {leaderboardTab === "local" && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Badge variant="outline" className="text-[10px] w-fit mt-1">
+                {locationStats.homeZone}
+              </Badge>
+            </motion.div>
+          )}
         </CardHeader>
 
         <CardContent className="space-y-5">
-          <div className="space-y-2.5">
-            <AnimatePresence mode="popLayout">
-              {visibleContributors.map((contributor, index) => (
+          {leaderboardTab === "local" ? (
+            <>
+              {allContributors.length === 0 ? (
                 <motion.div
-                  key={contributor.name}
-                  layout
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
-                  transition={{ duration: 0.35, delay: index * 0.05 }}
+                  className="flex flex-col items-center text-center py-6 px-4 space-y-4"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4 }}
                 >
-                  <div className="flex items-center justify-between rounded-lg p-1.5 -mx-1.5">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9">
-                        <AvatarImage src={getAvatarSrc(contributor.name, index)} />
-                        <AvatarFallback className="text-xs bg-muted text-muted-foreground">
-                          {contributor.name.split(" ").map((n) => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="text-sm font-medium">{contributor.name}</div>
-                        <div className="text-xs text-muted-foreground">{contributor.contributions} places verified</div>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
+                  <motion.div
+                    className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                  >
+                    <MapPinPlus className="h-7 w-7 text-primary" />
+                  </motion.div>
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-semibold">Be the first contributor!</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed max-w-[240px]">
+                      {locationStats.homeZone} has {locationStats.pendingCount} places waiting to be verified. Start now and claim the #1 spot.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 w-full">
+                    <Link href="/tasks">
+                      <Button size="sm" variant="secondary" className="w-full">
+                        <ListChecks className="h-3.5 w-3.5 mr-1.5" />
+                        Start Verifying Places
+                      </Button>
+                    </Link>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setInviteOpen(true)}
+                    >
+                      <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                      Invite Friends to Join
+                    </Button>
                   </div>
                 </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-
-          {canExpand && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setExpanded(!expanded)}
-              className="w-full text-xs text-muted-foreground h-7"
-            >
-              {expanded ? (
-                <>Show less <ChevronUp className="h-3.5 w-3.5 ml-1" /></>
               ) : (
-                <>See more <ChevronDown className="h-3.5 w-3.5 ml-1" /></>
+                <div className="space-y-2.5">
+                  <AnimatePresence mode="popLayout">
+                    {visibleContributors.map((contributor, index) => (
+                      <motion.div
+                        key={contributor.name}
+                        layout
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+                        transition={{ duration: 0.35, delay: index * 0.05 }}
+                      >
+                        <div className="flex items-center justify-between rounded-lg p-1.5 -mx-1.5">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                              <AvatarImage src={getAvatarSrc(contributor.name, index)} />
+                              <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+                                {contributor.name.split(" ").map((n) => n[0]).join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="text-sm font-medium flex items-center gap-2">
+                                {contributor.name}
+                                {contributor.name === userStats.name && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">You</Badge>
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground">{contributor.contributions} places verified</div>
+                            </div>
+                          </div>
+                          <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  {canExpand && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setExpanded(!expanded)}
+                      className="w-full text-xs text-muted-foreground h-7"
+                    >
+                      {expanded ? (
+                        <>Show less <ChevronUp className="h-3.5 w-3.5 ml-1" /></>
+                      ) : (
+                        <>See more <ChevronDown className="h-3.5 w-3.5 ml-1" /></>
+                      )}
+                    </Button>
+                  )}
+                </div>
               )}
-            </Button>
+            </>
+          ) : (
+            <div className="space-y-2.5">
+              <AnimatePresence mode="popLayout">
+                {MOCK_GLOBAL_LEADERBOARD.slice(0, expanded ? 15 : 5).map((contributor, index) => (
+                  <motion.div
+                    key={contributor.name}
+                    layout
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+                    transition={{ duration: 0.35, delay: index * 0.05 }}
+                  >
+                    <div className="flex items-center justify-between rounded-lg p-1.5 -mx-1.5">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage src={getAvatarSrc(contributor.name, index)} />
+                          <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+                            {contributor.name.split(" ").map((n) => n[0]).join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="text-sm font-medium flex items-center gap-2">
+                            {contributor.name}
+                            {contributor.name === userStats.name && (
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">You</Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {contributor.contributions} places verified
+                            <span className="ml-1.5 text-[10px] text-muted-foreground/70">• {contributor.region}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {MOCK_GLOBAL_LEADERBOARD.length > 5 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpanded(!expanded)}
+                  className="w-full text-xs text-muted-foreground h-7"
+                >
+                  {expanded ? (
+                    <>Show less <ChevronUp className="h-3.5 w-3.5 ml-1" /></>
+                  ) : (
+                    <>See more ({Math.min(MOCK_GLOBAL_LEADERBOARD.length, 15) - 5} more) <ChevronDown className="h-3.5 w-3.5 ml-1" /></>
+                  )}
+                </Button>
+              )}
+            </div>
           )}
 
           <Separator />

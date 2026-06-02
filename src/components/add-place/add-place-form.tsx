@@ -31,6 +31,7 @@ import {
   Upload,
   X,
   ImageIcon,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -395,6 +396,7 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoProcessing, setPhotoProcessing] = useState(false);
+  const [photoSectionOpen, setPhotoSectionOpen] = useState(true);
 
   const handlePhotoSelect = useCallback((file: File) => {
     setPhotoFile(file);
@@ -510,11 +512,15 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
         <CardContent className="space-y-5 pt-6">
           {/* Quick Start with Photo */}
           <div className="rounded-lg border border-dashed border-border p-4">
-            <div className="flex items-start gap-3">
+            <button
+              type="button"
+              onClick={() => setPhotoSectionOpen(!photoSectionOpen)}
+              className="flex w-full items-start gap-3 text-left"
+            >
               <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
                 <Upload className="size-4 text-muted-foreground" />
               </div>
-              <div>
+              <div className="flex-1">
                 <h3 className="text-sm font-semibold text-foreground">
                   Quick Start with Photo
                   <span className="ml-2 text-xs font-normal text-muted-foreground">(Optional)</span>
@@ -523,9 +529,16 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
                   Upload a photo of the storefront, menu, or receipt to auto-fill venue name, category, address, and phone.
                 </p>
               </div>
-            </div>
+              <ChevronDown
+                className={cn(
+                  "mt-1 size-4 shrink-0 text-muted-foreground transition-transform",
+                  photoSectionOpen && "rotate-180"
+                )}
+              />
+            </button>
 
-            <div className="mt-3">
+            {photoSectionOpen && (
+              <div className="mt-3">
               {!photoFile ? (
                 <div
                   onDragOver={(e) => e.preventDefault()}
@@ -590,6 +603,7 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
                 </div>
               )}
             </div>
+            )}
           </div>
 
           <Separator />

@@ -1886,6 +1886,24 @@ export const getLocationStatsByZone = (zone: string): LocationStats | undefined 
   return MOCK_LOCATION_PROFILES.find(location => location.homeZone === zone);
 };
 
+export const MOCK_GLOBAL_LEADERBOARD: Array<{ name: string; contributions: number; region: string }> = [
+  { name: "Carlos Mendoza", contributions: 312, region: "Los Angeles" },
+  { name: "Ashley Brown", contributions: 287, region: "New York Metro" },
+  { name: "Sam Taylor", contributions: 256, region: "San Francisco Bay Area" },
+  { name: "David Liu", contributions: 231, region: "New York Metro" },
+  { name: "Jenny Park", contributions: 198, region: "Los Angeles" },
+  { name: "Patrick Sullivan", contributions: 176, region: "Boston" },
+  { name: "Maria Rodriguez", contributions: 162, region: "San Francisco Bay Area" },
+  { name: "Sofia Garcia", contributions: 148, region: "New York Metro" },
+  { name: "Rajesh Kumar", contributions: 134, region: "San Jose" },
+  { name: "Tyler Williams", contributions: 121, region: "Austin Metro" },
+  { name: "Mei-Ling Zhang", contributions: 109, region: "Boston" },
+  { name: "Kenji Watanabe", contributions: 97, region: "Oakland" },
+  { name: "Alex Chen", contributions: 89, region: "San Francisco Bay Area" },
+  { name: "Linda Tran", contributions: 82, region: "San Jose" },
+  { name: "Connor O'Malley", contributions: 74, region: "Boston" },
+];
+
 export const MOCK_EPWS: EpwItem[] = [
   { id: "epw-1", name: "Peet's Coffee & Tea", address: "2 Theater Square", city: "Orinda", state: "CA", countryCode: "US", zip: "94563" },
   { id: "epw-2", name: "Zachary's Chicago Pizza", address: "3110 Crow Canyon Pl", city: "San Ramon", state: "CA", countryCode: "US", zip: "94583" },

@@ -180,7 +180,7 @@ interface WoeTableProps {
 function WoeTable({ woes }: WoeTableProps) {
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -250,13 +250,23 @@ function WoeTable({ woes }: WoeTableProps) {
           </TableHeader>
           <TableBody>
             {paginated.map((woe) => {
-              const expanded = expandedId === woe.id;
+              const expanded = expandedIds.has(woe.id);
               return (
                 <WoeRow
                   key={woe.id}
                   woe={woe}
                   expanded={expanded}
-                  onToggle={() => setExpandedId(expanded ? null : woe.id)}
+                  onToggle={() =>
+                    setExpandedIds((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(woe.id)) {
+                        next.delete(woe.id);
+                      } else {
+                        next.add(woe.id);
+                      }
+                      return next;
+                    })
+                  }
                   copiedId={copiedId}
                   onCopyId={copyWoeId}
                 />
