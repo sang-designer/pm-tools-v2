@@ -634,6 +634,12 @@ function YourLocalCommunityCard() {
 
           {/* Community Stats */}
           <CommunityStatsToggle weeklyLocationsAdded={locationStats.weeklyStats.locationsAdded} />
+
+          <Link href="/leaderboard" className="block">
+            <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground h-7">
+              View Full Leaderboard <ArrowRight className="h-3 w-3 ml-1" />
+            </Button>
+          </Link>
         </CardContent>
       </Card>
       <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} />
