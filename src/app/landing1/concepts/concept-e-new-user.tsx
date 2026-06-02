@@ -397,12 +397,12 @@ function NewUserCommunityCard() {
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold">Leaderboard</CardTitle>
           <Tabs value={leaderboardTab} onValueChange={(val) => setLeaderboardTab(val as string)}>
-            <TabsList variant="line" className="w-fit">
-              <TabsTrigger value="local" className="px-3 py-1.5 text-sm font-medium">
+            <TabsList className="w-fit h-8">
+              <TabsTrigger value="local" className="text-xs px-2.5 py-1">
                 Local
               </TabsTrigger>
-              <TabsTrigger value="global" className="px-3 py-1.5 text-sm font-medium">
-                <Globe className="h-3.5 w-3.5 mr-1" />
+              <TabsTrigger value="global" className="text-xs px-2.5 py-1">
+                <Globe className="h-3 w-3 mr-1" />
                 Global
               </TabsTrigger>
             </TabsList>
