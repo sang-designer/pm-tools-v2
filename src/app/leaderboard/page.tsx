@@ -160,11 +160,9 @@ export default function LeaderboardPage() {
             <Tabs value={tab} onValueChange={handleTabChange}>
               <TabsList className="h-9">
                 <TabsTrigger value="global" className="text-sm px-3 py-1.5">
-                  <Globe className="h-3.5 w-3.5 mr-1.5" />
                   Global
                 </TabsTrigger>
                 <TabsTrigger value="local" className="text-sm px-3 py-1.5">
-                  <MapPin className="h-3.5 w-3.5 mr-1.5" />
                   Local
                 </TabsTrigger>
               </TabsList>
@@ -246,7 +244,7 @@ export default function LeaderboardPage() {
           <Card>
             <CardContent className="p-0">
               {/* Header */}
-              <div className="grid grid-cols-[3rem_1fr_6rem] sm:grid-cols-[3rem_1fr_10rem_6rem] items-center px-4 py-3 border-b bg-muted/30 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <div className="grid grid-cols-[3rem_1fr_6rem] sm:grid-cols-[3rem_1fr_10rem_6rem] items-center px-4 py-3 border-b bg-muted/30 text-xs font-medium text-muted-foreground tracking-wide">
                 <span>Rank</span>
                 <span>Contributor</span>
                 <span className="hidden sm:block">Region</span>

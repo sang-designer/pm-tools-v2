@@ -324,9 +324,6 @@ export function ClassicView({
           <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Active Tasks
           </h2>
-          <Badge variant="secondary" className="text-xs font-medium">
-            {pendingCounts.total} pending
-          </Badge>
         </div>
       </motion.div>
 

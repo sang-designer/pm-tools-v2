@@ -113,7 +113,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
             </Tabs>
           </div>
         )}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-4 sm:gap-8">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex size-10 items-center justify-center rounded bg-foreground p-2" aria-label="Foursquare">
               <span className="text-xs font-bold leading-none text-background">
@@ -131,7 +131,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                 <div key={tab} className="relative" ref={contributeRef}>
                   <button
                     className={cn(
-                      "flex h-16 items-center justify-center gap-1 px-4 text-sm transition-colors sm:px-6",
+                      "flex h-16 items-center justify-center gap-1 px-5 text-sm transition-colors",
                       tab === activeTab
                         ? "border-b-2 border-foreground font-semibold text-foreground"
                         : "text-muted-foreground hover:text-foreground"
@@ -183,7 +183,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                 <div key={tab} className="relative" ref={placesRef}>
                   <button
                     className={cn(
-                      "flex h-16 items-center justify-center gap-1 px-4 text-sm transition-colors sm:px-6",
+                      "flex h-16 items-center justify-center gap-1 px-5 text-sm transition-colors",
                       tab === activeTab
                         ? "border-b-2 border-foreground font-semibold text-foreground"
                         : "text-muted-foreground hover:text-foreground"
@@ -219,7 +219,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                   key={tab}
                   href="/"
                   className={cn(
-                    "flex h-16 items-center justify-center px-4 text-sm transition-colors sm:px-6",
+                    "flex h-16 items-center justify-center px-5 text-sm transition-colors",
                     tab === activeTab
                       ? "border-b-2 border-foreground font-semibold text-foreground"
                       : "text-muted-foreground hover:text-foreground"

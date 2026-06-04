@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, Plus, Check, X, Pencil, Info } from "lucide-react";
+import { ChevronDown, Plus, Check, X, Pencil, Info, ExternalLink } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-responsive";
 import { cn } from "@/lib/utils";
 
@@ -145,9 +145,10 @@ function AddTranslationForm({ onAdd, onClose }: { onAdd: (t: GeoTranslation) => 
                 href="https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="text-primary hover:underline inline-flex items-center gap-0.5"
               >
                 Find your language code here
+                <ExternalLink className="h-3 w-3" />
               </a>
             </p>
           </div>

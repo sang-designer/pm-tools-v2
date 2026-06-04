@@ -181,9 +181,9 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
 
     case "efficiency":
       return (
-        <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-4 items-start", className)}>
+        <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-4", className)}>
           {/* Venue Specific Card - Efficiency */}
-          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-gray-900">
+          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-gray-900 flex flex-col">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold">Place Specific Tasks</CardTitle>
@@ -194,7 +194,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
               </div>
             </CardHeader>
 
-            <CardContent className="pt-0 space-y-4">
+            <CardContent className="pt-0 space-y-4 flex-1 flex flex-col">
               <div className="space-y-1">
                 <button
                   className="flex items-center justify-between w-full rounded-md px-2 py-2 hover:bg-muted/40 transition-colors text-left group border-b border-transparent hover:border-foreground/10"
@@ -249,7 +249,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
               </div>
               
               <Button 
-                className="w-full"
+                className="w-full mt-auto"
                 onClick={handleHighImpactClick}
               >
                 Continue Tasks
@@ -258,6 +258,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
           </Card>
 
           {/* Daily Quick Tasks Card - Efficiency */}
+          <div className="flex flex-col gap-4">
           <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
@@ -265,7 +266,7 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
               </div>
               
               <div className="text-sm text-muted-foreground">
-                Map-based micro-tasks · 5-10 min each
+                Map-based micro-tasks
               </div>
             </CardHeader>
 
@@ -290,6 +291,22 @@ export function TaskChoiceCardsVariant({ variant = "default", className }: TaskC
               </Button>
             </CardContent>
           </Card>
+
+          {/* Quick Wins Card - Endowed Progress Effect */}
+          <Card className="transition-all duration-200 hover:shadow-md hover:border-primary/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold">Quick Wins</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                These tasks are almost done — just <span className="font-semibold text-foreground">your review</span> to complete them.
+              </p>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Button variant="outline" className="w-full" onClick={() => router.push("/venue/v1")}>
+                Let&apos;s do it!
+              </Button>
+            </CardContent>
+          </Card>
+          </div>
         </div>
       );
 

@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FilterDrawer, FilterState } from "@/components/classic/filter-drawer";
 import { toast } from "sonner";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useGame } from "@/lib/game-context";
 import {
@@ -25,7 +24,6 @@ import {
   SquarePen,
   Share2,
   History,
-  ChevronDown,
   ArrowRight,
   Settings2,
   MapPin,
@@ -103,7 +101,6 @@ export default function VenueDetailPage() {
   const searchParams = useSearchParams();
   const venueId = params.id as string;
   const venue = MOCK_VENUES.find((v) => v.id === venueId);
-  const [infoOpen, setInfoOpen] = useState(true);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({ selected: new Set() });
   const [shareCopied, setShareCopied] = useState(false);
@@ -270,20 +267,8 @@ export default function VenueDetailPage() {
           </div>
 
           {/* Right: sidebar */}
-          <div className="xl:block">
-            <Collapsible open={infoOpen} onOpenChange={setInfoOpen}>
-              <CollapsibleTrigger className="mb-2 flex w-full items-center gap-2 sm:hidden">
-                <h2 className="text-xl font-bold tracking-tight text-foreground">
-                  Venue info
-                </h2>
-                <ChevronDown
-                  className={`size-5 text-muted-foreground transition-transform ${infoOpen ? "rotate-180" : ""}`}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="sm:!block sm:!h-auto sm:!overflow-visible">
-                <VenueInfoCard venue={venue} />
-              </CollapsibleContent>
-            </Collapsible>
+          <div className="hidden xl:block">
+            <VenueInfoCard venue={venue} />
           </div>
         </div>
       </div>

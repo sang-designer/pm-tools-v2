@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useGame } from "@/lib/game-context";
 import { Venue } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { Info } from "lucide-react";
+import { Info, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/pagination";
 
 const ROWS_PER_PAGE = 15;
+
+type SortKey = "veracityRating" | "reviewTypes" | null;
+type SortDir = "asc" | "desc";
 
 const VERACITY_COLORS: Record<number, string> = {
   1: "border-transparent bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400",
@@ -70,10 +73,24 @@ function VenueRow({ venue }: { venue: Venue }) {
   );
 }
 
-function ColumnHeader({ children, tooltip }: { children: React.ReactNode; tooltip?: string }) {
+function ColumnHeader({ children, tooltip, sortable, sortDir, onSort }: { children: React.ReactNode; tooltip?: string; sortable?: boolean; sortDir?: SortDir | null; onSort?: () => void }) {
   return (
-    <div className="flex items-center gap-1">
+    <div
+      className={`flex items-center gap-1 ${sortable ? "cursor-pointer select-none" : ""}`}
+      onClick={sortable ? onSort : undefined}
+    >
       <span>{children}</span>
+      {sortable && (
+        <span className="text-muted-foreground">
+          {sortDir === "asc" ? (
+            <ArrowUp className="size-3.5" />
+          ) : sortDir === "desc" ? (
+            <ArrowDown className="size-3.5" />
+          ) : (
+            <ArrowUpDown className="size-3.5" />
+          )}
+        </span>
+      )}
       {tooltip && (
         <TooltipProvider delay={300}>
           <Tooltip>
@@ -111,10 +128,44 @@ export function VenueTable({ venues: venuesProp }: { venues?: Venue[] }) {
   const game = useGame();
   const venues = venuesProp ?? game.venues;
   const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState<SortKey>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
-  const totalPages = Math.max(1, Math.ceil(venues.length / ROWS_PER_PAGE));
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      if (sortDir === "desc") {
+        setSortDir("asc");
+      } else {
+        setSortKey(null);
+      }
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+    setPage(1);
+  };
+
+  const sortedVenues = useMemo(() => {
+    if (!sortKey) return venues;
+
+    return [...venues].sort((a, b) => {
+      if (sortKey === "veracityRating") {
+        const aVal = a.veracityRating ?? 0;
+        const bVal = b.veracityRating ?? 0;
+        return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      if (sortKey === "reviewTypes") {
+        const aVal = a.globallyCompleted ? 0 : a.tags.length;
+        const bVal = b.globallyCompleted ? 0 : b.tags.length;
+        return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      return 0;
+    });
+  }, [venues, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedVenues.length / ROWS_PER_PAGE));
   const start = (page - 1) * ROWS_PER_PAGE;
-  const paginatedVenues = venues.slice(start, start + ROWS_PER_PAGE);
+  const paginatedVenues = sortedVenues.slice(start, start + ROWS_PER_PAGE);
   const pageNumbers = getPageNumbers(page, totalPages);
 
   return (
@@ -130,12 +181,12 @@ export function VenueTable({ venues: venuesProp }: { venues?: Venue[] }) {
                 Address
               </th>
               <th className="px-4 py-2 text-sm font-medium text-muted-foreground">
-                <ColumnHeader tooltip="A score from 1 to 5 measuring how truthful a claim is, where 1 is completely false and 5 is completely true.">
+                <ColumnHeader tooltip="A score from 1 to 5 measuring how truthful a claim is, where 1 is completely false and 5 is completely true." sortable sortDir={sortKey === "veracityRating" ? sortDir : null} onSort={() => handleSort("veracityRating")}>
                   Veracity Rating
                 </ColumnHeader>
               </th>
               <th className="px-4 py-2 text-sm font-medium text-muted-foreground">
-                <ColumnHeader tooltip="Types of reviews needed for this place">
+                <ColumnHeader tooltip="Types of reviews needed for this place" sortable sortDir={sortKey === "reviewTypes" ? sortDir : null} onSort={() => handleSort("reviewTypes")}>
                   Review Types
                 </ColumnHeader>
               </th>
