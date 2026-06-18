@@ -182,7 +182,7 @@ export function MomentumBar() {
   }
 
   return (
-    <div className="fixed right-6 top-[72px] z-40 sm:top-[76px]">
+    <div className="fixed right-6 top-[72px] z-40 sm:top-[76px] max-sm:right-3 max-sm:top-[60px]">
       {/* Floating rewards above the trigger */}
       <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2">
         <AnimatePresence>
@@ -217,24 +217,25 @@ export function MomentumBar() {
           "relative flex items-center gap-2 rounded-full px-3 py-2 shadow-lg",
           "bg-gradient-to-r from-indigo-500 via-primary to-violet-500 text-white",
           "hover:shadow-xl hover:brightness-110 transition-all",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "max-sm:gap-1.5 max-sm:px-2.5 max-sm:py-1.5"
         )}
         onClick={() => setOpen((prev) => !prev)}
         whileTap={{ scale: 0.95 }}
       >
         <motion.div
-          className="flex size-6 items-center justify-center"
+          className="flex size-6 items-center justify-center max-sm:size-5"
           animate={lastPointsAwarded ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.3 }}
         >
-          <PlacemakerIcon className="size-5" />
+          <PlacemakerIcon className="size-5 max-sm:size-4" />
         </motion.div>
-        <span className="font-mono text-sm font-bold tabular-nums">
+        <span className="font-mono text-sm font-bold tabular-nums max-sm:text-xs">
           {displayPoints}
         </span>
 
-        {/* Mini progress arc */}
-        <div className="relative size-5">
+        {/* Mini progress arc — hidden on mobile */}
+        <div className="relative size-5 max-sm:hidden">
           <svg viewBox="0 0 20 20" className="size-5 -rotate-90">
             <circle
               cx="10"
@@ -261,7 +262,7 @@ export function MomentumBar() {
 
         <ChevronDown
           className={cn(
-            "size-3.5 text-white/70 transition-transform",
+            "size-3.5 text-white/70 transition-transform max-sm:hidden",
             open ? "rotate-180" : ""
           )}
         />
@@ -271,7 +272,7 @@ export function MomentumBar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="absolute right-0 top-full mt-2 w-72 overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
+            className="absolute right-0 top-full mt-2 w-72 overflow-hidden rounded-2xl border border-border bg-card shadow-xl max-sm:right-0 max-sm:w-[calc(100vw-24px)] max-sm:max-w-72"
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}

@@ -20,6 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/components/ui/combobox";
 import { toast } from "sonner";
 import { MapPreview } from "@/components/venue/map-preview";
 import {
@@ -34,6 +43,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export interface EpwItem {
   id: string;
@@ -92,9 +102,65 @@ const NEARBY_PLACES = [
 ];
 
 const CATEGORIES = [
-  "Restaurant", "Coffee Shop", "Bar", "Bakery", "Grocery Store",
-  "Gym", "Park", "Museum", "Hotel", "Gas Station",
-  "Pharmacy", "Bank", "Clothing Store", "Bookstore", "Salon",
+  "Arts and Entertainment > Arcade",
+  "Arts and Entertainment > Aquarium",
+  "Arts and Entertainment > Art Gallery",
+  "Arts and Entertainment > Bowling Alley",
+  "Arts and Entertainment > Casino",
+  "Arts and Entertainment > Movie Theater",
+  "Arts and Entertainment > Movie Theater > Drive-in Theater",
+  "Arts and Entertainment > Movie Theater > Indie Movie Theater",
+  "Arts and Entertainment > Museum",
+  "Arts and Entertainment > Museum > Art Museum",
+  "Arts and Entertainment > Museum > History Museum",
+  "Arts and Entertainment > Performing Arts Venue > Music Venue",
+  "Arts and Entertainment > Performing Arts Venue > Theater",
+  "Arts and Entertainment > Performing Arts Venue > Concert Hall",
+  "Arts and Entertainment > Stadium > Baseball Stadium",
+  "Arts and Entertainment > Stadium > Soccer Stadium",
+  "Food and Drink > Restaurant > American Restaurant",
+  "Food and Drink > Restaurant > Italian Restaurant",
+  "Food and Drink > Restaurant > Mexican Restaurant",
+  "Food and Drink > Restaurant > Japanese Restaurant",
+  "Food and Drink > Restaurant > Chinese Restaurant",
+  "Food and Drink > Restaurant > Thai Restaurant",
+  "Food and Drink > Restaurant > Pizza Place",
+  "Food and Drink > Restaurant > Burger Joint",
+  "Food and Drink > Restaurant > Sushi Restaurant",
+  "Food and Drink > Coffee Shop",
+  "Food and Drink > Coffee Shop > Café",
+  "Food and Drink > Bar > Cocktail Bar",
+  "Food and Drink > Bar > Sports Bar",
+  "Food and Drink > Bar > Wine Bar",
+  "Food and Drink > Bar > Brewery",
+  "Food and Drink > Bakery",
+  "Food and Drink > Ice Cream Shop",
+  "Food and Drink > Juice Bar",
+  "Food and Drink > Food Truck",
+  "Retail > Grocery Store > Supermarket",
+  "Retail > Clothing Store > Boutique",
+  "Retail > Clothing Store > Thrift Store",
+  "Retail > Bookstore",
+  "Retail > Electronics Store",
+  "Retail > Pharmacy",
+  "Retail > Shopping Mall",
+  "Health and Fitness > Gym",
+  "Health and Fitness > Gym > Yoga Studio",
+  "Health and Fitness > Spa",
+  "Health and Fitness > Salon > Hair Salon",
+  "Health and Fitness > Salon > Barbershop",
+  "Health and Fitness > Dentist",
+  "Outdoors and Recreation > Park",
+  "Outdoors and Recreation > Beach",
+  "Outdoors and Recreation > Trail",
+  "Outdoors and Recreation > Golf Course",
+  "Travel and Transport > Hotel",
+  "Travel and Transport > Airport",
+  "Travel and Transport > Gas Station",
+  "Services > Bank",
+  "Services > Post Office",
+  "Services > Laundromat",
+  "Services > Auto Repair",
 ];
 
 const US_STATES = [
@@ -356,7 +422,7 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
   const [submitting, setSubmitting] = useState(false);
 
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
   const [address, setAddress] = useState("");
   const [crossStreet, setCrossStreet] = useState("");
   const [city, setCity] = useState("");
@@ -490,7 +556,7 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
     );
   }, []);
 
-  const isValid = name.trim() && category && address.trim() && city.trim() && postalCode.trim();
+  const isValid = name.trim() && categories.length > 0 && address.trim() && city.trim() && postalCode.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -623,18 +689,62 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
           </FormField>
 
           <FormField label="Category" required>
-            <Select value={category} onValueChange={(v) => setCategory(v ?? "")}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select or type categories" />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              items={CATEGORIES}
+              multiple
+              value={categories}
+              onValueChange={(val) => {
+                if (val.length <= 3) setCategories(val);
+              }}
+            >
+              <ComboboxTrigger
+                render={
+                  <button
+                    type="button"
+                    className="flex min-h-9 w-full items-start rounded-md border border-input bg-transparent px-2 py-1.5 text-sm shadow-xs hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                }
+              >
+                <span className="flex flex-1 flex-wrap items-center gap-1.5">
+                  {categories.length === 0 ? (
+                    <span className="text-muted-foreground px-1">Search categories...</span>
+                  ) : (
+                    categories.map((cat) => (
+                      <Badge key={cat} variant="secondary" className="gap-1 pr-1 shrink-0">
+                        <span className="truncate max-w-[180px]">{cat.split(" > ").pop()}</span>
+                        <span
+                          role="button"
+                          className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCategories((prev) => prev.filter((c) => c !== cat));
+                          }}
+                          aria-label={`Remove ${cat}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </span>
+                      </Badge>
+                    ))
+                  )}
+                </span>
+              </ComboboxTrigger>
+              <ComboboxContent className="p-2">
+                <ComboboxInput showTrigger={false} placeholder="Search..." className="mb-2" />
+                {categories.length >= 3 && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 px-2 py-1.5 mb-1 rounded bg-amber-50 dark:bg-amber-950/30">
+                    Maximum of 3 categories reached. Remove one to add another.
+                  </p>
+                )}
+                <ComboboxEmpty>No categories found.</ComboboxEmpty>
+                <ComboboxList className="max-h-[320px]">
+                  {(item) => (
+                    <ComboboxItem key={item} value={item}>
+                      {item}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </FormField>
 
           <FormField label="Country" required>
