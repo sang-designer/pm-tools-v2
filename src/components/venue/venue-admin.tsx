@@ -9,7 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MOCK_VENUE_WOES } from "@/lib/mock-data";
-import { X, Info, ArrowRight, Globe } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const ShapesEditor = dynamic(
+  () => import("./shapes-editor").then((m) => m.ShapesEditor),
+  { ssr: false, loading: () => <div className="h-[360px] w-full animate-pulse rounded-lg bg-muted" /> }
+);
+import { X, Info, ArrowRight, Globe, Pentagon } from "lucide-react";
 
 interface VenueAdminProps {
   venue: Venue;
@@ -215,6 +221,25 @@ export function VenueAdmin({ venue }: VenueAdminProps) {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+
+        <Separator className="my-6" />
+
+        {/* Shapes */}
+        <section>
+          <div className="flex items-center gap-2">
+            <Pentagon className="size-4 text-muted-foreground" />
+            <h3 className="text-base font-semibold text-foreground">Shapes</h3>
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Define the boundary geometry for this venue. Draw multiple disjoint polygons or carve holes in existing shapes. You can also import/export as GeoJSON or WKT.
+          </p>
+          <div className="mt-4">
+            <ShapesEditor
+              center={[venue.lat, venue.lng]}
+              zoom={17}
+            />
           </div>
         </section>
 
