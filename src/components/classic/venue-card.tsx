@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { MapPin, ArrowRight } from "lucide-react";
+import { VERACITY_COLORS } from "@/lib/constants";
 
 interface VenueCardProps {
   venue: Venue;
@@ -44,6 +45,11 @@ export function VenueCard({ venue, isSelected, onClick, onMouseEnter, onMouseLea
           <div className="flex items-center gap-2 mb-1">
             <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
             <div className="font-semibold text-foreground text-base truncate">{venue.name}</div>
+            {venue.veracityRating != null && (
+              <Badge className={`shrink-0 tabular-nums text-xs px-1.5 py-0 ${VERACITY_COLORS[venue.veracityRating] ?? ""}`}>
+                {venue.veracityRating}
+              </Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{venue.address}</p>
         </div>

@@ -18,6 +18,7 @@ import { useIsLgDown } from "@/hooks/use-responsive";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { X, ArrowRight, Search, SlidersHorizontal, List, Map, Home, ChevronRight } from "lucide-react";
+import { VERACITY_COLORS } from "@/lib/constants";
 
 
 const staggerItem = {
@@ -392,8 +393,15 @@ export function ClassicView({
                         onClick={() => router.push(`/venue/${selectedVenue.id}`)}
                         className="w-full text-left"
                       >
-                        <div className="pr-8 text-base font-semibold text-foreground">
-                          {selectedVenue.name}
+                        <div className="flex items-center gap-2 pr-8">
+                          <div className="text-base font-semibold text-foreground">
+                            {selectedVenue.name}
+                          </div>
+                          {selectedVenue.veracityRating != null && (
+                            <Badge className={`shrink-0 tabular-nums text-xs px-1.5 py-0 ${VERACITY_COLORS[selectedVenue.veracityRating] ?? ""}`}>
+                              {selectedVenue.veracityRating}
+                            </Badge>
+                          )}
                         </div>
                         <p className="mt-0.5 text-sm text-muted-foreground">
                           {selectedVenue.address}
