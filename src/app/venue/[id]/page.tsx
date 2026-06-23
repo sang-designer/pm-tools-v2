@@ -18,6 +18,7 @@ import { FilterDrawer, FilterState } from "@/components/classic/filter-drawer";
 import { toast } from "sonner";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useGame } from "@/lib/game-context";
+import { VERACITY_COLORS } from "@/lib/constants";
 import {
   Search,
   BookOpen,
@@ -148,6 +149,18 @@ export default function VenueDetailPage() {
                   <Briefcase className="size-3.5" />
                 </TooltipTrigger>
                 <TooltipContent>Claimed business</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {venue.veracityRating != null && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="inline-flex items-center">
+                  <Badge className={`tabular-nums text-xs px-2 py-0.5 ${VERACITY_COLORS[venue.veracityRating] ?? ""}`}>
+                    Veracity: {venue.veracityRating}/5
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>A score from 1 to 5 measuring how truthful a claim is</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
