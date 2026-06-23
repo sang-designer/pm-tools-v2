@@ -46,8 +46,8 @@ export function VenueCard({ venue, isSelected, onClick, onMouseEnter, onMouseLea
             <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
             <div className="font-semibold text-foreground text-base truncate">{venue.name}</div>
             {venue.veracityRating != null && (
-              <Badge className={`shrink-0 tabular-nums text-xs px-1.5 py-0 ${VERACITY_COLORS[venue.veracityRating] ?? ""}`}>
-                {venue.veracityRating}
+              <Badge className={`shrink-0 tabular-nums text-xs px-2 py-0.5 ${VERACITY_COLORS[venue.veracityRating] ?? ""}`}>
+                Veracity: {venue.veracityRating}/5
               </Badge>
             )}
           </div>

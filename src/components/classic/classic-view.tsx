@@ -398,8 +398,8 @@ export function ClassicView({
                             {selectedVenue.name}
                           </div>
                           {selectedVenue.veracityRating != null && (
-                            <Badge className={`shrink-0 tabular-nums text-xs px-1.5 py-0 ${VERACITY_COLORS[selectedVenue.veracityRating] ?? ""}`}>
-                              {selectedVenue.veracityRating}
+                            <Badge className={`shrink-0 tabular-nums text-xs px-2 py-0.5 ${VERACITY_COLORS[selectedVenue.veracityRating] ?? ""}`}>
+                              Veracity: {selectedVenue.veracityRating}/5
                             </Badge>
                           )}
                         </div>
