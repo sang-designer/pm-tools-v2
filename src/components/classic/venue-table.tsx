@@ -174,7 +174,7 @@ export function VenueTable({ venues: venuesProp }: { venues?: Venue[] }) {
                 Address
               </th>
               <th className="px-4 py-2 text-sm font-medium text-muted-foreground">
-                <ColumnHeader tooltip="A score from 1 to 5 indicating how truthful a claim is, where 1 is least trustworthy and 5 is most trustworthy." sortable sortDir={sortKey === "veracityRating" ? sortDir : null} onSort={() => handleSort("veracityRating")}>
+                <ColumnHeader tooltip="A score from 1 to 5 indicating how truthful a place is, where 1 is least trustworthy and 5 is most trustworthy." sortable sortDir={sortKey === "veracityRating" ? sortDir : null} onSort={() => handleSort("veracityRating")}>
                   Veracity Rating
                 </ColumnHeader>
               </th>

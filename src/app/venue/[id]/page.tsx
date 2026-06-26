@@ -160,7 +160,7 @@ export default function VenueDetailPage() {
                     Veracity: {venue.veracityRating}/5
                   </Badge>
                 </TooltipTrigger>
-                <TooltipContent>A score from 1 to 5 indicating how truthful a claim is, where 1 is least trustworthy and 5 is most trustworthy.</TooltipContent>
+                <TooltipContent>A score from 1 to 5 indicating how truthful a place is, where 1 is least trustworthy and 5 is most trustworthy.</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}

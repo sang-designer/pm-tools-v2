@@ -383,7 +383,7 @@ const EXISTING_PLACE_EDITS: ExistingPlaceEdit[] = [
   { id: "5", placeName: "Yang Chow Restaurant", details: "", resolvedBy: "N/A", status: "Pending", contributionType: "Info", created: "04/06/2026", resolved: "" },
   { id: "6", placeName: "KYU2 Sushi", details: "", resolvedBy: "avatar", status: "Accepted", contributionType: "Closed", created: "04/06/2026", resolved: "04/06/2026" },
   { id: "7", placeName: "Ken Bullock - State Farm Insurance Agent", details: "", resolvedBy: "N/A", status: "Pending", contributionType: "Photo", created: "04/06/2026", resolved: "" },
-  { id: "8", placeName: "Eco Chique Salon", details: "", resolvedBy: "N/A", status: "Pending", contributionType: "Photo", created: "02/13/2026", resolved: "" },
+  { id: "8", placeName: "Eco Chique Salon", details: "", resolvedBy: "N/A", status: "Pending", contributionType: "Vote", created: "03/28/2026", resolved: "" },
   { id: "9", placeName: "Moraga Country Club", details: "", resolvedBy: "avatar", status: "Accepted", contributionType: "Mislocated", created: "02/13/2026", resolved: "02/13/2026" },
   { id: "10", placeName: "Geppettos", details: "", resolvedBy: "N/A", status: "Pending", contributionType: "Photo", created: "02/13/2026", resolved: "" },
   { id: "11", placeName: "N/A", details: "", resolvedBy: "avatar", status: "Accepted", contributionType: "Delete", created: "02/03/2026", resolved: "02/03/2026" },
