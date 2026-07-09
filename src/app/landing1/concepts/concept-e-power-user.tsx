@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdentityHeaderVariant } from "@/components/landing/identity-header-variant";
@@ -150,38 +150,76 @@ function LeaderboardCard() {
   const [leaderboardTab, setLeaderboardTab] = useState<"local" | "global">("local");
   const [showAll, setShowAll] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const locationContext = useLocationContext();
+  const selectedZone = locationContext?.selectedZone || "San Francisco Bay Area";
 
-  const leaderboardData = [
-    { name: "Sam Taylor", verified: 89, avatar: "ST" },
-    { name: "Maria Rodriguez", verified: 67, avatar: "MR" },
-    { name: "Alex Chen", verified: 45, avatar: "AC", isYou: true },
-    { name: "Jordan Lee", verified: 38, avatar: "JL" },
-    { name: "Priya Patel", verified: 34, avatar: "PP" },
-    { name: "Elena Kim", verified: 27, avatar: "EK" },
-    { name: "David Park", verified: 24, avatar: "DP" },
-    { name: "Liam Foster", verified: 22, avatar: "LF" },
-    { name: "Zara Ahmed", verified: 19, avatar: "ZA" },
-    { name: "Noah Kim", verified: 17, avatar: "NK" },
-    { name: "Olivia Chen", verified: 15, avatar: "OC" },
-    { name: "James Wu", verified: 14, avatar: "JW" },
-    { name: "Ava Singh", verified: 12, avatar: "AS" },
-    { name: "Ethan Liu", verified: 10, avatar: "EL" },
-    { name: "Sophie Green", verified: 9, avatar: "SG" },
-  ];
+  const leaderboardByLocation: Record<string, Array<{ name: string; verified: number; avatar: string; image: string; isYou?: boolean }>> = {
+    "San Francisco Bay Area": [
+      { name: "Sam Taylor", verified: 89, avatar: "ST", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
+      { name: "Maria Rodriguez", verified: 67, avatar: "MR", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" },
+      { name: "Alex Chen", verified: 45, avatar: "AC", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop&crop=face", isYou: true },
+      { name: "Jordan Lee", verified: 38, avatar: "JL", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" },
+      { name: "Priya Patel", verified: 34, avatar: "PP", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face" },
+      { name: "Elena Kim", verified: 27, avatar: "EK", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" },
+      { name: "David Park", verified: 24, avatar: "DP", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" },
+      { name: "Liam Foster", verified: 22, avatar: "LF", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" },
+      { name: "Zara Ahmed", verified: 19, avatar: "ZA", image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop&crop=face" },
+      { name: "Noah Kim", verified: 17, avatar: "NK", image: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=80&h=80&fit=crop&crop=face" },
+      { name: "Olivia Chen", verified: 15, avatar: "OC", image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=face" },
+      { name: "James Wu", verified: 14, avatar: "JW", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&crop=face" },
+      { name: "Ava Singh", verified: 12, avatar: "AS", image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face" },
+      { name: "Ethan Liu", verified: 10, avatar: "EL", image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=80&h=80&fit=crop&crop=face" },
+      { name: "Sophie Green", verified: 9, avatar: "SG", image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=80&h=80&fit=crop&crop=face" },
+    ],
+    "Oakland": [
+      { name: "Dina West", verified: 72, avatar: "DW", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&h=80&fit=crop&crop=face" },
+      { name: "Marcus Johnson", verified: 58, avatar: "MJ", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
+      { name: "Alex Chen", verified: 31, avatar: "AC", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop&crop=face", isYou: true },
+      { name: "Kenji Tanaka", verified: 29, avatar: "KT", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" },
+      { name: "Fatima Al-Rashid", verified: 24, avatar: "FA", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" },
+    ],
+    "San Jose": [
+      { name: "Carlos Mendoza", verified: 94, avatar: "CM", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" },
+      { name: "Amy Tran", verified: 63, avatar: "AT", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face" },
+      { name: "Alex Chen", verified: 28, avatar: "AC", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop&crop=face", isYou: true },
+      { name: "Raj Krishnan", verified: 22, avatar: "RK", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" },
+      { name: "Lisa Park", verified: 18, avatar: "LP", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" },
+    ],
+    "Los Angeles": [
+      { name: "Diego Ramirez", verified: 112, avatar: "DR", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" },
+      { name: "Sasha Kim", verified: 88, avatar: "SK", image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop&crop=face" },
+      { name: "Tyler Brooks", verified: 71, avatar: "TB", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&crop=face" },
+      { name: "Nina Patel", verified: 55, avatar: "NP", image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=face" },
+      { name: "Alex Chen", verified: 12, avatar: "AC", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop&crop=face", isYou: true },
+    ],
+    "Boston": [
+      { name: "Patrick Sullivan", verified: 76, avatar: "PS", image: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=80&h=80&fit=crop&crop=face" },
+      { name: "Mei Lin", verified: 64, avatar: "ML", image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face" },
+      { name: "Alex Chen", verified: 19, avatar: "AC", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop&crop=face", isYou: true },
+      { name: "Hannah McCarthy", verified: 15, avatar: "HM", image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=80&h=80&fit=crop&crop=face" },
+      { name: "Ben Okafor", verified: 11, avatar: "BO", image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=80&h=80&fit=crop&crop=face" },
+    ],
+  };
+
+  const leaderboardData = leaderboardByLocation[selectedZone] || leaderboardByLocation["San Francisco Bay Area"];
 
   const friendsActivity = [
-    { name: "Jordan Lee", verified: 38, time: "2h ago" },
-    { name: "Priya Patel", verified: 34, time: "5h ago" },
-    { name: "Elena Kim", verified: 27, time: "1d ago" },
+    { name: "Jordan Lee", verified: 38, time: "2h ago", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" },
+    { name: "Priya Patel", verified: 34, time: "5h ago", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face" },
+    { name: "Elena Kim", verified: 27, time: "1d ago", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" },
   ];
 
   const displayedData = showAll ? leaderboardData : leaderboardData.slice(0, 5);
 
-  const communityStats = {
-    activeContributors: 23,
-    newMembers: 5,
-    placesUpdated: 23,
+  const communityStatsByLocation: Record<string, { activeContributors: number; newMembers: number; placesUpdated: number }> = {
+    "San Francisco Bay Area": { activeContributors: 23, newMembers: 5, placesUpdated: 23 },
+    "Oakland": { activeContributors: 14, newMembers: 3, placesUpdated: 11 },
+    "San Jose": { activeContributors: 18, newMembers: 4, placesUpdated: 16 },
+    "Los Angeles": { activeContributors: 41, newMembers: 9, placesUpdated: 37 },
+    "Boston": { activeContributors: 16, newMembers: 2, placesUpdated: 14 },
   };
+
+  const communityStats = communityStatsByLocation[selectedZone] || communityStatsByLocation["San Francisco Bay Area"];
 
   return (
     <motion.div variants={fadeUp}>
@@ -198,7 +236,7 @@ function LeaderboardCard() {
           </Tabs>
 
           <Badge variant="secondary" className="text-xs font-normal">
-            San Francisco Bay Area
+            {selectedZone}
           </Badge>
 
           {/* Leaderboard list */}
@@ -206,6 +244,7 @@ function LeaderboardCard() {
             {displayedData.map((user, i) => (
               <div key={user.name} className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/40 transition-colors">
                 <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.image} alt={user.name} className="object-cover" />
                   <AvatarFallback className="text-[10px] font-medium">{user.avatar}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
@@ -248,6 +287,7 @@ function LeaderboardCard() {
             {friendsActivity.map((friend) => (
               <div key={friend.name} className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/40 transition-colors">
                 <Avatar className="h-7 w-7">
+                  <AvatarImage src={friend.image} alt={friend.name} className="object-cover" />
                   <AvatarFallback className="text-[10px]">{friend.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
