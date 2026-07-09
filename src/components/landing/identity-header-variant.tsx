@@ -26,12 +26,14 @@ function PurpleProgress({ value = 0, className = "" }: { value?: number; classNa
 interface IdentityHeaderProps {
   variant?: "default" | "gamified" | "minimal" | "community" | "efficiency2" | "new-user";
   className?: string;
+  userId?: string;
 }
 
 const RECENT_CITIES = [
   { id: "sf-bay", name: "San Francisco Bay Area", tasksCompleted: 156, lastVisited: "Today" },
   { id: "oakland", name: "Oakland", tasksCompleted: 42, lastVisited: "2 days ago" },
   { id: "san-jose", name: "San Jose", tasksCompleted: 28, lastVisited: "Last week" },
+  { id: "portland", name: "Portland", tasksCompleted: 0, lastVisited: "Never" },
 ];
 
 const ALL_LOCATIONS = [
@@ -40,12 +42,13 @@ const ALL_LOCATIONS = [
   { id: "san-jose", name: "San Jose" },
   { id: "los-angeles", name: "Los Angeles" },
   { id: "boston", name: "Boston" },
+  { id: "portland", name: "Portland" },
   { id: "new-york", name: "New York Metro" },
   { id: "austin", name: "Austin Metro" },
   { id: "mountain-house", name: "Mountain House" },
 ];
 
-function LocationSelector({ currentLocation }: { currentLocation: string }) {
+export function LocationSelector({ currentLocation }: { currentLocation: string }) {
   const locationContext = useLocationContext();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -222,8 +225,8 @@ function PlacemakerIcon({ className }: { className?: string }) {
   );
 }
 
-export function IdentityHeaderVariant({ variant = "default", className }: IdentityHeaderProps) {
-  const { userStats, locationStats, isLoading, error } = useUserStats();
+export function IdentityHeaderVariant({ variant = "default", className, userId }: IdentityHeaderProps) {
+  const { userStats, locationStats, isLoading, error } = useUserStats({ userId });
 
   if (isLoading) {
     return (

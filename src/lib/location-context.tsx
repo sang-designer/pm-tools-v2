@@ -17,9 +17,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locationStats, setLocationStats] = useState<LocationStats>(MOCK_LOCATION_STATS);
 
   const switchZone = useCallback((zone: string) => {
+    setSelectedZone(zone);
     const stats = getLocationStatsByZone(zone);
     if (stats) {
-      setSelectedZone(zone);
       setLocationStats(stats);
     }
   }, []);

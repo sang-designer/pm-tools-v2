@@ -8,9 +8,10 @@ import { ChevronDown } from "lucide-react";
 
 import { ConceptETaskCommunity } from "./landing1/concepts/concept-e-task-community";
 import { ConceptENewUser } from "./landing1/concepts/concept-e-new-user";
+import { ConceptEPowerUser } from "./landing1/concepts/concept-e-power-user";
 
 function HomeContent() {
-  const [userVariant, setUserVariant] = useState<"existing" | "new-user">("existing");
+  const [userVariant, setUserVariant] = useState<"existing" | "power-user" | "new-user">("existing");
   const [headerVisible, setHeaderVisible] = useState(true);
 
   return (
@@ -65,6 +66,17 @@ function HomeContent() {
                 Existing User
               </button>
               <button
+                onClick={() => setUserVariant("power-user")}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-medium rounded-full transition-all",
+                  userVariant === "power-user"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Power User
+              </button>
+              <button
                 onClick={() => setUserVariant("new-user")}
                 className={cn(
                   "px-3 py-1.5 text-xs font-medium rounded-full transition-all",
@@ -84,7 +96,7 @@ function HomeContent() {
 
       {/* Main Content */}
       <main className="flex-1">
-        {userVariant === "new-user" ? <ConceptENewUser /> : <ConceptETaskCommunity />}
+        {userVariant === "new-user" ? <ConceptENewUser /> : userVariant === "power-user" ? <ConceptEPowerUser /> : <ConceptETaskCommunity />}
       </main>
     </div>
   );
