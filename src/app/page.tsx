@@ -11,7 +11,7 @@ import { ConceptENewUser } from "./landing1/concepts/concept-e-new-user";
 import { ConceptEPowerUser } from "./landing1/concepts/concept-e-power-user";
 
 function HomeContent() {
-  const [userVariant, setUserVariant] = useState<"existing" | "power-user" | "new-user">("existing");
+  const [userVariant, setUserVariant] = useState<"existing" | "power-user" | "new-user">("power-user");
   const [headerVisible, setHeaderVisible] = useState(true);
 
   return (
