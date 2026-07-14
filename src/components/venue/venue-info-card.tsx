@@ -70,13 +70,29 @@ export function VenueInfoCard({ venue }: VenueInfoCardProps) {
               </button>
             )}
             <p className="mt-1 text-sm leading-5 text-muted-foreground">
-              {venue.address?.split(",").map((part, i) => (
-                <span key={i}>
-                  {part.trim()}
-                  {i < venue.address.split(",").length - 1 && <>,<br /></>}
-                </span>
-              ))}
+              {(() => {
+                const parts = venue.address?.split(",").map((p) => p.trim()) || [];
+                const street = parts[0] || "";
+                const cityStateZip = parts.length > 1
+                  ? `${parts.slice(1).join(", ")} 94563`
+                  : "94563";
+                return (
+                  <>
+                    <span>{street}</span>
+                    <br />
+                    <span>{cityStateZip}</span>
+                  </>
+                );
+              })()}
             </p>
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${venue.lat},${venue.lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block text-xs font-medium text-primary hover:underline"
+            >
+              Get Directions
+            </a>
             {venue.parentVenue && (
               <p className="mt-1 text-sm text-muted-foreground">
                 At:{" "}
