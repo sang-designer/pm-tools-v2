@@ -17,7 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FilterDrawer, FilterState } from "@/components/classic/filter-drawer";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGame } from "@/lib/game-context";
 import { VERACITY_COLORS } from "@/lib/constants";
 import {
@@ -32,6 +36,8 @@ import {
   ArrowLeft,
   Check,
   Briefcase,
+  CalendarDays,
+  User,
 } from "lucide-react";
 import { useState, useRef } from "react";
 
@@ -107,6 +113,7 @@ export default function VenueDetailPage() {
   const [filters, setFilters] = useState<FilterState>({ selected: new Set() });
   const [shareCopied, setShareCopied] = useState(false);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [eventsOpen, setEventsOpen] = useState(false);
   const { getVenueState, completeTask, venueProgress, skippedTasks } = useGame();
   const justSubmittedRef = useRef(false);
 
@@ -213,6 +220,7 @@ export default function VenueDetailPage() {
             window.open("https://docs.foursquare.com/data-products/docs/placemaker-best-practices", "_blank");
           }} />
           <ActionLink icon={<SquarePen className="size-3.5" />} label="View/Edit this Place" onClick={() => setEditDrawerOpen(true)} />
+          <ActionLink icon={<CalendarDays className="size-3.5" />} label="Manage Events" onClick={() => setEventsOpen(true)} />
           <ActionLink icon={<History className="size-3.5" />} label="Edit History" />
           <ActionLink icon={<Share2 className="size-3.5" />} label="Share this Place" onClick={() => {
             navigator.clipboard.writeText(window.location.href);
@@ -338,6 +346,11 @@ export default function VenueDetailPage() {
         onOpenChange={setEditDrawerOpen}
         venue={venue}
       />
+      <ManageEventsSheet
+        open={eventsOpen}
+        onOpenChange={setEventsOpen}
+        venueName={venue.name}
+      />
     </div>
   );
 }
@@ -351,5 +364,247 @@ function ActionLink({ icon, label, onClick }: { icon: React.ReactNode; label: st
       {icon}
       <span>{label}</span>
     </button>
+  );
+}
+
+interface ManageEventsSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  venueName: string;
+}
+
+interface VenueEvent {
+  id: string;
+  name: string;
+  date: string;
+  time: string;
+  timezone: string;
+  registrationLink: string;
+  about: string;
+  createdBy: string;
+}
+
+function ManageEventsSheet({ open, onOpenChange, venueName }: ManageEventsSheetProps) {
+  const [events, setEvents] = useState<VenueEvent[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [eventName, setEventName] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("");
+  const [timezone, setTimezone] = useState("America/Los_Angeles");
+  const [registrationLink, setRegistrationLink] = useState("");
+  const [about, setAbout] = useState("");
+
+  function populateForm(event: VenueEvent) {
+    setEditingId(event.id);
+    setEventName(event.name);
+    setEventDate(event.date);
+    setEventTime(event.time);
+    setTimezone(event.timezone);
+    setRegistrationLink(event.registrationLink);
+    setAbout(event.about);
+  }
+
+  function clearForm() {
+    setEditingId(null);
+    setEventName("");
+    setEventDate("");
+    setEventTime("");
+    setRegistrationLink("");
+    setAbout("");
+  }
+
+  function handleCreate() {
+    if (!eventName.trim()) return;
+    const newEvent: VenueEvent = {
+      id: `e-${Date.now()}`,
+      name: eventName,
+      date: eventDate,
+      time: eventTime,
+      timezone,
+      registrationLink,
+      about,
+      createdBy: "You",
+    };
+    setEvents([newEvent, ...events]);
+    clearForm();
+  }
+
+  function handleUpdate() {
+    if (!eventName.trim() || !editingId) return;
+    setEvents(events.map(e => e.id === editingId ? { ...e, name: eventName, date: eventDate, time: eventTime, timezone, registrationLink, about } : e));
+    clearForm();
+  }
+
+  function handleRemove() {
+    if (!editingId) return;
+    setEvents(events.filter(e => e.id !== editingId));
+    clearForm();
+  }
+
+  const TIMEZONES = [
+    { value: "America/Los_Angeles", label: "Los Angeles (GMT-7)" },
+    { value: "America/Denver", label: "Denver (GMT-6)" },
+    { value: "America/Chicago", label: "Chicago (GMT-5)" },
+    { value: "America/New_York", label: "New York (GMT-4)" },
+    { value: "Europe/London", label: "London (GMT+1)" },
+    { value: "Europe/Paris", label: "Paris (GMT+2)" },
+    { value: "Asia/Tokyo", label: "Tokyo (GMT+9)" },
+  ];
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-xl flex flex-col overflow-hidden">
+        <SheetHeader className="shrink-0">
+          <SheetTitle className="text-xl">Events</SheetTitle>
+        </SheetHeader>
+
+        <div className="mt-6 px-4 space-y-6 flex-1 overflow-y-auto">
+          {/* Create/Edit event form */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground">
+                {editingId ? "Edit event" : `Create & manage events (${events.length})`}
+              </h3>
+              {editingId && (
+                <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={clearForm}>
+                  Cancel
+                </Button>
+              )}
+            </div>
+
+            <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-semibold text-foreground mb-1.5 block">Event name</label>
+                  <Input
+                    placeholder="e.g. Open Mic Night"
+                    value={eventName}
+                    onChange={(e) => setEventName(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-semibold text-foreground mb-1.5 block">Date</label>
+                    <Input
+                      type="date"
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-foreground mb-1.5 block">Time</label>
+                    <Input
+                      type="time"
+                      value={eventTime}
+                      onChange={(e) => setEventTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground mb-1.5 block">Time zone</label>
+                  <Select value={timezone} onValueChange={setTimezone}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIMEZONES.map((tz) => (
+                        <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground mb-1.5 block">Registration link</label>
+                  <Input
+                    placeholder="https://"
+                    value={registrationLink}
+                    onChange={(e) => setRegistrationLink(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground mb-1.5 block">About</label>
+                  <textarea
+                    placeholder="Describe your event..."
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={about}
+                    onChange={(e) => setAbout(e.target.value)}
+                  />
+                </div>
+
+                {editingId ? (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={handleRemove}
+                    >
+                      Remove Event
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={handleUpdate}
+                      disabled={!eventName.trim()}
+                    >
+                      Update Event
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full text-primary border-primary/30 hover:bg-primary/5"
+                    onClick={handleCreate}
+                    disabled={!eventName.trim()}
+                  >
+                    Create Event
+                  </Button>
+                )}
+            </div>
+          </div>
+
+          {/* Scheduled Events */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Scheduled Events</h3>
+            {events.length === 0 ? (
+              <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
+                <CalendarDays className="size-8 mx-auto text-muted-foreground/50 mb-2" />
+                <p className="text-sm font-medium text-foreground">No events scheduled</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Use the form above to add your first event for this place.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {events.map((event) => (
+                  <div key={event.id} className={cn("rounded-lg border p-3 transition-colors", editingId === event.id ? "border-primary bg-primary/5" : "border-border")}>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-foreground">{event.name}</p>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => populateForm(event)}>
+                        Edit
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      {event.date && <span>{new Date(event.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>}
+                      {event.time && <span>{event.time}</span>}
+                    </div>
+                    <Link href="/my-contributions?tab=history&subtab=events" className="flex items-center gap-1.5 mt-2 group cursor-pointer">
+                      <div className="flex size-5 items-center justify-center rounded-full bg-primary/10">
+                        <User className="size-3 text-primary" />
+                      </div>
+                      <span className="text-xs text-muted-foreground">Created by <span className="font-medium text-foreground group-hover:text-primary transition-colors">{event.createdBy}</span></span>
+                    </Link>
+                    {event.about && (
+                      <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{event.about}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

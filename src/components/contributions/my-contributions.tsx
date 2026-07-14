@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useGame } from "@/lib/game-context";
 import { getLevelFromPoints } from "@/lib/types";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -33,7 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronDown, ChevronUp, ArrowUpDown, MoreHorizontal, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowUpDown, MoreHorizontal, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MONTHLY_DATA = [
@@ -646,14 +647,339 @@ function CreatedPlacesTable() {
   );
 }
 
-function HistoryTab() {
-  const [subTab, setSubTab] = useState<string>("created");
+// -- Votes tab data & components --
+
+interface VoteRecord {
+  id: string;
+  placeName: string;
+  placeId: string;
+  type: string;
+  details: string;
+  proposedBy: "user" | "robot";
+  yourVote: "Accept" | "Reject";
+  correct: boolean | null;
+  status: "Pending" | "Accepted" | "Denied";
+  voted: string;
+  resolved: string;
+}
+
+const MOCK_VOTES: VoteRecord[] = [
+  { id: "v1", placeName: "ippudo", placeId: "v1", type: "Edit Info", details: "Website: https://www.ippudous.com/yerba-b...", proposedBy: "user", yourVote: "Accept", correct: null, status: "Pending", voted: "07/10/2026", resolved: "" },
+  { id: "v2", placeName: "ippudo", placeId: "v1", type: "Edit Info", details: "Website: https://ippudo-us.com", proposedBy: "user", yourVote: "Reject", correct: null, status: "Pending", voted: "07/10/2026", resolved: "" },
+  { id: "v3", placeName: "ippudo", placeId: "v1", type: "Edit Info", details: "Website: https://ippudous.com/yerba-buena", proposedBy: "robot", yourVote: "Reject", correct: null, status: "Pending", voted: "07/10/2026", resolved: "" },
+  { id: "v4", placeName: "ippudo", placeId: "v1", type: "Edit Info", details: "Website: https://ippudous.com", proposedBy: "user", yourVote: "Reject", correct: null, status: "Pending", voted: "07/10/2026", resolved: "" },
+  { id: "v5", placeName: "ippudo", placeId: "v1", type: "Edit Info", details: "Website: https://ippudo-us.com/store", proposedBy: "robot", yourVote: "Reject", correct: null, status: "Pending", voted: "07/10/2026", resolved: "" },
+  { id: "v6", placeName: "ippudo", placeId: "v1", type: "Location", details: "", proposedBy: "robot", yourVote: "Reject", correct: true, status: "Denied", voted: "07/10/2026", resolved: "07/10/2026" },
+  { id: "v7", placeName: "The Cheese Steak Shop", placeId: "v2", type: "Edit Info", details: "phone: +15107247160", proposedBy: "user", yourVote: "Reject", correct: true, status: "Denied", voted: "06/24/2026", resolved: "06/24/2026" },
+  { id: "v8", placeName: "The Cheese Steak Shop", placeId: "v2", type: "Location", details: "", proposedBy: "robot", yourVote: "Accept", correct: true, status: "Accepted", voted: "06/24/2026", resolved: "06/24/2026" },
+  { id: "v9", placeName: "Soi 4 Bangkok Eatery", placeId: "v3", type: "Hours", details: "", proposedBy: "robot", yourVote: "Accept", correct: true, status: "Accepted", voted: "06/24/2026", resolved: "06/24/2026" },
+];
+
+function VoteStatusBadge({ status }: { status: VoteRecord["status"] }) {
+  const styles = {
+    Pending: "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300",
+    Accepted: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
+    Denied: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300",
+  };
+  return (
+    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", styles[status])}>
+      {status}
+    </span>
+  );
+}
+
+function VotesTable() {
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  const totalPages = Math.max(1, Math.ceil(MOCK_VOTES.length / rowsPerPage));
+  const paginated = MOCK_VOTES.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  return (
+    <>
+      <div className="rounded-md border border-border">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="min-w-[160px] font-normal text-muted-foreground">Place Name</TableHead>
+              <TableHead className="font-normal text-muted-foreground">Type</TableHead>
+              <TableHead className="min-w-[200px] font-normal text-muted-foreground">Details</TableHead>
+              <TableHead className="font-normal text-muted-foreground">Proposed By</TableHead>
+              <TableHead className="font-normal text-muted-foreground">Your Vote</TableHead>
+              <TableHead className="font-normal text-muted-foreground">Correct?</TableHead>
+              <TableHead className="font-normal text-muted-foreground">Status</TableHead>
+              <TableHead className="font-normal text-muted-foreground">Voted</TableHead>
+              <TableHead className="font-normal text-muted-foreground">Resolved</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginated.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell className="py-3.5">
+                  <a href="#" className="text-primary hover:underline">{row.placeName}</a>
+                </TableCell>
+                <TableCell className="py-3.5">{row.type}</TableCell>
+                <TableCell className="py-3.5 text-muted-foreground text-sm">{row.details || "—"}</TableCell>
+                <TableCell className="py-3.5">
+                  {row.proposedBy === "user" ? <AvatarPlaceholder /> : (
+                    <div className="flex size-8 items-center justify-center rounded-full bg-muted">
+                      <svg viewBox="0 0 24 24" className="size-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M9 9h6M9 13h6M9 17h4" />
+                      </svg>
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell className="py-3.5">
+                  <span className={cn("text-sm font-medium", row.yourVote === "Accept" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>
+                    {row.yourVote}
+                  </span>
+                </TableCell>
+                <TableCell className="py-3.5">
+                  {row.correct === null ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (
+                    <span className="text-sm">{row.correct ? "✓" : "✗"}</span>
+                  )}
+                </TableCell>
+                <TableCell className="py-3.5">
+                  <VoteStatusBadge status={row.status} />
+                </TableCell>
+                <TableCell className="py-3.5 text-sm">{row.voted}</TableCell>
+                <TableCell className="py-3.5 text-sm text-muted-foreground">{row.resolved || "—"}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <TablePagination
+        page={page}
+        totalPages={totalPages}
+        rowsPerPage={rowsPerPage}
+        onPageChange={setPage}
+        onRowsPerPageChange={(n) => { setRowsPerPage(n); setPage(1); }}
+      />
+    </>
+  );
+}
+
+// -- Created Events tab data & components --
+
+interface CreatedEvent {
+  id: string;
+  name: string;
+  venue: string;
+  venueId: string;
+  date: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  checkins: number;
+  category: string;
+}
+
+const MOCK_EVENTS: CreatedEvent[] = [
+  { id: "e1", name: "Lit Up Trivia", venue: "Minnie's Bar", venueId: "v1", date: "2026-07-01", day: "Wednesday", startTime: "8:00 PM", endTime: "10:30 PM", checkins: 0, category: "Trivia" },
+  { id: "e2", name: "Baila Wednesdays", venue: "Solas", venueId: "v2", date: "2026-07-01", day: "Wednesday", startTime: "8:30 PM", endTime: "1:00 AM", checkins: 0, category: "Dance" },
+  { id: "e3", name: "Kings of Karaoke", venue: "American Cheez", venueId: "v3", date: "2026-07-01", day: "Wednesday", startTime: "9:00 PM", endTime: "1:00 AM", checkins: 1, category: "Karaoke" },
+  { id: "e4", name: "Kings of Karaoke", venue: "Talon Bar", venueId: "v4", date: "2026-07-01", day: "Wednesday", startTime: "10:00 PM", endTime: "2:00 AM", checkins: 0, category: "Karaoke" },
+  { id: "e5", name: "Greatest City In The World!", venue: "WeWork", venueId: "v5", date: "2026-07-02", day: "Thursday", startTime: "3:30 PM", endTime: "4:30 PM", checkins: 0, category: "Meetup" },
+  { id: "e6", name: "Lit Up Trivia", venue: "Blue Agave", venueId: "v6", date: "2026-07-02", day: "Thursday", startTime: "8:00 PM", endTime: "10:30 PM", checkins: 0, category: "Trivia" },
+  { id: "e7", name: "Lit Up Trivia", venue: "Sandy Jack's", venueId: "v7", date: "2026-07-02", day: "Thursday", startTime: "8:00 PM", endTime: "10:30 PM", checkins: 0, category: "Trivia" },
+  { id: "e8", name: "Friday Night Karaoke", venue: "The Bitter End", venueId: "v8", date: "2026-07-03", day: "Friday", startTime: "9:00 PM", endTime: "1:00 AM", checkins: 3, category: "Karaoke" },
+  { id: "e9", name: "Open Mic Night", venue: "Nuyorican Poets Café", venueId: "v9", date: "2026-07-04", day: "Saturday", startTime: "7:00 PM", endTime: "10:00 PM", checkins: 5, category: "Open Mic" },
+  { id: "e10", name: "Jazz Brunch", venue: "Blue Note", venueId: "v10", date: "2026-07-05", day: "Sunday", startTime: "11:00 AM", endTime: "2:00 PM", checkins: 2, category: "Music" },
+  { id: "e11", name: "Lit Up Trivia", venue: "Peculier Pub", venueId: "v11", date: "2026-07-08", day: "Wednesday", startTime: "8:00 PM", endTime: "10:30 PM", checkins: 0, category: "Trivia" },
+  { id: "e12", name: "Salsa Tuesdays", venue: "Bembe", venueId: "v12", date: "2026-07-14", day: "Tuesday", startTime: "9:00 PM", endTime: "2:00 AM", checkins: 0, category: "Dance" },
+  { id: "e13", name: "Comedy Open Mic", venue: "The Stand", venueId: "v13", date: "2026-07-15", day: "Wednesday", startTime: "7:30 PM", endTime: "9:30 PM", checkins: 0, category: "Comedy" },
+  { id: "e14", name: "Karaoke Thursdays", venue: "Baby Grand", venueId: "v14", date: "2026-07-16", day: "Thursday", startTime: "9:00 PM", endTime: "1:00 AM", checkins: 0, category: "Karaoke" },
+];
+
+function MiniCalendar({ selectedDate, onSelectDate, eventDates }: { selectedDate: string | null; onSelectDate: (date: string | null) => void; eventDates: Set<string> }) {
+  const [viewMonth, setViewMonth] = useState(6);
+  const [viewYear, setViewYear] = useState(2026);
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
+  const monthName = new Date(viewYear, viewMonth).toLocaleString("en-US", { month: "long", year: "numeric" });
+
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const blanks = Array.from({ length: firstDayOfWeek }, (_, i) => i);
+
+  const today = new Date("2026-07-14");
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+  function prevMonth() {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
+    else setViewMonth(viewMonth - 1);
+  }
+
+  function nextMonth() {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); }
+    else setViewMonth(viewMonth + 1);
+  }
+
+  return (
+    <div className="rounded-lg border border-border p-4 w-full max-w-[320px]">
+      <div className="flex items-center justify-between mb-3">
+        <Button variant="ghost" size="icon" className="size-7" onClick={prevMonth}>
+          <ChevronLeft className="size-4" />
+        </Button>
+        <span className="text-sm font-semibold text-foreground">{monthName.toUpperCase()}</span>
+        <Button variant="ghost" size="icon" className="size-7" onClick={nextMonth}>
+          <ChevronRight className="size-4" />
+        </Button>
+      </div>
+      <div className="grid grid-cols-7 text-center text-xs text-muted-foreground mb-1">
+        {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+          <span key={i} className="py-1 font-medium">{d}</span>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 text-center text-sm">
+        {blanks.map((_, i) => <span key={`b-${i}`} />)}
+        {days.map((day) => {
+          const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const isSelected = selectedDate === dateStr;
+          const isToday = dateStr === todayStr;
+          const hasEvent = eventDates.has(dateStr);
+
+          return (
+            <button
+              key={day}
+              onClick={() => onSelectDate(isSelected ? null : dateStr)}
+              className={cn(
+                "relative mx-auto flex size-8 items-center justify-center rounded-md text-sm transition-colors",
+                isSelected && "bg-primary text-primary-foreground font-medium",
+                !isSelected && isToday && "border border-primary text-primary font-medium",
+                !isSelected && !isToday && hasEvent && "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 font-medium",
+                !isSelected && !isToday && !hasEvent && "hover:bg-muted text-foreground"
+              )}
+            >
+              {day}
+              {hasEvent && !isSelected && (
+                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1 rounded-full bg-primary" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {selectedDate && (
+        <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={() => onSelectDate(null)}>
+          Clear filter
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function CreatedEventsTable() {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  const eventDates = useMemo(() => new Set(MOCK_EVENTS.map(e => e.date)), []);
+
+  const filtered = useMemo(() => {
+    if (!selectedDate) return MOCK_EVENTS;
+    return MOCK_EVENTS.filter(e => e.date === selectedDate);
+  }, [selectedDate]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
+  const paginated = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-6">
+      <MiniCalendar selectedDate={selectedDate} onSelectDate={(d) => { setSelectedDate(d); setPage(1); }} eventDates={eventDates} />
+      <div className="flex-1">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">
+            {selectedDate
+              ? `Events on ${new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}`
+              : "All Scheduled Events"
+            }
+          </h3>
+          <span className="text-xs text-muted-foreground">{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
+        </div>
+        <div className="rounded-md border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-normal text-muted-foreground">Event Name</TableHead>
+                <TableHead className="font-normal text-muted-foreground">Venue</TableHead>
+                <TableHead className="font-normal text-muted-foreground">Date</TableHead>
+                <TableHead className="font-normal text-muted-foreground">Time</TableHead>
+                <TableHead className="font-normal text-muted-foreground">Category</TableHead>
+                <TableHead className="font-normal text-muted-foreground text-center">Check-ins</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginated.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    No events scheduled for this date.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginated.map((event) => (
+                  <TableRow key={event.id}>
+                    <TableCell className="py-3.5">
+                      <a href="#" className="text-primary hover:underline font-medium">{event.name}</a>
+                    </TableCell>
+                    <TableCell className="py-3.5">
+                      <a href="#" className="text-primary hover:underline">{event.venue}</a>
+                    </TableCell>
+                    <TableCell className="py-3.5 text-sm">
+                      <span className="text-foreground">{event.day}</span>
+                      <br />
+                      <span className="text-muted-foreground text-xs">
+                        {new Date(event.date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3.5 text-sm text-muted-foreground">
+                      {event.startTime} – {event.endTime}
+                    </TableCell>
+                    <TableCell className="py-3.5">
+                      <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground">
+                        {event.category}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3.5 text-center">
+                      {event.checkins > 0 ? (
+                        <span className="text-sm font-medium text-foreground">{event.checkins}</span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        <TablePagination
+          page={page}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          onPageChange={setPage}
+          onRowsPerPageChange={(n) => { setRowsPerPage(n); setPage(1); }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function HistoryTab({ initialSubTab = "created" }: { initialSubTab?: string }) {
+  const [subTab, setSubTab] = useState<string>(initialSubTab);
 
   return (
     <Tabs value={subTab} onValueChange={setSubTab}>
       <TabsList>
         <TabsTrigger value="created">Created Places</TabsTrigger>
         <TabsTrigger value="existing">Existing Places</TabsTrigger>
+        <TabsTrigger value="votes">Votes</TabsTrigger>
+        <TabsTrigger value="events">Created Events</TabsTrigger>
       </TabsList>
 
       <TabsContent value="created" className="mt-4">
@@ -661,6 +987,12 @@ function HistoryTab() {
       </TabsContent>
       <TabsContent value="existing" className="mt-4">
         <ExistingPlacesTable />
+      </TabsContent>
+      <TabsContent value="votes" className="mt-4">
+        <VotesTable />
+      </TabsContent>
+      <TabsContent value="events" className="mt-4">
+        <CreatedEventsTable />
       </TabsContent>
     </Tabs>
   );
@@ -670,6 +1002,11 @@ export function MyContributions() {
   const { totalPoints } = useGame();
   const { level } = getLevelFromPoints(totalPoints);
   const [period, setPeriod] = useState<(typeof PERIODS)[number]>("Overall");
+
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "insights";
+  const initialSubTab = searchParams.get("subtab") || "created";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
     <div>
@@ -687,7 +1024,7 @@ export function MyContributions() {
 
       {/* Tabs */}
       <div className="mt-6">
-        <Tabs defaultValue="insights">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="border-b border-border">
             <TabsList variant="line">
               <TabsTrigger value="insights" className="px-4 py-2 text-sm">
@@ -748,7 +1085,7 @@ export function MyContributions() {
           </TabsContent>
 
           <TabsContent value="history" className="mt-6">
-            <HistoryTab />
+            <HistoryTab initialSubTab={initialSubTab} />
           </TabsContent>
         </Tabs>
       </div>
