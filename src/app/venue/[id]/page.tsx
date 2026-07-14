@@ -8,6 +8,7 @@ import { PhotoGallery, PHOTO_SETS } from "@/components/venue/photo-gallery";
 import { VenueInfoCard } from "@/components/venue/venue-info-card";
 import { DetailsTable } from "@/components/venue/details-table";
 import { CategoriesSection } from "@/components/venue/categories-section";
+import { SubvenuesSection } from "@/components/venue/subvenues-section";
 import { VenuePhotos } from "@/components/venue/venue-photos";
 import { VenueAdmin } from "@/components/venue/venue-admin";
 import { SuggestEditDrawer } from "@/components/venue/suggest-edit-drawer";
@@ -36,7 +37,7 @@ import { useState, useRef } from "react";
 
 function CelebrationIllustration() {
   return (
-    <svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="mx-auto" aria-hidden="true">
+    <svg width="96" height="96" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="mx-auto" aria-hidden="true">
       <rect x="47.421" y="138.055" style={{ fill: "#EBEBEC" }} width="417.427" height="365.248" />
       <rect x="47.421" y="138.055" style={{ fill: "#D7D8D9" }} width="26.089" height="365.248" />
       <path style={{ fill: "#CF442B" }} d="M47.421,242.412c19.211,0,34.786-15.574,34.786-34.786H12.636C12.636,226.838,28.209,242.412,47.421,242.412z" />
@@ -269,6 +270,7 @@ export default function VenueDetailPage() {
                       </div>
                     </>
                   )}
+                  <SubvenuesSection venueId={venueId} venueName={venue.name} />
                 </TabsContent>
                 <TabsContent value="photos" className="mt-0">
                   <VenuePhotos venue={venue} photos={venuePhotos} />

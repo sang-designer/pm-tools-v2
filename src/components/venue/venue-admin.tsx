@@ -311,6 +311,87 @@ export function VenueAdmin({ venue }: VenueAdminProps) {
         </Link>
       </section>
 
+      <Separator className="my-8" />
+
+      {/* Debug Tools */}
+      <section>
+        <h3 className="text-base font-semibold text-foreground">Debug Tools (Employee-only)</h3>
+
+        <div className="mt-4 space-y-4">
+          {/* Venue Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="rounded-md border border-border bg-muted/30 p-3">
+              <p className="text-[11px] uppercase tracking-wide text-foreground font-medium">Venue ID</p>
+              <p className="mt-1 font-mono text-sm text-foreground truncate">{venue.id}</p>
+            </div>
+            <div className="rounded-md border border-border bg-muted/30 p-3">
+              <p className="text-[11px] uppercase tracking-wide text-foreground font-medium">Total Visitors</p>
+              <p className="mt-1 font-mono text-sm text-foreground">{(16480).toLocaleString()}</p>
+            </div>
+            <div className="rounded-md border border-border bg-muted/30 p-3">
+              <p className="text-[11px] uppercase tracking-wide text-foreground font-medium">Total Visits</p>
+              <p className="mt-1 font-mono text-sm text-foreground">{(31835).toLocaleString()}</p>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="rounded-md border border-border bg-muted/30 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-foreground font-medium mb-2">Coordinates</p>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-muted-foreground">Lat: <span className="font-mono text-foreground">{venue.lat}</span></span>
+              <span className="text-muted-foreground">Lng: <span className="font-mono text-foreground">{venue.lng}</span></span>
+              <a
+                href={`https://www.google.com/maps?q=${venue.lat},${venue.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline text-xs font-medium"
+              >
+                Open in Google Maps ↗
+              </a>
+            </div>
+          </div>
+
+          {/* Geos */}
+          <div className="rounded-md border border-border bg-muted/30 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-foreground font-medium mb-2">Geo Hierarchy</p>
+            <div className="flex flex-wrap gap-1.5">
+              {["Financial District", "New York", "", "", "New York", "United States"].map((geo, i) => (
+                <Badge key={i} variant="secondary" className="text-xs font-mono">
+                  {geo || <span className="text-muted-foreground italic">empty</span>}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Debug Links */}
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-foreground font-medium mb-2">Tools</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {[
+                "Venue Rating Debug",
+                "Tip and Sentiment Data",
+                "Hfilez",
+                "Tastes",
+                "Justifications (Top Picks)",
+                "Justifications (All)",
+                "Debug Hours (Chart)",
+                "API",
+                "Similar Venues",
+              ].map((tool) => (
+                <a
+                  key={tool}
+                  href="#"
+                  className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-primary hover:bg-muted/50 hover:border-primary/30 transition-colors"
+                >
+                  <ArrowRight className="size-3 shrink-0" />
+                  {tool}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <Separator className="my-8 sm:hidden" />
     </div>
   );

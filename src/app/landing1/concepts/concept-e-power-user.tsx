@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdentityHeaderVariant } from "@/components/landing/identity-header-variant";
 import { PowerUserTasksCard } from "@/components/landing/power-user-tasks-card";
 import { LocationIntelligenceCardVariant } from "@/components/landing/location-intelligence-card-variant";
-import { ArrowRight, ChevronDown, ChevronUp, MapPinPlus, ListChecks, UserPlus, ImageOff } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, MapPinPlus, ListChecks, UserPlus, ImageOff, ShieldCheck, Globe, Database, Link2, Eye, Users, FileEdit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { LocationProvider, useLocationContext } from "@/lib/location-context";
@@ -393,6 +393,44 @@ function QuickLinksCard() {
   );
 }
 
+function AdminLinksCard() {
+  const links = [
+    { icon: Globe, title: "Geo Suggestions", href: "/admin/geo-suggestions" },
+    { icon: Database, title: "Geoname Overrides", href: "/admin/geoname-overrides" },
+    { icon: Link2, title: "Chains", href: "/admin/chains" },
+    { icon: Eye, title: "Manage Watchlists", href: "/admin/manage-watchlists" },
+    { icon: Eye, title: "Watchlists", href: "/admin/watchlists" },
+    { icon: FileEdit, title: "User Edits", href: "/admin/user-edits" },
+  ];
+
+  return (
+    <motion.div variants={fadeUp}>
+      <Card className="transition-all duration-200 hover:shadow-md border-amber-200/50 dark:border-amber-800/30">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-amber-600" />
+            <CardTitle className="text-lg font-semibold">Admin Links</CardTitle>
+          </div>
+          <p className="text-xs text-muted-foreground">Employee-only tools</p>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          {links.map((link) => (
+            <Link key={link.title} href={link.href}>
+              <div className="flex items-center gap-3 rounded-lg p-2.5 hover:bg-muted/40 transition-colors cursor-pointer group">
+                <link.icon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium group-hover:text-primary transition-colors">
+                  {link.title}
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 ml-auto text-muted-foreground group-hover:text-primary transition-all" />
+              </div>
+            </Link>
+          ))}
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
 export function ConceptEPowerUser() {
   return (
     <LocationProvider>
@@ -443,6 +481,7 @@ function PowerUserContent() {
             >
               <LeaderboardCard />
               <QuickLinksCard />
+              <AdminLinksCard />
             </motion.div>
           </div>
         </motion.div>
