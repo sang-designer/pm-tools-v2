@@ -12,16 +12,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { VERACITY_COLORS } from "@/lib/constants";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 const ROWS_PER_PAGE = 15;
 
@@ -100,22 +92,6 @@ function ColumnHeader({ children, tooltip, sortable, sortDir, onSort }: { childr
   );
 }
 
-function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-
-  const pages: (number | "ellipsis")[] = [1];
-
-  if (current > 3) pages.push("ellipsis");
-
-  const start = Math.max(2, current - 1);
-  const end = Math.min(total - 1, current + 1);
-  for (let i = start; i <= end; i++) pages.push(i);
-
-  if (current < total - 2) pages.push("ellipsis");
-
-  pages.push(total);
-  return pages;
-}
 
 export function VenueTable({ venues: venuesProp }: { venues?: Venue[] }) {
   const game = useGame();
@@ -159,7 +135,6 @@ export function VenueTable({ venues: venuesProp }: { venues?: Venue[] }) {
   const totalPages = Math.max(1, Math.ceil(sortedVenues.length / ROWS_PER_PAGE));
   const start = (page - 1) * ROWS_PER_PAGE;
   const paginatedVenues = sortedVenues.slice(start, start + ROWS_PER_PAGE);
-  const pageNumbers = getPageNumbers(page, totalPages);
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -193,49 +168,7 @@ export function VenueTable({ venues: venuesProp }: { venues?: Venue[] }) {
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                text=""
-                onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }}
-                aria-disabled={page === 1}
-                className={page === 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-
-            {pageNumbers.map((p, i) =>
-              p === "ellipsis" ? (
-                <PaginationItem key={`ellipsis-${i}`}>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              ) : (
-                <PaginationItem key={p}>
-                  <PaginationLink
-                    href="#"
-                    isActive={p === page}
-                    onClick={(e) => { e.preventDefault(); setPage(p); }}
-                  >
-                    {p}
-                  </PaginationLink>
-                </PaginationItem>
-              )
-            )}
-
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                text=""
-                onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }}
-                aria-disabled={page === totalPages}
-                className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+      <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

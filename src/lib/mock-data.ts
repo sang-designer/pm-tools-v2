@@ -1067,6 +1067,42 @@ export const MOCK_VENUES: Venue[] = [
       suggestedCategories: ["Coffee Shop", "Cafe"],
     },
   },
+  {
+    id: "v50", name: "McDonald's", address: "1100 Fillmore St, San Francisco, CA",
+    lat: 37.7803, lng: -122.4318, category: "Fast Food Restaurant",
+    tags: ["Chains", "Details", "Attributes"],
+    tasks: [
+      task("t50a", "v50", "confirm_hours", "Are the hours 5 AM - 1 AM daily correct?", ["Yes", "No", "Not sure"]),
+      task("t50b", "v50", "verify_address", "Is '1100 Fillmore St' the correct address?", ["Yes", "No", "Not sure"]),
+    ],
+    globallyCompleted: false,
+    claimed: true,
+    veracityRating: 4,
+    detail: {
+      phone: "415-346-5470",
+      hours: [
+        { day: "Mon - Thu", hours: "5 am - 1 am" },
+        { day: "Fri - Sat", hours: "5 am - 2 am" },
+        { day: "Sun", hours: "5 am - 12 am" },
+      ],
+      website: "https://www.mcdonalds.com/us/en-us/location/CA/SAN-FRANCISCO/1100-FILLMORE-ST/5765.html",
+      instagram: "@mcdonalds",
+      features: ["Drive-through", "Wi-Fi", "Delivery", "Credit card: Visa, MC, AMEX", "Mobile ordering", "Outdoor seating", "Wheelchair accessible"],
+      fsqPlaceId: "4b0586ebf964a5204f4f22e3",
+      uniqueVisitors: 892,
+      totalCheckins: 4231,
+      visitedLast60Days: 156,
+      suggestedAddress: "1100 Fillmore St, San Francisco, CA 94115",
+      suggestedPhone: "415-346-5470",
+      suggestedHours: [
+        { day: "Mon - Sun", hours: "5 am - 1 am" },
+      ],
+      categories: ["Fast Food Restaurant", "Burger Joint"],
+      suggestedCategories: ["Fast Food Restaurant", "Burger Joint", "Breakfast Spot"],
+      suggestedLat: 37.7805,
+      suggestedLng: -122.4316,
+    },
+  },
 ];
 
 const VERACITY_RATINGS = [1, 3, 4, 5, 5, 2, 3, 1, 5, 4, 2, 5, 3, 1, 4, 5, 2, 5, 3, 1, 4, 2, 5, 3, 5, 1, 4, 2, 5, 3, 5, 4, 5, 3, 5, 2, 5, 4, 3, 5, 4];

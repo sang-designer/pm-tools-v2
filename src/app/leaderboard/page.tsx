@@ -20,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe, MapPin, Flame, TrendingUp, ChevronLeft, ChevronRight, ChevronDown, Search, Check } from "lucide-react";
+import { Globe, MapPin, Flame, TrendingUp, ChevronDown, Search, Check } from "lucide-react";
 import { MOCK_GLOBAL_LEADERBOARD, MOCK_LOCATION_PROFILES, MOCK_USER_PROFILES } from "@/lib/mock-data";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { useUserStats } from "@/hooks/use-user-stats";
 import { cn } from "@/lib/utils";
 
@@ -302,41 +303,8 @@ export default function LeaderboardPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t">
-                  <p className="text-xs text-muted-foreground">
-                    Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, displayData.length)} of {displayData.length}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <Button
-                        key={p}
-                        variant={p === page ? "secondary" : "ghost"}
-                        size="sm"
-                        className="h-8 w-8 p-0 text-xs"
-                        onClick={() => setPage(p)}
-                      >
-                        {p}
-                      </Button>
-                    ))}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <div className="px-4 py-3 border-t">
+                  <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
                 </div>
               )}
             </CardContent>

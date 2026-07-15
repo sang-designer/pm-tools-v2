@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { GlobalNav } from "@/components/global-nav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 interface UserEdit {
   id: string;
@@ -46,9 +48,22 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function UserEditsPage() {
   const [page, setPage] = useState(1);
-  const perPage = 15;
-  const totalItems = 248;
-  const totalPages = Math.ceil(totalItems / perPage);
+  const [search, setSearch] = useState("");
+  const perPage = 20;
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return MOCK_USER_EDITS;
+    const q = search.toLowerCase();
+    return MOCK_USER_EDITS.filter(
+      (edit) =>
+        edit.user.toLowerCase().includes(q) ||
+        edit.venue.toLowerCase().includes(q) ||
+        edit.editType.toLowerCase().includes(q)
+    );
+  }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -62,21 +77,19 @@ export default function UserEditsPage() {
           </Link>
           <h1 className="text-2xl font-bold text-foreground">User Edits</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Recent edits submitted by users across all locations. Total: {totalItems} edits.
+            Recent edits submitted by users across all locations.
           </p>
         </div>
 
-        {/* Pagination */}
-        <div className="flex items-center gap-2 mb-4">
-          <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
-            <ChevronLeft className="size-4" /> Prev
-          </Button>
-          <span className="text-sm text-muted-foreground px-2">
-            Page {page} of {totalPages}
-          </span>
-          <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-            Next <ChevronRight className="size-4" />
-          </Button>
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by user, venue, or edit type..."
+            className="pl-10"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
         </div>
 
         <Card>
@@ -91,30 +104,40 @@ export default function UserEditsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MOCK_USER_EDITS.map((edit) => (
-                <TableRow key={edit.id}>
-                  <TableCell>
-                    <Link href={`/admin/user-edits/${edit.userSlug}`} className="text-primary hover:underline text-sm font-medium">{edit.user}</Link>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{edit.date}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="text-xs">{edit.editType}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/venue/${edit.venueId}`} className="text-sm text-primary hover:underline">
-                      {edit.venue}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`text-xs ${STATUS_STYLES[edit.status]}`}>
-                      {edit.status}
-                    </Badge>
+              {paginated.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    No edits match your search.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                paginated.map((edit) => (
+                  <TableRow key={edit.id}>
+                    <TableCell>
+                      <Link href={`/admin/user-edits/${edit.userSlug}`} className="text-primary hover:underline text-sm font-medium">{edit.user}</Link>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{edit.date}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="text-xs">{edit.editType}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Link href={`/venue/${edit.venueId}`} className="text-sm text-primary hover:underline">
+                        {edit.venue}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`text-xs ${STATUS_STYLES[edit.status]}`}>
+                        {edit.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </Card>
+
+        <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </div>
   );
