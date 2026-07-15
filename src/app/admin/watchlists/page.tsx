@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 interface WatchlistItem {
   id: string;
@@ -31,8 +32,12 @@ const MOCK_ITEMS: WatchlistItem[] = [
 
 export default function WatchlistsPage() {
   const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 10;
 
   const filteredItems = filter === "all" ? MOCK_ITEMS : MOCK_ITEMS.filter((item) => item.type === filter);
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PER_PAGE));
+  const paginated = filteredItems.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -69,36 +74,39 @@ export default function WatchlistsPage() {
         </div>
 
         {filteredItems.length > 0 ? (
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Edit Type</TableHead>
-                  <TableHead>Old Value (O)</TableHead>
-                  <TableHead>New Value (N)</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.location}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">{item.editType}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground font-mono">{item.oldValue}</TableCell>
-                    <TableCell className="text-sm font-mono">{item.newValue}</TableCell>
-                    <TableCell>
-                      <a href="#" className="text-primary hover:underline text-sm">{item.user}</a>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{item.date}</TableCell>
+          <>
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Edit Type</TableHead>
+                    <TableHead>Old Value (O)</TableHead>
+                    <TableHead>New Value (N)</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Date</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+                </TableHeader>
+                <TableBody>
+                  {paginated.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.location}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">{item.editType}</Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground font-mono">{item.oldValue}</TableCell>
+                      <TableCell className="text-sm font-mono">{item.newValue}</TableCell>
+                      <TableCell>
+                        <a href="#" className="text-primary hover:underline text-sm">{item.user}</a>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.date}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+            <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </>
         ) : (
           <Card>
             <CardContent className="flex flex-col items-center py-12 text-center">

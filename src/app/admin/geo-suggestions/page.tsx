@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 interface Suggestion {
   id: string;
@@ -84,6 +85,118 @@ const MOCK_SUGGESTIONS: LocationGroup[] = [
       { id: "s7", name: "คลองส่าน", submittedBy: 1, venues: [{ name: "FamilyMart", id: "v-th8" }] },
     ],
   },
+  {
+    id: "lg-6",
+    name: "Shinjuku",
+    type: "TOWN",
+    geoid: "72057594039600123",
+    language: "ja",
+    currentSpelling: "新宿区",
+    suggestions: [
+      { id: "s8", name: "新宿", submittedBy: 3, venues: [{ name: "Ichiran Ramen", id: "v-jp1" }, { name: "Don Quijote", id: "v-jp2" }] },
+    ],
+  },
+  {
+    id: "lg-7",
+    name: "Gangnam-gu",
+    type: "ADMIN2",
+    geoid: "72057594039610456",
+    language: "ko",
+    currentSpelling: "강남구",
+    suggestions: [
+      { id: "s9", name: "강남", submittedBy: 2, venues: [{ name: "COEX Mall", id: "v-kr1" }, { name: "Bongeunsa Temple", id: "v-kr2" }] },
+    ],
+  },
+  {
+    id: "lg-8",
+    name: "Tsim Sha Tsui",
+    type: "TOWN",
+    geoid: "72057594039620789",
+    language: "zh",
+    currentSpelling: "尖沙咀",
+    suggestions: [
+      { id: "s10", name: "尖沙嘴", submittedBy: 1, venues: [{ name: "The Peninsula", id: "v-hk1" }] },
+    ],
+  },
+  {
+    id: "lg-9",
+    name: "Petaling Jaya",
+    type: "TOWN",
+    geoid: "72057594039630111",
+    language: "ms",
+    currentSpelling: "Petaling Jaya",
+    suggestions: [
+      { id: "s11", name: "PJ", submittedBy: 2, venues: [{ name: "1 Utama", id: "v-my1" }, { name: "SS2 Mamak", id: "v-my2" }] },
+    ],
+  },
+  {
+    id: "lg-10",
+    name: "Shibuya",
+    type: "TOWN",
+    geoid: "72057594039640222",
+    language: "ja",
+    currentSpelling: "渋谷区",
+    suggestions: [
+      { id: "s12", name: "渋谷", submittedBy: 4, venues: [{ name: "Shibuya 109", id: "v-jp3" }, { name: "Hachiko Square", id: "v-jp4" }] },
+      { id: "s13", name: "シブヤ", submittedBy: 1, venues: [{ name: "Tower Records", id: "v-jp5" }] },
+    ],
+  },
+  {
+    id: "lg-11",
+    name: "Itaewon",
+    type: "TOWN",
+    geoid: "72057594039650333",
+    language: "ko",
+    currentSpelling: "이태원동",
+    suggestions: [
+      { id: "s14", name: "이태원", submittedBy: 2, venues: [{ name: "Hamilton Hotel", id: "v-kr3" }] },
+    ],
+  },
+  {
+    id: "lg-12",
+    name: "Minato",
+    type: "ADMIN2",
+    geoid: "72057594039660444",
+    language: "ja",
+    currentSpelling: "港区",
+    suggestions: [
+      { id: "s15", name: "みなと", submittedBy: 1, venues: [{ name: "Tokyo Tower", id: "v-jp6" }, { name: "Roppongi Hills", id: "v-jp7" }] },
+    ],
+  },
+  {
+    id: "lg-13",
+    name: "Wan Chai",
+    type: "TOWN",
+    geoid: "72057594039670555",
+    language: "zh",
+    currentSpelling: "灣仔",
+    suggestions: [
+      { id: "s16", name: "湾仔", submittedBy: 1, venues: [{ name: "Hong Kong Convention Centre", id: "v-hk2" }] },
+    ],
+  },
+  {
+    id: "lg-14",
+    name: "Harajuku",
+    type: "TOWN",
+    geoid: "72057594039680666",
+    language: "ja",
+    currentSpelling: "原宿",
+    suggestions: [
+      { id: "s17", name: "ハラジュク", submittedBy: 2, venues: [{ name: "Takeshita Street", id: "v-jp8" }, { name: "Meiji Shrine", id: "v-jp9" }] },
+    ],
+  },
+  {
+    id: "lg-15",
+    name: "Hongdae",
+    type: "TOWN",
+    geoid: "72057594039690777",
+    language: "ko",
+    currentSpelling: "홍대",
+    suggestions: [
+      { id: "s18", name: "홍익대학교", submittedBy: 1, venues: [{ name: "KT&G Sangsangmadang", id: "v-kr4" }] },
+      { id: "s19", name: "홍대입구", submittedBy: 3, venues: [{ name: "Thanks Nature Cafe", id: "v-kr5" }, { name: "Kakao Friends Store", id: "v-kr6" }] },
+    ],
+  },
 ];
 
 function SuggestionCard({ suggestion, onApprove, onDecline }: { suggestion: Suggestion; onApprove: () => void; onDecline: () => void }) {
@@ -111,6 +224,12 @@ function SuggestionCard({ suggestion, onApprove, onDecline }: { suggestion: Sugg
 
 export default function GeoSuggestionsPage() {
   const [groups, setGroups] = useState(MOCK_SUGGESTIONS);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 10;
+
+  const activeGroups = groups.filter((g) => g.suggestions.length > 0);
+  const totalPages = Math.max(1, Math.ceil(activeGroups.length / PER_PAGE));
+  const paginated = activeGroups.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const totalSuggestions = groups.reduce((acc, g) => acc + g.suggestions.length, 0);
   const totalLocations = new Set(groups.map((g) => g.geoid)).size;
@@ -147,7 +266,7 @@ export default function GeoSuggestionsPage() {
         </div>
 
         <div className="space-y-8">
-          {groups.filter((g) => g.suggestions.length > 0).map((group) => (
+          {paginated.map((group) => (
             <section key={group.id}>
               <div className="mb-3">
                 <h2 className="text-lg font-bold text-foreground">
@@ -174,6 +293,8 @@ export default function GeoSuggestionsPage() {
             </section>
           ))}
         </div>
+
+        <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </div>
   );

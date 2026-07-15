@@ -5,8 +5,9 @@ import { GlobalNav } from "@/components/global-nav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 interface Override {
   geoid: string;
@@ -87,32 +88,7 @@ export default function GeonameOverridesPage() {
           </Table>
         </Card>
 
-        {/* Pagination */}
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(1)}>
-            &laquo; first
-          </Button>
-          <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
-            <ChevronLeft className="size-4" /> prev
-          </Button>
-          {Array.from({ length: Math.min(10, totalPages) }, (_, i) => i + 1).map((p) => (
-            <Button
-              key={p}
-              variant={p === page ? "default" : "outline"}
-              size="sm"
-              className="w-8"
-              onClick={() => setPage(p)}
-            >
-              {p}
-            </Button>
-          ))}
-          <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-            next <ChevronRight className="size-4" />
-          </Button>
-          <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(totalPages)}>
-            last &raquo;
-          </Button>
-        </div>
+        <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </div>
   );

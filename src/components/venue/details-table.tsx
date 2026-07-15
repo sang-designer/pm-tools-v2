@@ -4,8 +4,6 @@ import { Venue, VenueHours } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   AlertTriangle,
   Info,
   MoreVertical,
@@ -14,6 +12,7 @@ import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-responsive";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { MapPreview, DualMapPreview } from "@/components/venue/map-preview";
+import { TablePagination as Pagination } from "@/components/ui/table-pagination";
 
 type RowAction = "none" | "removed" | "suggested" | "not_sure" | "na";
 
@@ -430,44 +429,6 @@ function MobileLatLngCard({
       <div className="mt-3 flex justify-end border-t border-border pt-3">
         <MobileActionCell rowAction={action} onAction={onActionChange} />
       </div>
-    </div>
-  );
-}
-
-function Pagination({
-  page,
-  totalPages,
-  onPageChange,
-}: {
-  page: number;
-  totalPages: number;
-  onPageChange: (p: number) => void;
-}) {
-  return (
-    <div className="mt-4 flex items-center justify-center gap-2">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-8"
-        disabled={page <= 1}
-        onClick={() => onPageChange(page - 1)}
-        aria-label="Previous page"
-      >
-        <ChevronLeft className="size-4" />
-      </Button>
-      <span className="min-w-[2rem] text-center text-sm font-medium text-foreground">
-        {page}
-      </span>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-8"
-        disabled={page >= totalPages}
-        onClick={() => onPageChange(page + 1)}
-        aria-label="Next page"
-      >
-        <ChevronRight className="size-4" />
-      </Button>
     </div>
   );
 }

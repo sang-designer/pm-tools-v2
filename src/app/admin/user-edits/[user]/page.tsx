@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ChevronRightIcon, ChevronLeft, ChevronRight, User, BarChart3 } from "lucide-react";
+import { ChevronRightIcon, User, BarChart3 } from "lucide-react";
 import Link from "next/link";
+import { TablePagination } from "@/components/ui/table-pagination";
 
 interface Woe {
   id: string;
@@ -129,9 +130,6 @@ export default function UserWoesPage() {
   }
 
   const totalPages = Math.ceil(userData.total / 10);
-  const startItem = (page - 1) * 10 + 1;
-  const endItem = Math.min(page * 10, userData.total);
-
   return (
     <TooltipProvider>
       <div className="flex min-h-screen flex-col bg-background">
@@ -173,40 +171,22 @@ export default function UserWoesPage() {
             </Card>
             <Card>
               <CardContent className="pt-3 pb-2 px-4">
-                <p className="text-xl font-bold tabular-nums text-green-600">{userData.woes.filter(w => w.resolved === "accepted").length}</p>
+                <p className="text-xl font-bold tabular-nums">{userData.woes.filter(w => w.resolved === "accepted").length}</p>
                 <p className="text-[11px] text-muted-foreground">Accepted</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-3 pb-2 px-4">
-                <p className="text-xl font-bold tabular-nums text-amber-600">{userData.woes.filter(w => w.resolved === "open").length}</p>
+                <p className="text-xl font-bold tabular-nums">{userData.woes.filter(w => w.resolved === "open").length}</p>
                 <p className="text-[11px] text-muted-foreground">Open</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-3 pb-2 px-4">
-                <p className="text-xl font-bold tabular-nums text-red-600">{userData.woes.filter(w => w.priority >= 700).length}</p>
+                <p className="text-xl font-bold tabular-nums">{userData.woes.filter(w => w.priority >= 700).length}</p>
                 <p className="text-[11px] text-muted-foreground">High Priority</p>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Pagination */}
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {startItem}–{endItem} of {userData.total.toLocaleString()}
-            </p>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
-                <ChevronLeft className="size-4" />
-              </Button>
-              <span className="px-3 text-sm tabular-nums text-muted-foreground">
-                {page} / {totalPages}
-              </span>
-              <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-                <ChevronRight className="size-4" />
-              </Button>
-            </div>
           </div>
 
           {/* Data Table */}
@@ -300,44 +280,7 @@ export default function UserWoesPage() {
             </Table>
           </Card>
 
-          {/* Bottom Pagination */}
-          <div className="flex items-center justify-center gap-1 mt-4">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(1)}>
-              First
-            </Button>
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-              let pageNum: number;
-              if (totalPages <= 7) {
-                pageNum = i + 1;
-              } else if (page <= 4) {
-                pageNum = i + 1;
-              } else if (page >= totalPages - 3) {
-                pageNum = totalPages - 6 + i;
-              } else {
-                pageNum = page - 3 + i;
-              }
-              return (
-                <Button
-                  key={pageNum}
-                  variant={pageNum === page ? "default" : "outline"}
-                  size="sm"
-                  className="w-9"
-                  onClick={() => setPage(pageNum)}
-                >
-                  {pageNum}
-                </Button>
-              );
-            })}
-            <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-              <ChevronRight className="size-4" />
-            </Button>
-            <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(totalPages)}>
-              Last
-            </Button>
-          </div>
+          <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       </div>
     </TooltipProvider>

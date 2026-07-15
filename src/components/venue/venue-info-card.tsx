@@ -1,7 +1,7 @@
 "use client";
 
 import { Venue } from "@/lib/types";
-import { Copy, Check, SquarePen, ChevronDown, Briefcase } from "lucide-react";
+import { Copy, Check, SquarePen, ChevronDown, Briefcase, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { MapPreview } from "@/components/venue/map-preview";
@@ -133,6 +133,24 @@ export function VenueInfoCard({ venue }: VenueInfoCardProps) {
                   ))}
                 </div>
               )}
+            </div>
+          </>
+        )}
+
+        {d?.website && (
+          <>
+            <Separator className="my-4" />
+            <div>
+              <h4 className="text-sm font-semibold text-foreground">Menu</h4>
+              <a
+                href={`${d.website}${d.website.endsWith("/") ? "" : "/"}menu`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                View menu
+                <ExternalLink className="size-3" />
+              </a>
             </div>
           </>
         )}

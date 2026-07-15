@@ -16,13 +16,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Pagination as ShadPagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-} from "@/components/ui/pagination";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -36,6 +29,7 @@ import {
 } from "@/components/ui/popover";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ArrowUpDown, MoreHorizontal, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TablePagination as SharedTablePagination } from "@/components/ui/table-pagination";
 
 const MONTHLY_DATA = [
   { month: "Jan", edits: 142, rejected: 5, rolledBack: 0, flagged: 2 },
@@ -439,7 +433,7 @@ function SortIcon({ field, activeField, dir }: { field: string; activeField: str
 
 const PAGE_SIZE = 15;
 
-function TablePagination({
+function ContribPagination({
   page,
   totalPages,
   rowsPerPage,
@@ -453,9 +447,9 @@ function TablePagination({
   onRowsPerPageChange: (n: number) => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-2 pt-4">
+    <div className="flex items-center justify-between pt-4">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Rows per page</span>
+        <span className="text-sm text-muted-foreground whitespace-nowrap">Rows per page</span>
         <Select
           value={String(rowsPerPage)}
           onValueChange={(v) => onRowsPerPageChange(Number(v))}
@@ -472,29 +466,7 @@ function TablePagination({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex items-center gap-1">
-        <span className="mr-2 text-sm text-muted-foreground">
-          {page} of {totalPages}
-        </span>
-        <ShadPagination className="mx-0 w-auto">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => { e.preventDefault(); onPageChange(Math.max(1, page - 1)); }}
-                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => { e.preventDefault(); onPageChange(Math.min(totalPages, page + 1)); }}
-                className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </ShadPagination>
-      </div>
+      <SharedTablePagination page={page} totalPages={totalPages} onPageChange={onPageChange} className="" />
     </div>
   );
 }
@@ -591,7 +563,7 @@ function ExistingPlacesTable() {
         </Table>
       </div>
 
-      <TablePagination
+      <ContribPagination
         page={page}
         totalPages={totalPages}
         rowsPerPage={rowsPerPage}
@@ -636,7 +608,7 @@ function CreatedPlacesTable() {
         </Table>
       </div>
 
-      <TablePagination
+      <ContribPagination
         page={page}
         totalPages={totalPages}
         rowsPerPage={rowsPerPage}
@@ -753,7 +725,7 @@ function VotesTable() {
         </Table>
       </div>
 
-      <TablePagination
+      <ContribPagination
         page={page}
         totalPages={totalPages}
         rowsPerPage={rowsPerPage}
@@ -958,7 +930,7 @@ function CreatedEventsTable() {
           </Table>
         </div>
 
-        <TablePagination
+        <ContribPagination
           page={page}
           totalPages={totalPages}
           rowsPerPage={rowsPerPage}

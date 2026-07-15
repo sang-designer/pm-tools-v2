@@ -29,6 +29,8 @@ const MOCK_SUBVENUES: Record<string, Subvenue[]> = {
     { id: "sv-6", name: "Lori's Diner", rating: 7.8, address: "900 North Point St #106", crossStreet: "Beach St", image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=120&h=120&fit=crop" },
     { id: "sv-7", name: "Biscoff Coffee Corner", rating: 8.7, address: "900 North Point St #108", crossStreet: "", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=120&h=120&fit=crop" },
     { id: "sv-8", name: "The San Francisco Brewing Co.", rating: 7.2, address: "900 North Point St #115", crossStreet: "Larkin St", image: "https://images.unsplash.com/photo-1559526324-593bc073d938?w=120&h=120&fit=crop" },
+    { id: "sv-9", name: "Kara's Cupcakes", rating: 8.5, address: "900 North Point St #301", crossStreet: "Polk St", image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=120&h=120&fit=crop" },
+    { id: "sv-10", name: "Sea Breeze Café", rating: 7.9, address: "900 North Point St #118", crossStreet: "Beach St", image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=120&h=120&fit=crop" },
   ],
 };
 
@@ -48,6 +50,8 @@ export function SubvenuesSection({ venueId, venueName }: SubvenuesSectionProps) 
   const subvenues = MOCK_SUBVENUES[venueId];
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<Subvenue[]>([]);
+  const [showAll, setShowAll] = useState(false);
+  const DEFAULT_VISIBLE = 6;
 
   if (!subvenues || subvenues.length === 0) return null;
 
@@ -144,7 +148,7 @@ export function SubvenuesSection({ venueId, venueName }: SubvenuesSectionProps) 
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {subvenues.map((sub) => (
+        {(showAll ? subvenues : subvenues.slice(0, DEFAULT_VISIBLE)).map((sub) => (
           <Link
             key={sub.id}
             href={`/venue/${sub.id}`}
@@ -173,6 +177,15 @@ export function SubvenuesSection({ venueId, venueName }: SubvenuesSectionProps) 
           </Link>
         ))}
       </div>
+
+      {subvenues.length > DEFAULT_VISIBLE && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="mt-3 text-sm font-medium text-primary hover:underline"
+        >
+          {showAll ? "Show less" : `Show all (${subvenues.length})`}
+        </button>
+      )}
     </div>
   );
 }
