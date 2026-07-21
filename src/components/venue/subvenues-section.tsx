@@ -7,8 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil, LayoutGrid } from "lucide-react";
+import { LayoutGrid, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 interface Subvenue {
   id: string;
@@ -142,9 +148,23 @@ export function SubvenuesSection({ venueId, venueName }: SubvenuesSectionProps) 
             Highest rated ({subvenues.length} places)
           </p>
         </div>
-        <Button variant="outline" onClick={startEdit}>
-          <Pencil className="size-3.5 mr-1.5" /> Edit Addresses
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant="outline">
+              Edit <ChevronDown className="size-3.5 ml-1.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Link href={`/venue/${venueId}/edit-subvenues`} className="w-full">
+                Edit Subvenues
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={startEdit}>
+              Edit Addresses
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
