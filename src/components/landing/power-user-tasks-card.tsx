@@ -22,7 +22,7 @@ export const REVIEW_QUEUES: ReviewQueue[] = [
   { slug: "suggest-categories", name: "Suggest categories", count: 51 },
   { slug: "review-removal-suggestions", name: "Review removal suggestions", count: 863 },
   { slug: "mark-places-private", name: "Mark places as private", count: 24 },
-  { slug: "review-flagged-tips", name: "Review flagged tips", count: 0 },
+  { slug: "review-flagged-tips", name: "Review flagged tips", count: 47 },
   { slug: "review-flagged-photos", name: "Review flagged photos", count: 23 },
   { slug: "review-location-suggestions", name: "Review location suggestions", count: 13202 },
   { slug: "review-venue-location", name: "Review a venue's current location", count: 0 },
@@ -30,6 +30,7 @@ export const REVIEW_QUEUES: ReviewQueue[] = [
   { slug: "review-chain-membership", name: "Review chain membership suggestions", count: 2016 },
   { slug: "review-subvenue-suggestions", name: "Review subvenue suggestions", count: 646 },
   { slug: "review-address-suggestions", name: "Review address suggestions", count: 1847 },
+  { slug: "review-flagged-users", name: "Review flagged users", count: 312 },
 ];
 
 const PLACE_TASKS_BY_LOCATION: Record<string, Array<{ id: string; name: string; address: string; category: string; tasks: number }>> = {

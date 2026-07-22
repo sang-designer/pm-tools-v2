@@ -117,14 +117,14 @@ function MobileActionCell({ rowAction, onAction }: { rowAction: RowAction; onAct
   }
 
   return (
-    <div className="flex w-full items-center gap-5">
-      <Button variant="outline" size="sm" className="h-10 flex-1 text-sm font-medium" onClick={() => onAction("suggested")}>
+    <div className="flex w-full items-center gap-2">
+      <Button variant="outline" className="flex-1" onClick={() => onAction("suggested")}>
         Suggest
       </Button>
-      <Button variant="outline" size="sm" className="h-10 flex-1 text-sm font-medium" onClick={() => onAction("not_sure")}>
+      <Button variant="outline" className="flex-1" onClick={() => onAction("not_sure")}>
         Not sure
       </Button>
-      <Button variant="outline" size="sm" className="h-10 flex-1 text-sm font-medium" onClick={() => onAction("na")}>
+      <Button variant="outline" className="flex-1" onClick={() => onAction("na")}>
         N/A
       </Button>
     </div>

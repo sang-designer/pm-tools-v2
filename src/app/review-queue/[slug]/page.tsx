@@ -10,6 +10,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -31,8 +38,208 @@ import {
   Clock,
   SkipForward,
   Info,
+  Flag,
+  Bot,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+} from "@/components/ui/combobox";
+
+const CATEGORY_OPTIONS = [
+  "Coffee Shop", "Cafe", "Restaurant", "Bar", "Bakery",
+  "Fast Food Restaurant", "Pizza Place", "Deli", "Ice Cream Shop",
+  "Juice Bar", "Food Truck", "Brewery", "Wine Bar", "Lounge",
+  "Nightclub", "Burger Joint", "Sushi Restaurant", "Thai Restaurant",
+  "Mexican Restaurant", "Italian Restaurant", "Chinese Restaurant",
+  "Indian Restaurant", "Korean Restaurant", "Vietnamese Restaurant",
+];
+
+interface FlaggedTip {
+  id: string;
+  author: string;
+  authorAvatar: string;
+  date: string;
+  text: string;
+  flaggedBy: string;
+  flagReason: string;
+  flagDate: string;
+}
+
+const MOCK_FLAGGED_TIPS: FlaggedTip[] = [
+  {
+    id: "tip-1",
+    author: "Jimmy Ha",
+    authorAvatar: "https://i.pravatar.cc/40?img=11",
+    date: "December 24, 2025",
+    text: "This food is terrible.",
+    flaggedBy: "Sain",
+    flagReason: "offensive",
+    flagDate: "January 24, 2026",
+  },
+  {
+    id: "tip-2",
+    author: "Maria K.",
+    authorAvatar: "https://i.pravatar.cc/40?img=23",
+    date: "March 15, 2026",
+    text: "Worst service ever. The staff are completely incompetent morons.",
+    flaggedBy: "AutoMod",
+    flagReason: "hateful",
+    flagDate: "March 16, 2026",
+  },
+  {
+    id: "tip-3",
+    author: "Dave R.",
+    authorAvatar: "https://i.pravatar.cc/40?img=33",
+    date: "June 1, 2026",
+    text: "Don't come here unless you want food poisoning. Owner should be in jail.",
+    flaggedBy: "ReviewBot",
+    flagReason: "harassing",
+    flagDate: "June 2, 2026",
+  },
+];
+
+interface FlaggedPhoto {
+  id: string;
+  uploader: string;
+  uploaderAvatar: string;
+  dateAdded: string;
+  photoUrl: string;
+  flaggedBy: string;
+  flagReason: string;
+  flagDate: string;
+}
+
+const MOCK_FLAGGED_PHOTOS: FlaggedPhoto[] = [
+  {
+    id: "photo-1",
+    uploader: "David",
+    uploaderAvatar: "https://i.pravatar.cc/40?img=15",
+    dateAdded: "June 8",
+    photoUrl: "https://picsum.photos/seed/flagged1/600/400",
+    flaggedBy: "Eugene K.",
+    flagReason: "unrelated",
+    flagDate: "July 1, 2026",
+  },
+  {
+    id: "photo-2",
+    uploader: "Sarah M.",
+    uploaderAvatar: "https://i.pravatar.cc/40?img=28",
+    dateAdded: "May 15",
+    photoUrl: "https://picsum.photos/seed/flagged2/600/400",
+    flaggedBy: "AutoMod",
+    flagReason: "spam",
+    flagDate: "May 16, 2026",
+  },
+  {
+    id: "photo-3",
+    uploader: "Alex T.",
+    uploaderAvatar: "https://i.pravatar.cc/40?img=42",
+    dateAdded: "April 20",
+    photoUrl: "https://picsum.photos/seed/flagged3/600/400",
+    flaggedBy: "ReviewBot",
+    flagReason: "inappropriate",
+    flagDate: "April 21, 2026",
+  },
+];
+
+interface FlaggedUser {
+  id: string;
+  name: string;
+  avatar: string;
+  joinedDate: string;
+  stats: { label: string; value: number }[];
+  flaggedBy: string;
+  flaggedDate: string;
+  flagVote: string;
+}
+
+const MOCK_FLAGGED_USERS: FlaggedUser[] = [
+  {
+    id: "user-1",
+    name: "Jason Baughman-Oprică",
+    avatar: "https://i.pravatar.cc/120?img=52",
+    joinedDate: "January 4, 2013",
+    stats: [
+      { label: "Check-ins", value: 34046 },
+      { label: "Friends", value: 23 },
+      { label: "Ignored Requests", value: 0 },
+      { label: "Followers", value: 103 },
+      { label: "Tips", value: 391 },
+      { label: "Flagged Tips", value: 0 },
+      { label: "Lists Created", value: 0 },
+      { label: "Photos", value: 2839 },
+      { label: "Flagged Photos", value: 2 },
+      { label: "Banned Photos", value: 0 },
+      { label: "Edits", value: 241 },
+      { label: "Rejected Edits", value: 8 },
+      { label: "Rolled Back Edits", value: 0 },
+      { label: "Venues Rated", value: 1430 },
+      { label: "Venues Managed", value: 0 },
+    ],
+    flaggedBy: "hannah",
+    flaggedDate: "April 15, 2023",
+    flagVote: "Yes",
+  },
+  {
+    id: "user-2",
+    name: "Mike Thornton",
+    avatar: "https://i.pravatar.cc/120?img=31",
+    joinedDate: "March 22, 2016",
+    stats: [
+      { label: "Check-ins", value: 1203 },
+      { label: "Friends", value: 8 },
+      { label: "Ignored Requests", value: 3 },
+      { label: "Followers", value: 12 },
+      { label: "Tips", value: 56 },
+      { label: "Flagged Tips", value: 14 },
+      { label: "Lists Created", value: 2 },
+      { label: "Photos", value: 89 },
+      { label: "Flagged Photos", value: 7 },
+      { label: "Banned Photos", value: 3 },
+      { label: "Edits", value: 512 },
+      { label: "Rejected Edits", value: 45 },
+      { label: "Rolled Back Edits", value: 12 },
+      { label: "Venues Rated", value: 320 },
+      { label: "Venues Managed", value: 1 },
+    ],
+    flaggedBy: "AutoMod",
+    flaggedDate: "June 10, 2026",
+    flagVote: "Yes",
+  },
+  {
+    id: "user-3",
+    name: "Aisha Patel",
+    avatar: "https://i.pravatar.cc/120?img=45",
+    joinedDate: "November 8, 2019",
+    stats: [
+      { label: "Check-ins", value: 567 },
+      { label: "Friends", value: 45 },
+      { label: "Ignored Requests", value: 0 },
+      { label: "Followers", value: 78 },
+      { label: "Tips", value: 203 },
+      { label: "Flagged Tips", value: 5 },
+      { label: "Lists Created", value: 4 },
+      { label: "Photos", value: 1450 },
+      { label: "Flagged Photos", value: 12 },
+      { label: "Banned Photos", value: 1 },
+      { label: "Edits", value: 89 },
+      { label: "Rejected Edits", value: 22 },
+      { label: "Rolled Back Edits", value: 6 },
+      { label: "Venues Rated", value: 890 },
+      { label: "Venues Managed", value: 0 },
+    ],
+    flaggedBy: "ReviewBot",
+    flaggedDate: "July 2, 2026",
+    flagVote: "Yes",
+  },
+];
 
 interface SuggestedAttribute {
   id: string;
@@ -177,6 +384,10 @@ function getAttributesForQueue(slug: string, venueName: string): SuggestedAttrib
       { id: "primary_category", label: "Primary Category", suggestedValue: "Coffee Shop", confirmed: null },
       { id: "secondary_category", label: "Secondary Category", suggestedValue: "Cafe", confirmed: null },
     ],
+    "suggest-categories": [
+      { id: "primary_category", label: "Primary Category", suggestedValue: "Restaurant", confirmed: null },
+      { id: "secondary_category", label: "Secondary Category", suggestedValue: "Italian Restaurant", confirmed: null },
+    ],
     "review-removal-suggestions": [
       { id: "is_closed", label: "Place is closed", suggestedValue: "Permanently Closed", confirmed: null },
     ],
@@ -193,6 +404,9 @@ function getAttributesForQueue(slug: string, venueName: string): SuggestedAttrib
     "review-flagged-photos": [
       { id: "photo_appropriate", label: "Photo is appropriate", suggestedValue: "No — flagged as spam", confirmed: null },
     ],
+    "review-flagged-tips": [
+      { id: "tip_offensive", label: "Tip is offensive", suggestedValue: "Yes — flagged as offensive", confirmed: null },
+    ],
     "review-translated-names": [
       { id: "translated_name", label: "Translated Name (ES)", suggestedValue: `${venueName} (translated)`, confirmed: null },
     ],
@@ -208,6 +422,9 @@ function getAttributesForQueue(slug: string, venueName: string): SuggestedAttrib
       { id: "address", label: "Address", currentValue: "2712 Pinole Valley Rd, Pinole, CA", suggestedValue: "2712 Pinole Valley Rd", confirmed: null },
       { id: "name", label: "Name", currentValue: venueName, suggestedValue: `${venueName.split(" ").slice(0, 2).join(" ")}`, confirmed: null },
     ],
+    "review-flagged-users": [
+      { id: "is_bad_editor", label: "Is this user a bad editor?", suggestedValue: "Yes", confirmed: null },
+    ],
   };
 
   return attributeSets[slug] || [
@@ -220,6 +437,50 @@ function getWarnings(checkIns: number): string[] {
   if (checkIns > 250) warnings.push("This venue has more than 250 check-ins. Please be EXTRA careful.");
   if (checkIns > 100) warnings.push("This venue has recent check-ins. Please be EXTRA careful.");
   return warnings;
+}
+
+interface ChainSuggestion {
+  id: string;
+  name: string;
+  chainCategory: string;
+  categoryMismatch: boolean;
+}
+
+function getChainSuggestions(venueCategory: string, venueName: string): ChainSuggestion[] {
+  const chainMap: Record<string, ChainSuggestion[]> = {
+    "Coffee Shop": [
+      { id: "chain-starbucks", name: "Starbucks Corporation", chainCategory: "Coffee Shop", categoryMismatch: false },
+    ],
+    "Restaurant": [
+      { id: "chain-cheesecake", name: "The Cheesecake Factory", chainCategory: "Restaurant", categoryMismatch: false },
+    ],
+    "Italian Restaurant": [
+      { id: "chain-olive-garden", name: "Olive Garden", chainCategory: "Italian Restaurant", categoryMismatch: false },
+    ],
+    "Bakery": [
+      { id: "chain-panera", name: "Panera Bread", chainCategory: "Bakery & Cafe", categoryMismatch: false },
+    ],
+    "Fast Food Restaurant": [
+      { id: "chain-mcdonalds", name: "McDonald's Corporation", chainCategory: "Fast Food Restaurant", categoryMismatch: false },
+    ],
+  };
+
+  const suggestions = chainMap[venueCategory] || [
+    { id: "chain-generic", name: "Bowlero", chainCategory: "Bowling Alley", categoryMismatch: true },
+  ];
+
+  // Add a potential mismatch suggestion for variety
+  if (suggestions.length === 1 && !suggestions[0].categoryMismatch) {
+    const mismatch: ChainSuggestion = {
+      id: "chain-mismatch",
+      name: venueCategory === "Coffee Shop" ? "Valentino" : "Saks Fifth Avenue",
+      chainCategory: venueCategory === "Coffee Shop" ? "Fashion Boutique" : "Department Store",
+      categoryMismatch: true,
+    };
+    suggestions.push(mismatch);
+  }
+
+  return suggestions;
 }
 
 export default function ReviewQueuePage() {
@@ -245,6 +506,10 @@ function ReviewQueueContent() {
   const [attributes, setAttributes] = useState<SuggestedAttribute[]>(
     () => tasks[0]?.attributes.map((a) => ({ ...a })) || []
   );
+  const [suggestOpenId, setSuggestOpenId] = useState<string | null>(null);
+  const [locationSuggestOpen, setLocationSuggestOpen] = useState(false);
+  const [translatedNameSuggestOpen, setTranslatedNameSuggestOpen] = useState(false);
+  const [badEditorVote, setBadEditorVote] = useState<boolean | null>(null);
 
   useEffect(() => {
     const newTasks = generateMockTasks(slug, selectedLocation);
@@ -282,6 +547,51 @@ function ReviewQueueContent() {
 
   const handleDontMerge = () => {
     toast("Not merged", { description: task.venueName });
+    advance();
+  };
+
+  const handleClose = () => {
+    toast.success("Closed", { description: `${task.venueName} marked as closed` });
+    advance();
+  };
+
+  const handleDontClose = () => {
+    toast("Kept open", { description: task.venueName });
+    advance();
+  };
+
+  const handleFlag = () => {
+    toast("Flagged", { description: `${task.venueName} flagged for review` });
+    advance();
+  };
+
+  const handleRemoveTip = () => {
+    toast.success("Removed", { description: `Tip removed from ${task.venueName}` });
+    advance();
+  };
+
+  const handleDontRemove = () => {
+    toast("Kept", { description: `Tip kept on ${task.venueName}` });
+    advance();
+  };
+
+  const handleChangeLocation = () => {
+    toast.success("Location changed", { description: task.venueName });
+    advance();
+  };
+
+  const handleDontChange = () => {
+    toast("Location kept", { description: task.venueName });
+    advance();
+  };
+
+  const handleMarkPrivate = () => {
+    toast.success("Marked private", { description: task.venueName });
+    advance();
+  };
+
+  const handleKeepPublic = () => {
+    toast("Kept public", { description: task.venueName });
     advance();
   };
 
@@ -521,12 +831,12 @@ function ReviewQueueContent() {
                   <Button variant="outline" size="lg">
                     Make Subvenue
                   </Button>
-                  <Button size="lg" onClick={handleMerge}>
-                    Merge
-                  </Button>
                   <div className="flex-1" />
                   <Button variant="outline" size="lg" onClick={handleSkip}>
                     Skip <SkipForward className="ml-1 h-4 w-4" />
+                  </Button>
+                  <Button size="lg" onClick={handleMerge}>
+                    Merge
                   </Button>
                 </div>
 
@@ -552,6 +862,1017 @@ function ReviewQueueContent() {
                   <LocationSelector currentLocation={selectedLocation} />
                 </div>
               </div>
+            </div>
+          ) : slug === "review-chain-membership" ? (
+            /* Chain membership layout */
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-3 space-y-4">
+                {/* Venue info card */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-foreground truncate">
+                            <Link href={`/venue/${task.venueId}`} className="hover:text-primary hover:underline transition-colors">
+                              {task.venueName}
+                            </Link>
+                          </h2>
+                          {task.venueClaimed && (
+                            <Badge variant="secondary" className="text-[10px] shrink-0">Claimed</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          {task.venueAddress}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{task.venueCategory}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <History className="h-3 w-3" /> Edit history
+                          </button>
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <Search className="h-3 w-3" /> Search the web
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      </div>
+                      <div>
+                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-foreground")}>
+                          {task.recentCheckIns}
+                        </p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Current chains */}
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    <h3 className="text-base font-semibold text-foreground">Current chains</h3>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground">Make a suggestion:</span>
+                      <input
+                        type="text"
+                        placeholder="Start typing a chain name"
+                        className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Add to these chains? */}
+                <Card>
+                  <CardContent className="p-4 space-y-4">
+                    <h3 className="text-base font-semibold text-foreground">Add to these chains?</h3>
+                    {getChainSuggestions(task.venueCategory, task.venueName).map((chain) => (
+                      <div key={chain.id} className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <div className="size-10 shrink-0 rounded-md bg-muted flex items-center justify-center overflow-hidden border border-border">
+                            <span className="text-lg font-bold text-muted-foreground">{chain.name.charAt(0)}</span>
+                          </div>
+                          <Link href={`/admin/chains/${chain.id}`} className="text-sm font-medium text-primary hover:underline flex-1">
+                            {chain.name}
+                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" onClick={() => {
+                              toast("Not added", { description: `${task.venueName} won't be added to ${chain.name}` });
+                            }}>
+                              Don&apos;t Add
+                            </Button>
+                            <Button variant="secondary" onClick={() => {
+                              toast.success("Added", { description: `${task.venueName} added to ${chain.name}` });
+                            }}>
+                              Add
+                            </Button>
+                          </div>
+                        </div>
+                        {chain.categoryMismatch && (
+                          <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-500/30 dark:bg-amber-500/10">
+                            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                            <p className="text-xs text-amber-800 dark:text-amber-200">
+                              Most venues in this chain are <strong>{chain.chainCategory}</strong>, but this venue&apos;s primary category is <strong>{task.venueCategory}</strong>.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Remove from these chains? */}
+                <Card>
+                  <CardContent className="p-4 space-y-2">
+                    <h3 className="text-base font-semibold text-foreground">Remove from these chains?</h3>
+                    <p className="text-sm text-muted-foreground">None</p>
+                  </CardContent>
+                </Card>
+
+                {/* Action buttons */}
+                <div className="flex items-center justify-end gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleSkip}
+                  >
+                    Skip <SkipForward className="ml-1 h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="lg"
+                    onClick={handleDone}
+                  >
+                    Done
+                  </Button>
+                </div>
+
+                {/* Keyboard hints */}
+                <p className="text-center text-xs text-muted-foreground">
+                  Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">D</kbd> done
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
+                </p>
+              </div>
+
+              {/* Right: map */}
+              <div className="lg:col-span-2 space-y-3">
+                <Card className="overflow-hidden sticky top-6">
+                  <MapPreview
+                    lat={task.lat}
+                    lng={task.lng}
+                    name={task.venueName}
+                    className="h-64 w-full lg:h-[400px]"
+                  />
+                </Card>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">near</span>
+                  <LocationSelector currentLocation={selectedLocation} />
+                </div>
+              </div>
+            </div>
+          ) : slug === "review-removal-suggestions" ? (
+            /* Removal suggestions layout */
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-3 space-y-4">
+                {/* Venue info card */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      <div className="size-20 shrink-0 rounded-lg bg-muted overflow-hidden border border-border">
+                        <img
+                          src={`https://picsum.photos/seed/${task.venueId}/160/160`}
+                          alt={task.venueName}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-foreground truncate">
+                            <Link href={`/venue/${task.venueId}`} className="text-primary hover:underline transition-colors">
+                              {task.venueName}
+                            </Link>
+                          </h2>
+                          {task.venueClaimed && (
+                            <Badge variant="secondary" className="text-[10px] shrink-0">Claimed</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          {task.venueAddress}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{task.venueCategory}</p>
+                        {task.attributes[0]?.suggestedValue && (
+                          <a href="#" className="text-xs text-primary hover:underline mt-1 inline-block">
+                            {task.venueName.toLowerCase().replace(/\s+/g, "")}.com
+                          </a>
+                        )}
+                        <div className="flex items-center gap-3 mt-2">
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <History className="h-3 w-3" /> Edit history
+                          </button>
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <Search className="h-3 w-3" /> Search the web
+                          </button>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                        <Link href={`/venue/${task.venueId}`}>
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {/* Stats row */}
+                    <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      </div>
+                      <div>
+                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>
+                          {task.recentCheckIns}
+                        </p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Info messages */}
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    {/* Creator info */}
+                    <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                      <User className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <p className="text-sm text-foreground">
+                        <span className="text-primary font-medium">Steve L.</span> created this place.
+                      </p>
+                    </div>
+
+                    {/* Bot suggestion */}
+                    <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                      <Bot className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <p className="text-sm text-foreground">
+                        May 22, 2024 · <span className="text-primary font-medium">Flipp</span> thinks this place is <strong>closed</strong>. — <em className="text-muted-foreground">via Flipp</em>
+                      </p>
+                    </div>
+
+                    {/* Warnings */}
+                    {task.warnings.length > 0 && task.warnings.map((warning, i) => (
+                      <div key={i} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                        <AlertTriangle className="h-4 w-4 mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <p className="text-sm text-amber-800 dark:text-amber-200">{warning}</p>
+                      </div>
+                    ))}
+
+                    {/* Days since last check-in */}
+                    <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                      <Bot className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <p className="text-sm text-foreground">
+                        {task.recentCheckIns > 0
+                          ? `${Math.floor(60 / task.recentCheckIns)} days since the last check-in at this venue.`
+                          : "No recent check-ins at this venue."}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Action buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="lg">
+                        Flag
+                        <span className="text-xs text-muted-foreground ml-1 font-normal">for another reason</span>
+                        <ChevronDown className="ml-1.5 h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem onClick={() => {
+                        toast("Flagged", { description: `${task.venueName} — This place is private` });
+                        advance();
+                      }}>
+                        This place is private
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toast("Flagged", { description: `${task.venueName} — This place is a home` });
+                        advance();
+                      }}>
+                        This place is a home
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button variant="outline" size="lg" onClick={handleDontClose}>
+                    Don&apos;t close
+                  </Button>
+                  <div className="flex-1" />
+                  <Button variant="destructive" size="lg" onClick={handleClose}>
+                    Close
+                  </Button>
+                </div>
+
+                {/* Skip */}
+                <div className="flex items-center justify-end gap-3 pt-1">
+                  <Button variant="outline" size="lg" onClick={handleSkip}>
+                    Skip <SkipForward className="ml-1 h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Keyboard hints */}
+                <p className="text-center text-xs text-muted-foreground">
+                  Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">C</kbd> close
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t close
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
+                </p>
+              </div>
+
+              {/* Right: map */}
+              <div className="lg:col-span-2 space-y-3">
+                <Card className="overflow-hidden sticky top-6">
+                  <MapPreview
+                    lat={task.lat}
+                    lng={task.lng}
+                    name={task.venueName}
+                    className="h-64 w-full lg:h-[400px]"
+                  />
+                </Card>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">near</span>
+                  <LocationSelector currentLocation={selectedLocation} />
+                </div>
+              </div>
+            </div>
+          ) : slug === "review-flagged-tips" ? (
+            /* Flagged tips layout */
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-3 space-y-4">
+                {/* Venue info card */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      <div className="size-20 shrink-0 rounded-lg bg-muted overflow-hidden border border-border">
+                        <img
+                          src={`https://picsum.photos/seed/${task.venueId}/160/160`}
+                          alt={task.venueName}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-foreground truncate">
+                            <Link href={`/venue/${task.venueId}`} className="text-primary hover:underline transition-colors">
+                              {task.venueName}
+                            </Link>
+                          </h2>
+                          {task.venueClaimed && (
+                            <Badge variant="secondary" className="text-[10px] shrink-0">Claimed</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          {task.venueAddress}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{task.venueCategory}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <History className="h-3 w-3" /> Edit history
+                          </button>
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <Search className="h-3 w-3" /> Search the web
+                          </button>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                        <Link href={`/venue/${task.venueId}`}>
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {/* Stats row */}
+                    <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      </div>
+                      <div>
+                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>
+                          {task.recentCheckIns}
+                        </p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Tip to review */}
+                <Card>
+                  <CardContent className="p-4 space-y-4">
+                    <h3 className="text-base font-semibold text-foreground">
+                      {MOCK_FLAGGED_TIPS[currentIndex % MOCK_FLAGGED_TIPS.length]
+                        ? "1 tip to review at this location"
+                        : "No tips to review"}
+                    </h3>
+                    {(() => {
+                      const tip = MOCK_FLAGGED_TIPS[currentIndex % MOCK_FLAGGED_TIPS.length];
+                      if (!tip) return null;
+                      return (
+                        <div className="rounded-lg border border-border p-4">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={tip.authorAvatar}
+                              alt={tip.author}
+                              className="size-10 rounded-full object-cover"
+                            />
+                            <div>
+                              <span className="text-sm font-semibold text-primary">{tip.author}</span>
+                              <span className="text-sm text-muted-foreground ml-2">{tip.date}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-foreground mt-3">{tip.text}</p>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+
+                {/* Info messages */}
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    {(() => {
+                      const tip = MOCK_FLAGGED_TIPS[currentIndex % MOCK_FLAGGED_TIPS.length];
+                      if (!tip) return null;
+                      return (
+                        <>
+                          <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                            <Bot className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                            <p className="text-sm text-foreground">
+                              {tip.flagDate} · <span className="text-primary font-medium">{tip.flaggedBy}</span> thinks this tip is <strong>{tip.flagReason}</strong>.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                            <Bot className="h-4 w-4 mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <p className="text-sm text-amber-800 dark:text-amber-200">
+                              Are you sure this tip is hateful, vulgar, harassing, or obscene? Be honest!
+                            </p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+
+                {/* Action buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="lg">
+                        Flag
+                        <span className="text-xs text-muted-foreground ml-1 font-normal">for another reason</span>
+                        <ChevronDown className="ml-1.5 h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem onClick={() => {
+                        toast("Flagged", { description: `Tip flagged — Spam` });
+                        advance();
+                      }}>
+                        Spam
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toast("Flagged", { description: `Tip flagged — Not relevant` });
+                        advance();
+                      }}>
+                        Not relevant
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toast("Flagged", { description: `Tip flagged — Duplicate` });
+                        advance();
+                      }}>
+                        Duplicate
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button variant="outline" size="lg" onClick={handleDontRemove}>
+                    Don&apos;t remove
+                  </Button>
+                  <div className="flex-1" />
+                  <Button variant="destructive" size="lg" onClick={handleRemoveTip}>
+                    Remove
+                  </Button>
+                </div>
+
+                {/* Skip */}
+                <div className="flex items-center justify-end gap-3 pt-1">
+                  <Button variant="outline" size="lg" onClick={handleSkip}>
+                    Skip <SkipForward className="ml-1 h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Keyboard hints */}
+                <p className="text-center text-xs text-muted-foreground">
+                  Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">R</kbd> remove
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t remove
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
+                </p>
+              </div>
+
+              {/* Right: map */}
+              <div className="lg:col-span-2 space-y-3">
+                <Card className="overflow-hidden sticky top-6">
+                  <MapPreview
+                    lat={task.lat}
+                    lng={task.lng}
+                    name={task.venueName}
+                    className="h-64 w-full lg:h-[400px]"
+                  />
+                </Card>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">near</span>
+                  <LocationSelector currentLocation={selectedLocation} />
+                </div>
+              </div>
+            </div>
+          ) : slug === "review-flagged-photos" ? (
+            /* Flagged photos layout */
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-3 space-y-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      <div className="size-20 shrink-0 rounded-lg bg-muted overflow-hidden border border-border">
+                        <img src={`https://picsum.photos/seed/${task.venueId}/160/160`} alt={task.venueName} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-foreground truncate">
+                            <Link href={`/venue/${task.venueId}`} className="text-primary hover:underline transition-colors">{task.venueName}</Link>
+                          </h2>
+                          {task.venueClaimed && <Badge variant="secondary" className="text-[10px] shrink-0">Claimed</Badge>}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />{task.venueAddress}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{task.venueCategory}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><History className="h-3 w-3" /> Edit history</button>
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><Search className="h-3 w-3" /> Search the web</button>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                        <Link href={`/venue/${task.venueId}`}><ExternalLink className="h-4 w-4" /></Link>
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      </div>
+                      <div>
+                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>{task.recentCheckIns}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 space-y-4">
+                    <h3 className="text-base font-semibold text-foreground">1 photo to review at this location</h3>
+                    {(() => {
+                      const photo = MOCK_FLAGGED_PHOTOS[currentIndex % MOCK_FLAGGED_PHOTOS.length];
+                      if (!photo) return null;
+                      return (
+                        <>
+                          <div className="flex items-center gap-3 rounded-lg bg-muted/30 p-3">
+                            <img src={photo.uploaderAvatar} alt={photo.uploader} className="size-8 rounded-full object-cover" />
+                            <p className="text-sm text-foreground">
+                              <span className="text-primary font-medium">{photo.uploader}</span>{" "}
+                              <span className="text-muted-foreground">Added {photo.dateAdded}</span>
+                            </p>
+                          </div>
+                          <div className="rounded-lg overflow-hidden border border-border">
+                            <img src={photo.photoUrl} alt="Flagged photo" className="w-full h-auto max-h-80 object-cover" />
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    {(() => {
+                      const photo = MOCK_FLAGGED_PHOTOS[currentIndex % MOCK_FLAGGED_PHOTOS.length];
+                      if (!photo) return null;
+                      return (
+                        <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                          <Bot className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                          <p className="text-sm text-foreground">
+                            {photo.flagDate} · <span className="text-primary font-medium">{photo.flaggedBy}</span> thinks this photo is <strong>{photo.flagReason}</strong>.
+                          </p>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="lg">
+                        Flag<span className="text-xs text-muted-foreground ml-1 font-normal">for another reason</span>
+                        <ChevronDown className="ml-1.5 h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: "Photo flagged — Spam" }); advance(); }}>Spam</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: "Photo flagged — Duplicate" }); advance(); }}>Duplicate</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: "Photo flagged — Copyright" }); advance(); }}>Copyright</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button variant="outline" size="lg" onClick={handleDontRemove}>Don&apos;t remove</Button>
+                  <div className="flex-1" />
+                  <Button variant="destructive" size="lg" onClick={handleRemoveTip}>Remove</Button>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-1">
+                  <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
+                </div>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">R</kbd> remove
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t remove
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
+                </p>
+              </div>
+              <div className="lg:col-span-2 space-y-3">
+                <Card className="overflow-hidden sticky top-6">
+                  <MapPreview lat={task.lat} lng={task.lng} name={task.venueName} className="h-64 w-full lg:h-[400px]" />
+                </Card>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">near</span>
+                  <LocationSelector currentLocation={selectedLocation} />
+                </div>
+              </div>
+            </div>
+          ) : slug === "review-location-suggestions" ? (
+            /* Location suggestions layout */
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-3 space-y-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      <div className="size-20 shrink-0 rounded-lg bg-muted overflow-hidden border border-border">
+                        <img src={`https://picsum.photos/seed/${task.venueId}/160/160`} alt={task.venueName} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-foreground truncate">
+                            <Link href={`/venue/${task.venueId}`} className="text-primary hover:underline transition-colors">{task.venueName}</Link>
+                          </h2>
+                          {task.venueClaimed && <Badge variant="secondary" className="text-[10px] shrink-0">Claimed</Badge>}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />{task.venueAddress}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{task.venueCategory}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><History className="h-3 w-3" /> Edit history</button>
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><Search className="h-3 w-3" /> Search the web</button>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                        <Link href={`/venue/${task.venueId}`}><ExternalLink className="h-4 w-4" /></Link>
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      </div>
+                      <div>
+                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>{task.recentCheckIns}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Info messages */}
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                      <Bot className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <p className="text-sm text-foreground">
+                        June 23, 2024 · <span className="text-primary font-medium">*</span> thinks this place <strong>should be relocated</strong>.
+                      </p>
+                    </div>
+                    {task.warnings.length > 0 && task.warnings.map((warning, i) => (
+                      <div key={i} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                        <Bot className="h-4 w-4 mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <p className="text-sm text-amber-800 dark:text-amber-200">{warning}</p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Current vs Suggested Location */}
+                <Card>
+                  <CardContent className="p-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="text-sm font-semibold text-foreground mb-1">Current Location</h4>
+                        <p className="text-xs text-primary font-mono">{task.lat.toFixed(6)},{task.lng.toFixed(6)}</p>
+                        <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
+                          <MapPreview lat={task.lat} lng={task.lng} name={task.venueName} className="h-full w-full" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-foreground mb-1">Suggested Location</h4>
+                        <p className="text-xs text-primary font-mono">{(task.lat + 0.002).toFixed(6)},{(task.lng + 0.003).toFixed(6)}</p>
+                        <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
+                          <MapPreview lat={task.lat + 0.002} lng={task.lng + 0.003} name={`${task.venueName} (suggested)`} className="h-full w-full" />
+                        </div>
+                      </div>
+                    </div>
+                    <a href={`https://www.google.com/maps?q=${task.lat},${task.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">
+                      View both locations on Google Maps.
+                    </a>
+                  </CardContent>
+                </Card>
+
+                {/* Suggest another location input */}
+                {locationSuggestOpen && (
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Input placeholder="Enter coordinates (lat, lng)..." className="flex-1" />
+                        <Button size="sm" onClick={() => { toast.success("Location suggested"); setLocationSuggestOpen(false); }}>Submit</Button>
+                        <button className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" onClick={() => setLocationSuggestOpen(false)} aria-label="Dismiss">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <Button variant="outline" size="lg" onClick={handleDontChange}>Don&apos;t change</Button>
+                  <Button size="lg" onClick={handleChangeLocation}>Change location</Button>
+                  <button className="text-xs text-primary hover:underline" onClick={() => setLocationSuggestOpen(true)}>or suggest another location</button>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-1">
+                  <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
+                </div>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">C</kbd> change
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t change
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
+                </p>
+              </div>
+              <div className="lg:col-span-2 space-y-3">
+                <Card className="overflow-hidden sticky top-6">
+                  <MapPreview lat={task.lat} lng={task.lng} name={task.venueName} className="h-64 w-full lg:h-[400px]" />
+                </Card>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">near</span>
+                  <LocationSelector currentLocation={selectedLocation} />
+                </div>
+              </div>
+            </div>
+          ) : slug === "mark-places-private" ? (
+            /* Mark places private layout */
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-3 space-y-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      <div className="size-20 shrink-0 rounded-lg bg-muted overflow-hidden border border-border">
+                        <img src={`https://picsum.photos/seed/${task.venueId}/160/160`} alt={task.venueName} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-foreground truncate">
+                            <Link href={`/venue/${task.venueId}`} className="text-primary hover:underline transition-colors">{task.venueName}</Link>
+                          </h2>
+                          {task.venueClaimed && <Badge variant="secondary" className="text-[10px] shrink-0">Claimed</Badge>}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />{task.venueAddress}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-0.5">{task.venueCategory}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><History className="h-3 w-3" /> Edit history</button>
+                          <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><Search className="h-3 w-3" /> Search the web</button>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                        <Link href={`/venue/${task.venueId}`}><ExternalLink className="h-4 w-4" /></Link>
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      </div>
+                      <div>
+                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>{task.recentCheckIns}</p>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Info messages */}
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                      <img src="https://i.pravatar.cc/32?img=60" alt="creator" className="size-8 rounded-full" />
+                      <p className="text-sm text-foreground">
+                        <span className="text-primary font-medium">w</span> created this place.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                      <img src="https://i.pravatar.cc/32?img=60" alt="flagger" className="size-8 rounded-full" />
+                      <p className="text-sm text-foreground">
+                        August 30, 2025 · <span className="text-primary font-medium">w</span> thinks this place <strong>should be marked private</strong>.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                      <Bot className="h-4 w-4 mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <p className="text-sm text-amber-800 dark:text-amber-200">
+                        Remember, only mark a place as private if it shouldn&apos;t show up in search results.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Action buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="lg">
+                        Flag<span className="text-xs text-muted-foreground ml-1 font-normal">for another reason</span>
+                        <ChevronDown className="ml-1.5 h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: `${task.venueName} — Not a residence` }); advance(); }}>Not a residence</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: `${task.venueName} — Duplicate` }); advance(); }}>Duplicate</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: `${task.venueName} — Other` }); advance(); }}>Other</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button variant="outline" size="lg" onClick={handleKeepPublic}>Keep public</Button>
+                  <div className="flex-1" />
+                  <Button size="lg" onClick={handleMarkPrivate}>Mark as private</Button>
+                </div>
+
+                {/* Skip */}
+                <div className="flex items-center justify-end gap-3 pt-1">
+                  <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
+                </div>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">P</kbd> mark private
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">K</kbd> keep public
+                  {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
+                </p>
+              </div>
+              <div className="lg:col-span-2 space-y-3">
+                <Card className="overflow-hidden sticky top-6">
+                  <MapPreview lat={task.lat} lng={task.lng} name={task.venueName} className="h-64 w-full lg:h-[400px]" />
+                </Card>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">near</span>
+                  <LocationSelector currentLocation={selectedLocation} />
+                </div>
+              </div>
+            </div>
+          ) : slug === "review-flagged-users" ? (
+            /* Flagged users layout */
+            <div className="mx-auto max-w-2xl space-y-4">
+              {/* User profile card */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <img
+                      src={MOCK_FLAGGED_USERS[currentIndex % MOCK_FLAGGED_USERS.length]?.avatar}
+                      alt={MOCK_FLAGGED_USERS[currentIndex % MOCK_FLAGGED_USERS.length]?.name}
+                      className="size-24 rounded-lg object-cover border border-border"
+                    />
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">
+                        {MOCK_FLAGGED_USERS[currentIndex % MOCK_FLAGGED_USERS.length]?.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Joined {MOCK_FLAGGED_USERS[currentIndex % MOCK_FLAGGED_USERS.length]?.joinedDate}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Stats grid */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-3 divide-x divide-y divide-border border border-border rounded-lg overflow-hidden">
+                    {MOCK_FLAGGED_USERS[currentIndex % MOCK_FLAGGED_USERS.length]?.stats.map((stat) => (
+                      <div key={stat.label} className="p-3 text-center">
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{stat.label}</p>
+                        <p className={cn("text-lg font-semibold tabular-nums", stat.value === 0 ? "text-muted-foreground" : "text-primary")}>{stat.value.toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Is this user a bad editor? */}
+              <Card>
+                <CardContent className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-foreground">Is this user a bad editor?</h3>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={badEditorVote === false ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setBadEditorVote(false)}
+                        className={badEditorVote === false ? "bg-orange-500 hover:bg-orange-600" : ""}
+                      >
+                        No
+                      </Button>
+                      <Button
+                        variant={badEditorVote === true ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setBadEditorVote(true)}
+                        className={badEditorVote === true ? "bg-green-600 hover:bg-green-700" : ""}
+                      >
+                        Yes
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Flag info */}
+                  {(() => {
+                    const user = MOCK_FLAGGED_USERS[currentIndex % MOCK_FLAGGED_USERS.length];
+                    if (!user) return null;
+                    return (
+                      <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                        <img src={`https://i.pravatar.cc/32?u=${user.flaggedBy}`} alt={user.flaggedBy} className="size-8 rounded-full" />
+                        <p className="text-sm text-foreground">
+                          {user.flaggedDate} · <span className="text-primary font-medium">{user.flaggedBy}</span> voted <strong>{user.flagVote}</strong>
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="lg">
+                      Flag<span className="text-xs text-muted-foreground ml-1 font-normal">for another reason</span>
+                      <ChevronDown className="ml-1.5 h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem onClick={() => { toast("Flagged", { description: "User flagged — Spammer" }); advance(); }}>Spammer</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { toast("Flagged", { description: "User flagged — Bot account" }); advance(); }}>Bot account</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { toast("Flagged", { description: "User flagged — Abusive behavior" }); advance(); }}>Abusive behavior</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <div className="flex-1" />
+                <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
+                <Button size="lg" onClick={handleDone}>Done</Button>
+              </div>
+
+              <p className="text-center text-xs text-muted-foreground">
+                Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">D</kbd> done
+                {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
+              </p>
             </div>
           ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
@@ -638,11 +1959,133 @@ function ReviewQueueContent() {
                           </div>
                         )}
 
+                        {slug !== "review-removal-suggestions" && slug !== "review-flagged-photos" && slug !== "review-flagged-tips" && slug !== "review-location-suggestions" && slug !== "review-flagged-users" && (
                         <div className="flex items-center gap-3 mt-2">
-                          <button className="text-xs text-primary hover:underline">Suggest</button>
-                          <span className="text-xs text-muted-foreground">·</span>
-                          <button className="text-xs text-primary hover:underline">Not applicable</button>
+                          <button
+                            className="text-xs text-primary hover:underline"
+                            onClick={() => setSuggestOpenId(suggestOpenId === attr.id ? null : attr.id)}
+                          >
+                            Suggest
+                          </button>
+                          {slug !== "suggest-categories" && slug !== "review-category-suggestions" && slug !== "review-translated-names" && slug !== "confirm-business-details" && (
+                            <>
+                              <span className="text-xs text-muted-foreground">·</span>
+                              <button className="text-xs text-primary hover:underline">Not applicable</button>
+                            </>
+                          )}
                         </div>
+                        )}
+                        {suggestOpenId === attr.id && (slug === "review-category-suggestions" || slug === "suggest-categories") && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="flex-1">
+                              <Combobox>
+                                <ComboboxInput placeholder="Search categories..." showClear />
+                                <ComboboxContent align="start">
+                                  <ComboboxList>
+                                    <ComboboxEmpty>No categories found.</ComboboxEmpty>
+                                    {CATEGORY_OPTIONS.map((cat) => (
+                                      <ComboboxItem
+                                        key={cat}
+                                        value={cat}
+                                        onSelect={() => {
+                                          toast.success("Category suggested", { description: cat });
+                                          setSuggestOpenId(null);
+                                        }}
+                                      >
+                                        {cat}
+                                      </ComboboxItem>
+                                    ))}
+                                  </ComboboxList>
+                                </ComboboxContent>
+                              </Combobox>
+                            </div>
+                            <button
+                              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                              onClick={() => setSuggestOpenId(null)}
+                              aria-label="Dismiss"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        {suggestOpenId === attr.id && slug !== "review-category-suggestions" && slug !== "suggest-categories" && slug !== "review-translated-names" && slug !== "confirm-business-details" && slug !== "review-subvenue-suggestions" && slug !== "review-address-suggestions" && (
+                          <div className="flex items-center gap-4 mt-2 rounded-md border border-border bg-muted/30 px-3 py-2">
+                            <span className="text-xs font-medium text-muted-foreground">Your suggestion:</span>
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`suggest-${attr.id}`}
+                                className="size-3.5 accent-primary"
+                                onChange={() => {
+                                  toast.success("Suggestion submitted", { description: `${attr.label}: Yes` });
+                                  setSuggestOpenId(null);
+                                }}
+                              />
+                              <span className="text-xs font-medium text-foreground">Yes</span>
+                            </label>
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`suggest-${attr.id}`}
+                                className="size-3.5 accent-primary"
+                                onChange={() => {
+                                  toast.success("Suggestion submitted", { description: `${attr.label}: No` });
+                                  setSuggestOpenId(null);
+                                }}
+                              />
+                              <span className="text-xs font-medium text-foreground">No</span>
+                            </label>
+                            <button
+                              className="ml-auto rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                              onClick={() => setSuggestOpenId(null)}
+                              aria-label="Dismiss"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        {suggestOpenId === attr.id && (slug === "confirm-business-details" || slug === "review-subvenue-suggestions" || slug === "review-address-suggestions") && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Input
+                              placeholder={`Suggest a value for ${attr.label}...`}
+                              className="flex-1 h-8 text-sm"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
+                                  toast.success("Suggestion submitted", { description: `${attr.label}: ${(e.target as HTMLInputElement).value}` });
+                                  setSuggestOpenId(null);
+                                }
+                              }}
+                            />
+                            <button
+                              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                              onClick={() => setSuggestOpenId(null)}
+                              aria-label="Dismiss"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        {suggestOpenId === attr.id && slug === "review-translated-names" && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Input
+                              placeholder="Suggest a name..."
+                              className="flex-1 h-8 text-sm"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
+                                  toast.success("Name suggested", { description: (e.target as HTMLInputElement).value });
+                                  setSuggestOpenId(null);
+                                }
+                              }}
+                            />
+                            <button
+                              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                              onClick={() => setSuggestOpenId(null)}
+                              aria-label="Dismiss"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 ml-3 mt-1">
                         <button
@@ -688,20 +2131,19 @@ function ReviewQueueContent() {
               )}
 
               {/* Action buttons */}
-              <div className="flex items-center gap-3 pt-2">
-                <Button
-                  size="lg"
-                  onClick={handleDone}
-                >
-                  Done
-                </Button>
-                <div className="flex-1" />
+              <div className="flex items-center justify-end gap-3 pt-2">
                 <Button
                   variant="outline"
                   size="lg"
                   onClick={handleSkip}
                 >
                   Skip <SkipForward className="ml-1 h-4 w-4" />
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={handleDone}
+                >
+                  Done
                 </Button>
               </div>
 

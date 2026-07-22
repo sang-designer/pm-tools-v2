@@ -122,7 +122,7 @@ export default function LeaderboardPage() {
       <main className="flex-1">
         <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
           {/* Page Header */}
-          <div className="mb-8">
+          <div className="mb-4">
             <h1 className="text-2xl font-bold tracking-tight">Leaderboard</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               See how you stack up against other contributors

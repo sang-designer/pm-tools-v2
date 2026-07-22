@@ -39,6 +39,7 @@ interface ShapesEditorProps {
   center?: LatLng;
   zoom?: number;
   initialPolygons?: Polygon[];
+  initialImportText?: string;
   onChange?: (polygons: Polygon[]) => void;
 }
 
@@ -46,8 +47,12 @@ export function ShapesEditor({
   center = [37.7749, -122.4194],
   zoom = 16,
   initialPolygons = [],
+  initialImportText = "",
   onChange,
 }: ShapesEditorProps) {
+  // #region agent log
+  fetch('http://127.0.0.1:7737/ingest/790c4b03-4390-4ecf-9a0a-74c372d6adba',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'3d096e'},body:JSON.stringify({sessionId:'3d096e',location:'shapes-editor.tsx:50',message:'ShapesEditor render start',data:{center,zoom,initialPolygonsLength:initialPolygons?.length},timestamp:Date.now(),hypothesisId:'H6'})}).catch(()=>{});
+  // #endregion
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const { resolvedTheme } = useTheme();
@@ -59,7 +64,7 @@ export function ShapesEditor({
   const [history, setHistory] = useState<Polygon[][]>([initialPolygons]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [importMode, setImportMode] = useState<"geojson" | "wkt">("geojson");
-  const [importText, setImportText] = useState("");
+  const [importText, setImportText] = useState(initialImportText);
   const [importError, setImportError] = useState("");
 
   const polygonLayersRef = useRef<L.Polygon[]>([]);
