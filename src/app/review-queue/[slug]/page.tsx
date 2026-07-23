@@ -510,6 +510,8 @@ function ReviewQueueContent() {
   const [locationSuggestOpen, setLocationSuggestOpen] = useState(false);
   const [translatedNameSuggestOpen, setTranslatedNameSuggestOpen] = useState(false);
   const [badEditorVote, setBadEditorVote] = useState<boolean | null>(null);
+  const [chainDecisions, setChainDecisions] = useState<Record<string, "add" | "dont-add">>({});
+  const [categorySearch, setCategorySearch] = useState("");
 
   useEffect(() => {
     const newTasks = generateMockTasks(slug, selectedLocation);
@@ -528,6 +530,7 @@ function ReviewQueueContent() {
     const nextIndex = currentIndex < tasks.length - 1 ? currentIndex + 1 : 0;
     setCurrentIndex(nextIndex);
     setAttributes(tasks[nextIndex].attributes.map((a) => ({ ...a })));
+    setChainDecisions({});
   }, [currentIndex, tasks]);
 
   const handleDone = () => {
@@ -947,15 +950,21 @@ function ReviewQueueContent() {
                             {chain.name}
                           </Link>
                           <div className="flex items-center gap-2">
-                            <Button variant="outline" onClick={() => {
-                              toast("Not added", { description: `${task.venueName} won't be added to ${chain.name}` });
-                            }}>
+                            <Button
+                              variant="outline"
+                              className={chainDecisions[chain.id] === "dont-add" ? "border-foreground/30 bg-muted text-foreground" : ""}
+                              onClick={() => setChainDecisions((prev) => ({ ...prev, [chain.id]: "dont-add" }))}
+                            >
                               Don&apos;t Add
+                              {chainDecisions[chain.id] === "dont-add" && <Check className="ml-1.5 h-3.5 w-3.5 text-green-600" />}
                             </Button>
-                            <Button variant="secondary" onClick={() => {
-                              toast.success("Added", { description: `${task.venueName} added to ${chain.name}` });
-                            }}>
+                            <Button
+                              variant={chainDecisions[chain.id] === "add" ? "outline" : "secondary"}
+                              className={chainDecisions[chain.id] === "add" ? "border-green-300 bg-green-50 text-green-700 dark:border-green-600/30 dark:bg-green-950/30 dark:text-green-400" : ""}
+                              onClick={() => setChainDecisions((prev) => ({ ...prev, [chain.id]: "add" }))}
+                            >
                               Add
+                              {chainDecisions[chain.id] === "add" && <Check className="ml-1.5 h-3.5 w-3.5 text-green-600" />}
                             </Button>
                           </div>
                         </div>
@@ -1976,36 +1985,47 @@ function ReviewQueueContent() {
                         </div>
                         )}
                         {suggestOpenId === attr.id && (slug === "review-category-suggestions" || slug === "suggest-categories") && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <div className="flex-1">
-                              <Combobox>
-                                <ComboboxInput placeholder="Search categories..." showClear />
-                                <ComboboxContent align="start">
-                                  <ComboboxList>
-                                    <ComboboxEmpty>No categories found.</ComboboxEmpty>
-                                    {CATEGORY_OPTIONS.map((cat) => (
-                                      <ComboboxItem
-                                        key={cat}
-                                        value={cat}
-                                        onSelect={() => {
-                                          toast.success("Category suggested", { description: cat });
-                                          setSuggestOpenId(null);
-                                        }}
-                                      >
-                                        {cat}
-                                      </ComboboxItem>
-                                    ))}
-                                  </ComboboxList>
-                                </ComboboxContent>
-                              </Combobox>
+                          <div className="mt-2 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <div className="relative flex-1">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                                <Input
+                                  placeholder="Search categories..."
+                                  className="h-8 pl-8 text-sm"
+                                  value={categorySearch}
+                                  onChange={(e) => setCategorySearch(e.target.value)}
+                                  autoFocus
+                                />
+                              </div>
+                              <button
+                                className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                                onClick={() => { setSuggestOpenId(null); setCategorySearch(""); }}
+                                aria-label="Dismiss"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
                             </div>
-                            <button
-                              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                              onClick={() => setSuggestOpenId(null)}
-                              aria-label="Dismiss"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
+                            {categorySearch.trim() && (
+                            <div className="max-h-48 overflow-y-auto rounded-md border border-border bg-popover shadow-sm">
+                              {CATEGORY_OPTIONS.filter((cat) => cat.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 ? (
+                                <p className="text-xs text-muted-foreground text-center py-3">No categories found.</p>
+                              ) : (
+                                CATEGORY_OPTIONS.filter((cat) => cat.toLowerCase().includes(categorySearch.toLowerCase())).map((cat) => (
+                                  <button
+                                    key={cat}
+                                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+                                    onClick={() => {
+                                      toast.success("Category suggested", { description: cat });
+                                      setSuggestOpenId(null);
+                                      setCategorySearch("");
+                                    }}
+                                  >
+                                    {cat}
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                            )}
                           </div>
                         )}
                         {suggestOpenId === attr.id && slug !== "review-category-suggestions" && slug !== "suggest-categories" && slug !== "review-translated-names" && slug !== "confirm-business-details" && slug !== "review-subvenue-suggestions" && slug !== "review-address-suggestions" && (

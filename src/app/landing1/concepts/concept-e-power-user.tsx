@@ -14,6 +14,7 @@ import { ArrowRight, ChevronDown, ChevronUp, MapPinPlus, ListChecks, UserPlus, I
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { LocationProvider, useLocationContext } from "@/lib/location-context";
+import { MOCK_GLOBAL_LEADERBOARD } from "@/lib/mock-data";
 import { InviteModal } from "@/components/invite/invite-modal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -72,7 +73,7 @@ function ContributeToPlacesSection() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Contribute to Places</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Help places in your area</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Help new places in your area</p>
         </div>
         <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-1">
           {venues.length} nearby
@@ -203,13 +204,23 @@ function LeaderboardCard() {
 
   const leaderboardData = leaderboardByLocation[selectedZone] || leaderboardByLocation["San Francisco Bay Area"];
 
+  const globalLeaderboard = MOCK_GLOBAL_LEADERBOARD.map((entry) => ({
+    name: entry.name,
+    verified: entry.contributions,
+    avatar: entry.name.split(" ").map(n => n[0]).join(""),
+    image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.name.replace(/\s+/g, "")}&backgroundColor=b6e3f4,c0aede,d1d4f9`,
+    isYou: entry.name === "Alex Chen",
+  }));
+
+  const activeLeaderboard = leaderboardTab === "global" ? globalLeaderboard : leaderboardData;
+
   const friendsActivity = [
     { name: "Jordan Lee", verified: 38, time: "2h ago", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" },
     { name: "Priya Patel", verified: 34, time: "5h ago", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face" },
     { name: "Elena Kim", verified: 27, time: "1d ago", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" },
   ];
 
-  const displayedData = showAll ? leaderboardData : leaderboardData.slice(0, 5);
+  const displayedData = showAll ? activeLeaderboard : activeLeaderboard.slice(0, 5);
 
   const communityStatsByLocation: Record<string, { activeContributors: number; newMembers: number; placesUpdated: number }> = {
     "San Francisco Bay Area": { activeContributors: 23, newMembers: 5, placesUpdated: 23 },
@@ -228,7 +239,7 @@ function LeaderboardCard() {
           <CardTitle className="text-lg font-semibold">Leaderboard</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tabs value={leaderboardTab} onValueChange={(v) => setLeaderboardTab(v as "local" | "global")}>
+          <Tabs value={leaderboardTab} onValueChange={(v) => { setLeaderboardTab(v as "local" | "global"); setShowAll(false); }}>
             <TabsList>
               <TabsTrigger value="local" className="text-xs">Local</TabsTrigger>
               <TabsTrigger value="global" className="text-xs">Global</TabsTrigger>
@@ -236,7 +247,7 @@ function LeaderboardCard() {
           </Tabs>
 
           <Badge variant="secondary" className="text-xs font-normal">
-            {selectedZone}
+            {leaderboardTab === "global" ? "Worldwide" : selectedZone}
           </Badge>
 
           {/* Leaderboard list */}
@@ -254,7 +265,7 @@ function LeaderboardCard() {
                       <Badge variant="outline" className="text-[9px] px-1.5 py-0">You</Badge>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground">{user.verified} places verified</span>
+                  <span className="text-xs text-muted-foreground">{user.verified} contributions</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {i === 0 && <span className="text-amber-500">★</span>}
@@ -264,7 +275,7 @@ function LeaderboardCard() {
             ))}
           </div>
 
-          {leaderboardData.length > 5 && (
+          {activeLeaderboard.length > 5 && (
             <Button
               variant="ghost"
               size="sm"
@@ -274,7 +285,7 @@ function LeaderboardCard() {
               {showAll ? (
                 <>Show less <ChevronUp className="h-3 w-3 ml-1" /></>
               ) : (
-                <>See more ({leaderboardData.length - 5} more) <ChevronDown className="h-3 w-3 ml-1" /></>
+                <>See more ({activeLeaderboard.length - 5} more) <ChevronDown className="h-3 w-3 ml-1" /></>
               )}
             </Button>
           )}
