@@ -100,13 +100,19 @@ export default function LeaderboardPage() {
   })();
   const userLocalRank = localData.findIndex((c) => c.name === currentUser.name) + 1 || 3;
 
-  const displayData = tab === "global" ? globalData : localData;
-  const totalPages = Math.ceil(displayData.length / PAGE_SIZE);
-  const paginatedData = displayData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
   const regions = MOCK_LOCATION_PROFILES.map((p) => p.homeZone);
   const [regionSearch, setRegionSearch] = useState("");
   const [regionOpen, setRegionOpen] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+
+  const displayData = (() => {
+    const base = tab === "global" ? globalData : localData;
+    if (!userSearch.trim()) return base;
+    return base.filter((c) => c.name.toLowerCase().includes(userSearch.toLowerCase()));
+  })();
+  const totalPages = Math.ceil(displayData.length / PAGE_SIZE);
+  const paginatedData = displayData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const filteredRegions = regions.filter((r) =>
     r.toLowerCase().includes(regionSearch.toLowerCase())
   );
@@ -158,16 +164,27 @@ export default function LeaderboardPage() {
 
           {/* Controls */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <Tabs value={tab} onValueChange={handleTabChange}>
-              <TabsList className="h-9">
-                <TabsTrigger value="global" className="text-sm px-3 py-1.5">
-                  Global
-                </TabsTrigger>
-                <TabsTrigger value="local" className="text-sm px-3 py-1.5">
-                  Local
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex items-center gap-3">
+              <Tabs value={tab} onValueChange={handleTabChange}>
+                <TabsList className="h-9">
+                  <TabsTrigger value="global" className="text-sm px-3 py-1.5">
+                    Global
+                  </TabsTrigger>
+                  <TabsTrigger value="local" className="text-sm px-3 py-1.5">
+                    Local
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search users..."
+                  value={userSearch}
+                  onChange={(e) => { setUserSearch(e.target.value); setPage(1); }}
+                  className="h-9 w-[240px] pl-8 text-sm"
+                />
+              </div>
+            </div>
 
             <div className="flex items-center gap-3">
               {tab === "local" && (

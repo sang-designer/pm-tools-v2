@@ -122,7 +122,7 @@ export function PowerUserTasksCard() {
         <div className="text-sm text-muted-foreground">
           {showPlaceTasks
             ? "Tasks for specific places near you"
-            : "Moderate community suggestions"}
+            : "Pick a queue and help keep places accurate"}
         </div>
       </CardHeader>
 
