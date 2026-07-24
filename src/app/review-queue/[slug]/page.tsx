@@ -534,7 +534,7 @@ function ReviewQueueContent() {
   }, [currentIndex, tasks]);
 
   const handleDone = () => {
-    toast.success("Confirmed", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
@@ -544,57 +544,57 @@ function ReviewQueueContent() {
   };
 
   const handleMerge = () => {
-    toast.success("Merged", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleDontMerge = () => {
-    toast("Not merged", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleClose = () => {
-    toast.success("Closed", { description: `${task.venueName} marked as closed` });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleDontClose = () => {
-    toast("Kept open", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleFlag = () => {
-    toast("Flagged", { description: `${task.venueName} flagged for review` });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleRemoveTip = () => {
-    toast.success("Removed", { description: `Tip removed from ${task.venueName}` });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleDontRemove = () => {
-    toast("Kept", { description: `Tip kept on ${task.venueName}` });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleChangeLocation = () => {
-    toast.success("Location changed", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleDontChange = () => {
-    toast("Location kept", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleMarkPrivate = () => {
-    toast.success("Marked private", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
   const handleKeepPublic = () => {
-    toast("Kept public", { description: task.venueName });
+    toast.success("Review submitted", { description: task.venueName });
     advance();
   };
 
@@ -1153,13 +1153,13 @@ function ReviewQueueContent() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
                       <DropdownMenuItem onClick={() => {
-                        toast("Flagged", { description: `${task.venueName} — This place is private` });
+                        toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
                         This place is private
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
-                        toast("Flagged", { description: `${task.venueName} — This place is a home` });
+                        toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
                         This place is a home
@@ -1343,19 +1343,19 @@ function ReviewQueueContent() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
                       <DropdownMenuItem onClick={() => {
-                        toast("Flagged", { description: `Tip flagged — Spam` });
+                        toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
                         Spam
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
-                        toast("Flagged", { description: `Tip flagged — Not relevant` });
+                        toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
                         Not relevant
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
-                        toast("Flagged", { description: `Tip flagged — Duplicate` });
+                        toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
                         Duplicate
@@ -1501,9 +1501,9 @@ function ReviewQueueContent() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
-                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: "Photo flagged — Spam" }); advance(); }}>Spam</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: "Photo flagged — Duplicate" }); advance(); }}>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: "Photo flagged — Copyright" }); advance(); }}>Copyright</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Spam</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Duplicate</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Copyright</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <Button variant="outline" size="lg" onClick={handleDontRemove}>Don&apos;t remove</Button>
@@ -1629,7 +1629,7 @@ function ReviewQueueContent() {
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2">
                         <Input placeholder="Enter coordinates (lat, lng)..." className="flex-1" />
-                        <Button size="sm" onClick={() => { toast.success("Location suggested"); setLocationSuggestOpen(false); }}>Submit</Button>
+                        <Button size="sm" onClick={() => { toast.success("Review submitted", { description: task.venueName }); setLocationSuggestOpen(false); }}>Submit</Button>
                         <button className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" onClick={() => setLocationSuggestOpen(false)} aria-label="Dismiss">
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -1748,9 +1748,9 @@ function ReviewQueueContent() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
-                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: `${task.venueName} — Not a residence` }); advance(); }}>Not a residence</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: `${task.venueName} — Duplicate` }); advance(); }}>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { toast("Flagged", { description: `${task.venueName} — Other` }); advance(); }}>Other</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Not a residence</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Duplicate</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Other</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <Button variant="outline" size="lg" onClick={handleKeepPublic}>Keep public</Button>
@@ -1868,9 +1868,9 @@ function ReviewQueueContent() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => { toast("Flagged", { description: "User flagged — Spammer" }); advance(); }}>Spammer</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => { toast("Flagged", { description: "User flagged — Bot account" }); advance(); }}>Bot account</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => { toast("Flagged", { description: "User flagged — Abusive behavior" }); advance(); }}>Abusive behavior</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Spammer</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Bot account</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { toast.success("Review submitted", { description: task.venueName }); advance(); }}>Abusive behavior</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <div className="flex-1" />
@@ -2015,7 +2015,7 @@ function ReviewQueueContent() {
                                     key={cat}
                                     className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
                                     onClick={() => {
-                                      toast.success("Category suggested", { description: cat });
+                                      toast.success("Review submitted", { description: task.venueName });
                                       setSuggestOpenId(null);
                                       setCategorySearch("");
                                     }}
@@ -2037,7 +2037,7 @@ function ReviewQueueContent() {
                                 name={`suggest-${attr.id}`}
                                 className="size-3.5 accent-primary"
                                 onChange={() => {
-                                  toast.success("Suggestion submitted", { description: `${attr.label}: Yes` });
+                                  toast.success("Review submitted", { description: task.venueName });
                                   setSuggestOpenId(null);
                                 }}
                               />
@@ -2049,7 +2049,7 @@ function ReviewQueueContent() {
                                 name={`suggest-${attr.id}`}
                                 className="size-3.5 accent-primary"
                                 onChange={() => {
-                                  toast.success("Suggestion submitted", { description: `${attr.label}: No` });
+                                  toast.success("Review submitted", { description: task.venueName });
                                   setSuggestOpenId(null);
                                 }}
                               />
@@ -2071,7 +2071,7 @@ function ReviewQueueContent() {
                               className="flex-1 h-8 text-sm"
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
-                                  toast.success("Suggestion submitted", { description: `${attr.label}: ${(e.target as HTMLInputElement).value}` });
+                                  toast.success("Review submitted", { description: task.venueName });
                                   setSuggestOpenId(null);
                                 }
                               }}
@@ -2092,7 +2092,7 @@ function ReviewQueueContent() {
                               className="flex-1 h-8 text-sm"
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
-                                  toast.success("Name suggested", { description: (e.target as HTMLInputElement).value });
+                                  toast.success("Review submitted", { description: task.venueName });
                                   setSuggestOpenId(null);
                                 }
                               }}
