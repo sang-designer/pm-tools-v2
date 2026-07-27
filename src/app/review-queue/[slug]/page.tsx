@@ -512,6 +512,7 @@ function ReviewQueueContent() {
   const [badEditorVote, setBadEditorVote] = useState<boolean | null>(null);
   const [chainDecisions, setChainDecisions] = useState<Record<string, "add" | "dont-add">>({});
   const [categorySearch, setCategorySearch] = useState("");
+  const [showMergePreview, setShowMergePreview] = useState(false);
 
   useEffect(() => {
     const newTasks = generateMockTasks(slug, selectedLocation);
@@ -531,6 +532,7 @@ function ReviewQueueContent() {
     setCurrentIndex(nextIndex);
     setAttributes(tasks[nextIndex].attributes.map((a) => ({ ...a })));
     setChainDecisions({});
+    setShowMergePreview(false);
   }, [currentIndex, tasks]);
 
   const handleDone = () => {
@@ -692,7 +694,193 @@ function ReviewQueueContent() {
       {/* Main content */}
       <main className="flex-1 px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          {slug === "review-merge-suggestions" ? (
+          {showMergePreview && slug === "review-merge-suggestions" ? (
+            /* Merge Preview Overlay */
+            <div className="space-y-4">
+              {/* Back button */}
+              <Button variant="ghost" size="sm" onClick={() => setShowMergePreview(false)}>
+                <span className="mr-1">←</span> Back
+              </Button>
+
+              {/* Header with venue name and claimed badge */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-semibold text-foreground">
+                          {task.venueName}
+                        </h2>
+                        {task.venueClaimed && (
+                          <Badge variant="secondary" className="text-[10px] shrink-0">Claimed</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        {task.venueAddress}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-0.5">{task.venueCategory}</p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                          <History className="h-3 w-3" /> Edit history
+                        </button>
+                        <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                          <Search className="h-3 w-3" /> Search the web
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
+                    <div>
+                      <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns}</p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                    </div>
+                    <div>
+                      <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-foreground")}>
+                        {task.recentCheckIns}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Editable attributes */}
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  {/* Name */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Name <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> {task.venueName}
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Address <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> {task.venueAddress}
+                    </div>
+                  </div>
+
+                  {/* Cross street */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Cross street <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> None
+                    </div>
+                  </div>
+
+                  {/* City */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      City <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> San Francisco
+                    </div>
+                  </div>
+
+                  {/* State */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      State <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> CA
+                    </div>
+                  </div>
+
+                  {/* Zip code */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Zip code <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> 94118
+                    </div>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Phone <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> (415) 751-1700
+                    </div>
+                  </div>
+
+                  {/* Twitter */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Twitter <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> None
+                    </div>
+                  </div>
+
+                  {/* Url */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Url <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> <a href="http://leeyoungortho.com" className="text-primary hover:underline">leeyoungortho.com</a>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Description <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> None
+                    </div>
+                  </div>
+
+                  {/* Hours */}
+                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <div className="text-sm text-muted-foreground pt-2">
+                      Hours <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
+                    </div>
+                    <div className="pt-2 text-sm text-foreground">
+                      <span className="font-medium">Current:</span> None
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-3 pt-2">
+                <Button variant="outline" size="lg" onClick={() => setShowMergePreview(false)}>
+                  Skip
+                </Button>
+                <div className="flex-1" />
+                <Button variant="outline" size="lg" onClick={handleDontMerge}>
+                  Don&apos;t merge
+                </Button>
+                <Button size="lg" onClick={handleMerge}>
+                  Merge
+                </Button>
+              </div>
+            </div>
+          ) : slug === "review-merge-suggestions" ? (
             /* Merge suggestions layout */
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
               <div className="lg:col-span-3 space-y-4">
@@ -828,7 +1016,7 @@ function ReviewQueueContent() {
                   <Button variant="outline" size="lg" onClick={handleDontMerge}>
                     Don&apos;t merge
                   </Button>
-                  <Button variant="outline" size="lg">
+                  <Button variant="outline" size="lg" onClick={() => setShowMergePreview(true)}>
                     Preview merge
                   </Button>
                   <Button variant="outline" size="lg">
@@ -1170,20 +1358,16 @@ function ReviewQueueContent() {
                     Don&apos;t close
                   </Button>
                   <div className="flex-1" />
+                  <Button variant="outline" size="lg" onClick={handleSkip}>
+                    Skip <SkipForward className="ml-1 h-4 w-4" />
+                  </Button>
                   <Button variant="destructive" size="lg" onClick={handleClose}>
                     Close
                   </Button>
                 </div>
 
-                {/* Skip */}
-                <div className="flex items-center justify-end gap-3 pt-1">
-                  <Button variant="outline" size="lg" onClick={handleSkip}>
-                    Skip <SkipForward className="ml-1 h-4 w-4" />
-                  </Button>
-                </div>
-
                 {/* Keyboard hints */}
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-xs text-muted-foreground pt-1">
                   Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">C</kbd> close
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t close
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
@@ -1366,20 +1550,16 @@ function ReviewQueueContent() {
                     Don&apos;t remove
                   </Button>
                   <div className="flex-1" />
+                  <Button variant="outline" size="lg" onClick={handleSkip}>
+                    Skip <SkipForward className="ml-1 h-4 w-4" />
+                  </Button>
                   <Button variant="destructive" size="lg" onClick={handleRemoveTip}>
                     Remove
                   </Button>
                 </div>
 
-                {/* Skip */}
-                <div className="flex items-center justify-end gap-3 pt-1">
-                  <Button variant="outline" size="lg" onClick={handleSkip}>
-                    Skip <SkipForward className="ml-1 h-4 w-4" />
-                  </Button>
-                </div>
-
                 {/* Keyboard hints */}
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-xs text-muted-foreground pt-1">
                   Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">R</kbd> remove
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t remove
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
@@ -1508,14 +1688,11 @@ function ReviewQueueContent() {
                   </DropdownMenu>
                   <Button variant="outline" size="lg" onClick={handleDontRemove}>Don&apos;t remove</Button>
                   <div className="flex-1" />
+                  <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
                   <Button variant="destructive" size="lg" onClick={handleRemoveTip}>Remove</Button>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-1">
-                  <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
-                </div>
-
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-xs text-muted-foreground pt-1">
                   Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">R</kbd> remove
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t remove
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
@@ -1629,7 +1806,7 @@ function ReviewQueueContent() {
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2">
                         <Input placeholder="Enter coordinates (lat, lng)..." className="flex-1" />
-                        <Button size="sm" onClick={() => { toast.success("Review submitted", { description: task.venueName }); setLocationSuggestOpen(false); }}>Submit</Button>
+                        <Button variant="outline" size="lg" onClick={() => { toast.success("Review submitted", { description: task.venueName }); setLocationSuggestOpen(false); }}>Submit</Button>
                         <button className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" onClick={() => setLocationSuggestOpen(false)} aria-label="Dismiss">
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -1641,15 +1818,13 @@ function ReviewQueueContent() {
                 {/* Action buttons */}
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <Button variant="outline" size="lg" onClick={handleDontChange}>Don&apos;t change</Button>
-                  <Button size="lg" onClick={handleChangeLocation}>Change location</Button>
                   <button className="text-xs text-primary hover:underline" onClick={() => setLocationSuggestOpen(true)}>or suggest another location</button>
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-1">
+                  <div className="flex-1" />
                   <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
+                  <Button size="lg" onClick={handleChangeLocation}>Change location</Button>
                 </div>
 
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-xs text-muted-foreground pt-1">
                   Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">C</kbd> change
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">N</kbd> don&apos;t change
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
@@ -1755,15 +1930,11 @@ function ReviewQueueContent() {
                   </DropdownMenu>
                   <Button variant="outline" size="lg" onClick={handleKeepPublic}>Keep public</Button>
                   <div className="flex-1" />
+                  <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
                   <Button size="lg" onClick={handleMarkPrivate}>Mark as private</Button>
                 </div>
 
-                {/* Skip */}
-                <div className="flex items-center justify-end gap-3 pt-1">
-                  <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
-                </div>
-
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-xs text-muted-foreground pt-1">
                   Keyboard: <kbd className="rounded border px-1 py-0.5 text-[10px]">P</kbd> mark private
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">K</kbd> keep public
                   {" "}<kbd className="rounded border px-1 py-0.5 text-[10px]">S</kbd> skip
