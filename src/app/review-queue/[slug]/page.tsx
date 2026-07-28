@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPreview } from "@/components/venue/map-preview";
+import { MapPreview, DualMapPreview } from "@/components/venue/map-preview";
 import { REVIEW_QUEUES } from "@/components/landing/power-user-tasks-card";
 import { toast } from "sonner";
 import {
@@ -376,10 +376,52 @@ function generateMockTasks(slug: string, location?: string): MockTask[] {
 function getAttributesForQueue(slug: string, venueName: string): SuggestedAttribute[] {
   const attributeSets: Record<string, SuggestedAttribute[]> = {
     "confirm-business-details": [
-      { id: "accepts_creditcards", label: "Accepts Credit Cards", suggestedValue: "Yes", confirmed: null },
-      { id: "outdoor_seating", label: "Outdoor Seating", suggestedValue: "Yes", confirmed: null },
-      { id: "wifi", label: "Wi-Fi", suggestedValue: "Free", confirmed: null },
-      { id: "parking", label: "Parking", suggestedValue: "Street", confirmed: null },
+      { 
+        id: "accepts_creditcards", 
+        label: "Accepts Credit Cards", 
+        currentValue: "Yes",
+        suggestedValue: "Yes", 
+        suggestions: [
+          { id: "cc-1", value: "Yes", source: "bot" },
+          { id: "cc-2", value: "No", source: "user" }
+        ],
+        confirmed: null 
+      },
+      { 
+        id: "outdoor_seating", 
+        label: "Outdoor Seating", 
+        currentValue: "No",
+        suggestedValue: "Yes", 
+        suggestions: [
+          { id: "os-1", value: "Yes", source: "bot" },
+          { id: "os-2", value: "No", source: "user" }
+        ],
+        confirmed: null 
+      },
+      { 
+        id: "wifi", 
+        label: "Wi-Fi", 
+        currentValue: "Free",
+        suggestedValue: "Free", 
+        suggestions: [
+          { id: "wifi-1", value: "Free", source: "bot" },
+          { id: "wifi-2", value: "Paid", source: "user" },
+          { id: "wifi-3", value: "None", source: "bot" }
+        ],
+        confirmed: null 
+      },
+      { 
+        id: "parking", 
+        label: "Parking", 
+        currentValue: "Street",
+        suggestedValue: "Street", 
+        suggestions: [
+          { id: "park-1", value: "Street", source: "bot" },
+          { id: "park-2", value: "Lot", source: "user" },
+          { id: "park-3", value: "Valet", source: "bot" }
+        ],
+        confirmed: null 
+      },
     ],
     "review-category-suggestions": [
       { id: "primary_category", label: "Primary Category", suggestedValue: "Coffee Shop", confirmed: null },
@@ -419,9 +461,28 @@ function getAttributesForQueue(slug: string, venueName: string): SuggestedAttrib
       { id: "parent_venue", label: "Parent Venue", suggestedValue: "Main Street Mall", confirmed: null },
     ],
     "review-address-suggestions": [
-      { id: "url", label: "Url", currentValue: `locations.example.com/ll/US/CA/${venueName.replace(/\s/g, "-")}`, suggestedValue: `https://www.example.com/pages/store-locator?query=${venueName.replace(/\s/g, "+")}`, confirmed: null },
-      { id: "address", label: "Address", currentValue: "2712 Pinole Valley Rd, Pinole, CA", suggestedValue: "2712 Pinole Valley Rd", confirmed: null },
-      { id: "name", label: "Name", currentValue: venueName, suggestedValue: `${venueName.split(" ").slice(0, 2).join(" ")}`, confirmed: null },
+      { 
+        id: "url", 
+        label: "Url", 
+        currentValue: `brooklynboulders.com`, 
+        suggestedValue: `https://boulderingproject.com`,
+        suggestions: [
+          { id: "url-1", value: `https://boulderingproject.com`, source: "bot" },
+          { id: "url-2", value: `https://boulderingproject.com/location/gowanus`, source: "user" }
+        ],
+        confirmed: null 
+      },
+      { 
+        id: "name", 
+        label: "Name", 
+        currentValue: `${venueName}`, 
+        suggestedValue: `${venueName.split(" ").slice(0, 2).join(" ")}`,
+        suggestions: [
+          { id: "name-1", value: `${venueName.split(" ").slice(0, 2).join(" ")}`, source: "bot" },
+          { id: "name-2", value: `${venueName.split(" ").reverse().slice(0, 2).reverse().join(" ")}`, source: "user" }
+        ],
+        confirmed: null 
+      },
     ],
     "review-flagged-users": [
       { id: "is_bad_editor", label: "Is this user a bad editor?", suggestedValue: "Yes", confirmed: null },
@@ -516,6 +577,18 @@ function ReviewQueueContent() {
   const [showMergePreview, setShowMergePreview] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
+  const [viewTogether, setViewTogether] = useState(false);
+  const [selectedAddressSuggestions, setSelectedAddressSuggestions] = useState<Record<string, string>>({});
+
+  const handleSelectAddressSuggestion = (attrId: string, value: string) => {
+    const normalizedValue = value.trim();
+    setSelectedAddressSuggestions(prev => ({
+      ...prev,
+      [attrId]: normalizedValue
+    }));
+    console.log(`Selected for ${attrId}:`, normalizedValue);
+    console.log('Current state:', { ...selectedAddressSuggestions, [attrId]: normalizedValue });
+  };
 
   useEffect(() => {
     const newTasks = generateMockTasks(slug, selectedLocation);
@@ -1824,22 +1897,48 @@ function ReviewQueueContent() {
                 {/* Current vs Suggested Location */}
                 <Card>
                   <CardContent className="p-4 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="text-sm font-semibold text-foreground mb-1">Current Location</h4>
-                        <p className="text-xs text-primary font-mono">{task.lat.toFixed(6)},{task.lng.toFixed(6)}</p>
-                        <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
-                          <MapPreview lat={task.lat} lng={task.lng} name={task.venueName} className="h-full w-full" />
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-foreground mb-1">Suggested Location</h4>
-                        <p className="text-xs text-primary font-mono">{(task.lat + 0.002).toFixed(6)},{(task.lng + 0.003).toFixed(6)}</p>
-                        <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
-                          <MapPreview lat={task.lat + 0.002} lng={task.lng + 0.003} name={`${task.venueName} (suggested)`} className="h-full w-full" />
-                        </div>
-                      </div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-base font-semibold text-foreground">Current & Suggested Location</h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setViewTogether(!viewTogether)}
+                        className="text-xs rounded-lg"
+                      >
+                        {viewTogether ? "View separately" : "View together"}
+                      </Button>
                     </div>
+
+                    {viewTogether ? (
+                      <div className="rounded-lg overflow-hidden border border-border" style={{ height: "260px" }}>
+                        <DualMapPreview
+                          currentLat={task.lat}
+                          currentLng={task.lng}
+                          suggestedLat={task.lat + 0.002}
+                          suggestedLng={task.lng + 0.003}
+                          name={task.venueName}
+                          className="h-full w-full"
+                        />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground mb-1">Current Location</h4>
+                          <p className="text-xs text-primary font-mono">{task.lat.toFixed(6)},{task.lng.toFixed(6)}</p>
+                          <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
+                            <MapPreview lat={task.lat} lng={task.lng} name={task.venueName} className="h-full w-full" />
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground mb-1">Suggested Location</h4>
+                          <p className="text-xs text-primary font-mono">{(task.lat + 0.002).toFixed(6)},{(task.lng + 0.003).toFixed(6)}</p>
+                          <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
+                            <MapPreview lat={task.lat + 0.002} lng={task.lng + 0.003} name={`${task.venueName} (suggested)`} className="h-full w-full" pinColor="red" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <a href={`https://www.google.com/maps?q=${task.lat},${task.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">
                       View both locations on Google Maps.
                     </a>
@@ -1853,9 +1952,6 @@ function ReviewQueueContent() {
                       <div className="flex items-center gap-2">
                         <Input placeholder="Enter coordinates (lat, lng)..." className="flex-1" />
                         <Button variant="outline" size="lg" onClick={() => { toast.success("Review submitted", { description: task.venueName }); setLocationSuggestOpen(false); }}>Submit</Button>
-                        <button className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" onClick={() => setLocationSuggestOpen(false)} aria-label="Dismiss">
-                          <X className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                     </CardContent>
                   </Card>
@@ -2041,7 +2137,7 @@ function ReviewQueueContent() {
                         variant={badEditorVote === false ? "default" : "outline"}
                         size="sm"
                         onClick={() => setBadEditorVote(false)}
-                        className={badEditorVote === false ? "bg-orange-500 hover:bg-orange-600" : ""}
+                        className={badEditorVote === false ? "bg-orange-500 hover:bg-orange-600 rounded-lg" : "rounded-lg"}
                       >
                         No
                       </Button>
@@ -2049,7 +2145,7 @@ function ReviewQueueContent() {
                         variant={badEditorVote === true ? "default" : "outline"}
                         size="sm"
                         onClick={() => setBadEditorVote(true)}
-                        className={badEditorVote === true ? "bg-green-600 hover:bg-green-700" : ""}
+                        className={badEditorVote === true ? "bg-green-600 hover:bg-green-700 rounded-lg" : "rounded-lg"}
                       >
                         Yes
                       </Button>
@@ -2160,7 +2256,143 @@ function ReviewQueueContent() {
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-medium text-muted-foreground">{attr.label}</span>
 
-                        {attr.currentValue ? (
+                        {slug === "confirm-business-details" ? (
+                          <div className="mt-3 space-y-0 divide-y divide-border">
+                            {/* Current Value */}
+                            <button
+                              className="w-full py-3 flex items-center justify-between text-left"
+                              onClick={() => {
+                                handleSelectAddressSuggestion(attr.id, attr.currentValue || "");
+                                toast.success("Selected", { description: "Current value selected" });
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">Current:</span>
+                                <span className="text-sm font-semibold text-foreground">{attr.currentValue}</span>
+                              </div>
+                              <button
+                                className={cn(
+                                  "shrink-0 h-8 w-8 flex items-center justify-center rounded-lg border-2 transition-colors",
+                                  selectedAddressSuggestions[attr.id] === (attr.currentValue || "").trim()
+                                    ? "border-green-600 bg-green-50 text-green-600 dark:bg-green-950/30"
+                                    : "border-border text-muted-foreground hover:border-green-300 hover:text-green-600"
+                                )}
+                                aria-label="Select current value"
+                              >
+                                <Check className="h-4 w-4" />
+                              </button>
+                            </button>
+
+                            {/* Suggested Values */}
+                            {(attr as any).suggestions?.map((suggestion: any) => (
+                              <button
+                                key={suggestion.id}
+                                className="w-full py-3 flex items-center justify-between text-left"
+                                onClick={() => {
+                                  handleSelectAddressSuggestion(attr.id, suggestion.value);
+                                  toast.success("Selected", { description: "Suggestion selected" });
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">Suggested:</span>
+                                  {suggestion.source === "bot" ? (
+                                    <Bot className="h-3.5 w-3.5 text-muted-foreground" />
+                                  ) : (
+                                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                                  )}
+                                  <span className="text-sm font-semibold text-primary">{suggestion.value}</span>
+                                </div>
+                                <button
+                                  className={cn(
+                                    "shrink-0 h-8 w-8 flex items-center justify-center rounded-lg border-2 transition-colors",
+                                    selectedAddressSuggestions[attr.id] === suggestion.value.trim()
+                                      ? "border-green-600 bg-green-50 text-green-600 dark:bg-green-950/30"
+                                      : "border-border text-muted-foreground hover:border-green-300 hover:text-green-600"
+                                  )}
+                                  aria-label="Select suggestion"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </button>
+                              </button>
+                            ))}
+
+                            {/* Other options */}
+                            <div className="flex items-center gap-2 pt-3">
+                              <span className="text-xs text-muted-foreground">Other:</span>
+                              <button className="text-xs text-primary hover:underline">Make a suggestion</button>
+                              <span className="text-xs text-muted-foreground">·</span>
+                              <button className="text-xs text-primary hover:underline">Does not apply</button>
+                            </div>
+                          </div>
+                        ) : slug === "review-address-suggestions" ? (
+                          <div className="mt-3 space-y-0 divide-y divide-border">
+                            {/* Current Value */}
+                            <button
+                              className="w-full py-3 flex items-center justify-between text-left"
+                              onClick={() => {
+                                handleSelectAddressSuggestion(attr.id, attr.currentValue || "");
+                                toast.success("Selected", { description: "Current value selected" });
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">Current:</span>
+                                <span className="text-sm font-semibold text-foreground">{attr.currentValue}</span>
+                              </div>
+                              <button
+                                className={cn(
+                                  "shrink-0 h-8 w-8 flex items-center justify-center rounded-lg border-2 transition-colors",
+                                  selectedAddressSuggestions[attr.id] === (attr.currentValue || "").trim()
+                                    ? "border-green-600 bg-green-50 text-green-600 dark:bg-green-950/30"
+                                    : "border-border text-muted-foreground hover:border-green-300 hover:text-green-600"
+                                )}
+                                aria-label="Select current value"
+                              >
+                                <Check className="h-4 w-4" />
+                              </button>
+                            </button>
+
+                            {/* Suggested Values */}
+                            {(attr as any).suggestions?.map((suggestion: any) => (
+                              <button
+                                key={suggestion.id}
+                                className="w-full py-3 flex items-center justify-between text-left"
+                                onClick={() => {
+                                  handleSelectAddressSuggestion(attr.id, suggestion.value);
+                                  toast.success("Selected", { description: "Suggestion selected" });
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">Suggested:</span>
+                                  {suggestion.source === "bot" ? (
+                                    <Bot className="h-3.5 w-3.5 text-muted-foreground" />
+                                  ) : (
+                                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                                  )}
+                                  <span className="text-sm font-semibold text-primary">{suggestion.value}</span>
+                                </div>
+                                <button
+                                  className={cn(
+                                    "shrink-0 h-8 w-8 flex items-center justify-center rounded-lg border-2 transition-colors",
+                                    selectedAddressSuggestions[attr.id] === suggestion.value.trim()
+                                      ? "border-green-600 bg-green-50 text-green-600 dark:bg-green-950/30"
+                                      : "border-border text-muted-foreground hover:border-green-300 hover:text-green-600"
+                                  )}
+                                  aria-label="Select suggestion"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </button>
+                              </button>
+                            ))}
+
+                            {/* Other options */}
+                            <div className="flex items-center gap-2 pt-3">
+                              <span className="text-xs text-muted-foreground">Other:</span>
+                              <button className="text-xs text-primary hover:underline">Make a suggestion</button>
+                              <span className="text-xs text-muted-foreground">·</span>
+                              <button className="text-xs text-primary hover:underline">Does not apply</button>
+                            </div>
+                          </div>
+                        ) : attr.currentValue ? (
                           <div className="mt-2 space-y-2">
                             <div className="flex items-baseline gap-2">
                               <span className="text-xs text-muted-foreground w-20 shrink-0">Current:</span>
@@ -2177,7 +2409,7 @@ function ReviewQueueContent() {
                           </div>
                         )}
 
-                        {slug !== "review-removal-suggestions" && slug !== "review-flagged-photos" && slug !== "review-flagged-tips" && slug !== "review-location-suggestions" && slug !== "review-flagged-users" && (
+                        {slug !== "review-removal-suggestions" && slug !== "review-flagged-photos" && slug !== "review-flagged-tips" && slug !== "review-location-suggestions" && slug !== "review-flagged-users" && slug !== "review-address-suggestions" && slug !== "confirm-business-details" && (
                         <div className="flex items-center gap-3 mt-2">
                           <button
                             className="text-xs text-primary hover:underline"
@@ -2185,34 +2417,21 @@ function ReviewQueueContent() {
                           >
                             Suggest
                           </button>
-                          {slug !== "suggest-categories" && slug !== "review-category-suggestions" && slug !== "review-translated-names" && slug !== "confirm-business-details" && (
-                            <>
-                              <span className="text-xs text-muted-foreground">·</span>
-                              <button className="text-xs text-primary hover:underline">Not applicable</button>
-                            </>
-                          )}
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <button className="text-xs text-primary hover:underline">Does not apply</button>
                         </div>
                         )}
                         {suggestOpenId === attr.id && (slug === "review-category-suggestions" || slug === "suggest-categories") && (
                           <div className="mt-2 space-y-1">
-                            <div className="flex items-center gap-2">
-                              <div className="relative flex-1">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                                <Input
-                                  placeholder="Search categories..."
-                                  className="h-8 pl-8 text-sm"
-                                  value={categorySearch}
-                                  onChange={(e) => setCategorySearch(e.target.value)}
-                                  autoFocus
-                                />
-                              </div>
-                              <button
-                                className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                                onClick={() => { setSuggestOpenId(null); setCategorySearch(""); }}
-                                aria-label="Dismiss"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
+                            <div className="relative">
+                              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                              <Input
+                                placeholder="Search categories..."
+                                className="h-8 pl-8 text-sm"
+                                value={categorySearch}
+                                onChange={(e) => setCategorySearch(e.target.value)}
+                                autoFocus
+                              />
                             </div>
                             {categorySearch.trim() && (
                             <div className="max-h-48 overflow-y-auto rounded-md border border-border bg-popover shadow-sm">
@@ -2264,20 +2483,13 @@ function ReviewQueueContent() {
                               />
                               <span className="text-xs font-medium text-foreground">No</span>
                             </label>
-                            <button
-                              className="ml-auto rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                              onClick={() => setSuggestOpenId(null)}
-                              aria-label="Dismiss"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
                           </div>
                         )}
-                        {suggestOpenId === attr.id && (slug === "confirm-business-details" || slug === "review-subvenue-suggestions" || slug === "review-address-suggestions") && (
-                          <div className="flex items-center gap-2 mt-2">
+                        {suggestOpenId === attr.id && slug === "review-subvenue-suggestions" && (
+                          <div className="mt-2">
                             <Input
                               placeholder={`Suggest a value for ${attr.label}...`}
-                              className="flex-1 h-8 text-sm"
+                              className="w-full h-8 text-sm"
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
                                   toast.success("Review submitted", { description: task.venueName });
@@ -2285,20 +2497,13 @@ function ReviewQueueContent() {
                                 }
                               }}
                             />
-                            <button
-                              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                              onClick={() => setSuggestOpenId(null)}
-                              aria-label="Dismiss"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
                           </div>
                         )}
                         {suggestOpenId === attr.id && slug === "review-translated-names" && (
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="mt-2">
                             <Input
                               placeholder="Suggest a name..."
-                              className="flex-1 h-8 text-sm"
+                              className="w-full h-8 text-sm"
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
                                   toast.success("Review submitted", { description: task.venueName });
@@ -2306,16 +2511,10 @@ function ReviewQueueContent() {
                                 }
                               }}
                             />
-                            <button
-                              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                              onClick={() => setSuggestOpenId(null)}
-                              aria-label="Dismiss"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
                           </div>
                         )}
                       </div>
+                      {slug !== "review-address-suggestions" && slug !== "confirm-business-details" && (
                       <div className="flex items-center gap-1 ml-3 mt-1">
                         <button
                           onClick={() => confirmAttribute(attr.id, true)}
@@ -2329,19 +2528,8 @@ function ReviewQueueContent() {
                         >
                           <Check className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => confirmAttribute(attr.id, false)}
-                          className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-md border transition-colors",
-                            attr.confirmed === false
-                              ? "border-red-500 bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
-                              : "border-border text-muted-foreground hover:border-red-300 hover:text-red-600"
-                          )}
-                          aria-label="Reject"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
                       </div>
+                      )}
                     </div>
                   ))}
                 </CardContent>
