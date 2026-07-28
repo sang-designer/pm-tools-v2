@@ -41,6 +41,7 @@ import {
   Flag,
   Bot,
   ChevronDown,
+  Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -513,6 +514,8 @@ function ReviewQueueContent() {
   const [chainDecisions, setChainDecisions] = useState<Record<string, "add" | "dont-add">>({});
   const [categorySearch, setCategorySearch] = useState("");
   const [showMergePreview, setShowMergePreview] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editedValues, setEditedValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const newTasks = generateMockTasks(slug, selectedLocation);
@@ -553,6 +556,20 @@ function ReviewQueueContent() {
   const handleDontMerge = () => {
     toast.success("Review submitted", { description: task.venueName });
     advance();
+  };
+
+  const handleEditField = (fieldName: string, currentValue: string) => {
+    setEditingField(fieldName);
+    setEditedValues({ ...editedValues, [fieldName]: currentValue });
+  };
+
+  const handleSaveField = (fieldName: string) => {
+    toast.success("Field updated", { description: `${fieldName} has been updated` });
+    setEditingField(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingField(null);
   };
 
   const handleClose = () => {
@@ -603,6 +620,103 @@ function ReviewQueueContent() {
   const confirmAttribute = (id: string, value: boolean) => {
     setAttributes((prev) =>
       prev.map((a) => (a.id === id ? { ...a, confirmed: value } : a))
+    );
+  };
+
+  const renderPinVisualization = (value: number, maxValue: number = 500) => {
+    const totalPins = 5;
+    const filledPins = Math.min(Math.ceil((value / maxValue) * totalPins), totalPins);
+    const emptyPins = totalPins - filledPins;
+    
+    return (
+      <div className="flex items-center justify-center gap-0.5" role="img" aria-label={`${value} represented as ${filledPins} of ${totalPins} pins`}>
+        {Array(filledPins).fill(0).map((_, i) => (
+          <span key={`filled-${i}`} className="text-2xl">📍</span>
+        ))}
+        {Array(emptyPins).fill(0).map((_, i) => (
+          <span key={`empty-${i}`} className="text-2xl opacity-30">📍</span>
+        ))}
+      </div>
+    );
+  };
+
+  const EditableField = ({ 
+    label, 
+    fieldName, 
+    value, 
+    isUrl = false 
+  }: { 
+    label: string; 
+    fieldName: string; 
+    value: string; 
+    isUrl?: boolean;
+  }) => {
+    const isEditing = editingField === fieldName;
+    const displayValue = editedValues[fieldName] ?? value;
+
+    return (
+      <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
+        <div className="text-sm text-muted-foreground pt-2 flex items-center gap-2">
+          {label}
+          {!isEditing && (
+            <button
+              onClick={() => handleEditField(fieldName, displayValue)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={`Edit ${label}`}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <div className="pt-2 text-sm text-foreground">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <Input
+                value={displayValue}
+                onChange={(e) => setEditedValues({ ...editedValues, [fieldName]: e.target.value })}
+                className="flex-1"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSaveField(fieldName);
+                  } else if (e.key === 'Escape') {
+                    handleCancelEdit();
+                  }
+                }}
+              />
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleSaveField(fieldName)}
+                className="h-8 w-8 p-0"
+              >
+                <Check className="h-4 w-4 text-green-600" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleCancelEdit}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4 text-red-600" />
+              </Button>
+            </div>
+          ) : (
+            <div>
+              <span className="font-medium">Current:</span>{" "}
+              {displayValue === "None" || !displayValue ? (
+                "None"
+              ) : isUrl ? (
+                <a href={`http://${displayValue}`} className="text-primary hover:underline">
+                  {displayValue}
+                </a>
+              ) : (
+                displayValue
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -734,18 +848,16 @@ function ReviewQueueContent() {
                 <CardContent className="pt-0">
                   <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                     <div>
-                      <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      {renderPinVisualization(task.uniqueVisitors, 500)}
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns}</p>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      {renderPinVisualization(task.totalCheckIns, 1000)}
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                     </div>
                     <div>
-                      <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-foreground")}>
-                        {task.recentCheckIns}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      {renderPinVisualization(task.recentCheckIns, 100)}
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                     </div>
                   </div>
                 </CardContent>
@@ -754,115 +866,72 @@ function ReviewQueueContent() {
               {/* Editable attributes */}
               <Card>
                 <CardContent className="p-6 space-y-4">
-                  {/* Name */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Name <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> {task.venueName}
-                    </div>
-                  </div>
-
-                  {/* Address */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Address <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> {task.venueAddress}
-                    </div>
-                  </div>
-
-                  {/* Cross street */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Cross street <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> None
-                    </div>
-                  </div>
-
-                  {/* City */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      City <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> San Francisco
-                    </div>
-                  </div>
-
-                  {/* State */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      State <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> CA
-                    </div>
-                  </div>
-
-                  {/* Zip code */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Zip code <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> 94118
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Phone <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> (415) 751-1700
-                    </div>
-                  </div>
-
-                  {/* Twitter */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Twitter <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> None
-                    </div>
-                  </div>
-
-                  {/* Url */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Url <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> <a href="http://leeyoungortho.com" className="text-primary hover:underline">leeyoungortho.com</a>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Description <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> None
-                    </div>
-                  </div>
-
-                  {/* Hours */}
-                  <div className="grid grid-cols-[120px_1fr] gap-4 items-start">
-                    <div className="text-sm text-muted-foreground pt-2">
-                      Hours <button className="text-primary text-xs hover:underline ml-1">[edit]</button>
-                    </div>
-                    <div className="pt-2 text-sm text-foreground">
-                      <span className="font-medium">Current:</span> None
-                    </div>
-                  </div>
+                  <EditableField 
+                    label="Name" 
+                    fieldName="name" 
+                    value={task.venueName} 
+                  />
+                  
+                  <EditableField 
+                    label="Address" 
+                    fieldName="address" 
+                    value={task.venueAddress} 
+                  />
+                  
+                  <EditableField 
+                    label="Cross street" 
+                    fieldName="crossStreet" 
+                    value="None" 
+                  />
+                  
+                  <EditableField 
+                    label="City" 
+                    fieldName="city" 
+                    value="San Francisco" 
+                  />
+                  
+                  <EditableField 
+                    label="State" 
+                    fieldName="state" 
+                    value="CA" 
+                  />
+                  
+                  <EditableField 
+                    label="Zip code" 
+                    fieldName="zipCode" 
+                    value="94118" 
+                  />
+                  
+                  <EditableField 
+                    label="Phone" 
+                    fieldName="phone" 
+                    value="(415) 751-1700" 
+                  />
+                  
+                  <EditableField 
+                    label="Twitter" 
+                    fieldName="twitter" 
+                    value="None" 
+                  />
+                  
+                  <EditableField 
+                    label="Url" 
+                    fieldName="url" 
+                    value="leeyoungortho.com" 
+                    isUrl={true}
+                  />
+                  
+                  <EditableField 
+                    label="Description" 
+                    fieldName="description" 
+                    value="None" 
+                  />
+                  
+                  <EditableField 
+                    label="Hours" 
+                    fieldName="hours" 
+                    value="None" 
+                  />
                 </CardContent>
               </Card>
 
@@ -924,18 +993,16 @@ function ReviewQueueContent() {
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(task.uniqueVisitors, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(task.totalCheckIns, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-foreground")}>
-                          {task.recentCheckIns}
-                        </p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(task.recentCheckIns, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -972,16 +1039,16 @@ function ReviewQueueContent() {
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">0</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(0, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">0</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(0, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-destructive tabular-nums">0</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(0, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -993,6 +1060,7 @@ function ReviewQueueContent() {
                     <div className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
                       <User className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                       <p className="text-sm text-foreground">
+                        <span className="text-muted-foreground">July 22, 2026 · </span>
                         <span className="text-primary font-medium">Jimmy F.</span> thinks these places <strong>are duplicates</strong>.
                       </p>
                     </div>
@@ -1092,18 +1160,16 @@ function ReviewQueueContent() {
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(task.uniqueVisitors, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(task.totalCheckIns, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-foreground")}>
-                          {task.recentCheckIns}
-                        </p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(task.recentCheckIns, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1262,29 +1328,22 @@ function ReviewQueueContent() {
                           </button>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                        <Link href={`/venue/${task.venueId}`}>
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     {/* Stats row */}
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(task.uniqueVisitors, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(task.totalCheckIns, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>
-                          {task.recentCheckIns}
-                        </p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(task.recentCheckIns, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1430,29 +1489,22 @@ function ReviewQueueContent() {
                           </button>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                        <Link href={`/venue/${task.venueId}`}>
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     {/* Stats row */}
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(task.uniqueVisitors, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(task.totalCheckIns, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>
-                          {task.recentCheckIns}
-                        </p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(task.recentCheckIns, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1530,19 +1582,19 @@ function ReviewQueueContent() {
                         toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
-                        Spam
+                        This tip is spam
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
                         toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
-                        Not relevant
+                        This tip is offensive
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
                         toast.success("Review submitted", { description: task.venueName });
                         advance();
                       }}>
-                        Duplicate
+                        This tip is negative but shouldn&apos;t be removed
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -1608,24 +1660,21 @@ function ReviewQueueContent() {
                           <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><Search className="h-3 w-3" /> Search the web</button>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                        <Link href={`/venue/${task.venueId}`}><ExternalLink className="h-4 w-4" /></Link>
-                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(task.uniqueVisitors, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(task.totalCheckIns, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>{task.recentCheckIns}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(task.recentCheckIns, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1734,24 +1783,21 @@ function ReviewQueueContent() {
                           <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><Search className="h-3 w-3" /> Search the web</button>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                        <Link href={`/venue/${task.venueId}`}><ExternalLink className="h-4 w-4" /></Link>
-                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(task.uniqueVisitors, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(task.totalCheckIns, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>{task.recentCheckIns}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(task.recentCheckIns, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1866,24 +1912,21 @@ function ReviewQueueContent() {
                           <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><Search className="h-3 w-3" /> Search the web</button>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                        <Link href={`/venue/${task.venueId}`}><ExternalLink className="h-4 w-4" /></Link>
-                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                        {renderPinVisualization(task.uniqueVisitors, 500)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns.toLocaleString()}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                        {renderPinVisualization(task.totalCheckIns, 1000)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                       </div>
                       <div>
-                        <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-primary")}>{task.recentCheckIns}</p>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                        {renderPinVisualization(task.recentCheckIns, 100)}
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                       </div>
                     </div>
                   </CardContent>
@@ -2086,9 +2129,6 @@ function ReviewQueueContent() {
                         <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
                           <Search className="h-3 w-3" /> Search the web
                         </button>
-                        <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                          <ExternalLink className="h-3 w-3" /> Open
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -2097,18 +2137,16 @@ function ReviewQueueContent() {
                   {/* Stats row */}
                   <div className="grid grid-cols-3 gap-4 rounded-lg border border-border p-3 text-center">
                     <div>
-                      <p className="text-lg font-semibold text-foreground tabular-nums">{task.uniqueVisitors}</p>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Unique Visitors</p>
+                      {renderPinVisualization(task.uniqueVisitors, 500)}
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Unique Visitors</p>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-foreground tabular-nums">{task.totalCheckIns}</p>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Check-ins</p>
+                      {renderPinVisualization(task.totalCheckIns, 1000)}
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Total Check-ins</p>
                     </div>
                     <div>
-                      <p className={cn("text-lg font-semibold tabular-nums", task.recentCheckIns === 0 ? "text-destructive" : "text-foreground")}>
-                        {task.recentCheckIns}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Last 60 Days</p>
+                      {renderPinVisualization(task.recentCheckIns, 100)}
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Last 60 Days</p>
                     </div>
                   </div>
                 </CardContent>
