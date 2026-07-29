@@ -151,6 +151,7 @@ function LeaderboardCard() {
   const [leaderboardTab, setLeaderboardTab] = useState<"local" | "global">("local");
   const [showAll, setShowAll] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [statsView, setStatsView] = useState<"weekly" | "monthly">("weekly");
   const locationContext = useLocationContext();
   const selectedZone = locationContext?.selectedZone || "San Francisco Bay Area";
 
@@ -230,7 +231,17 @@ function LeaderboardCard() {
     "Boston": { activeContributors: 16, newMembers: 2, placesUpdated: 14 },
   };
 
-  const communityStats = communityStatsByLocation[selectedZone] || communityStatsByLocation["San Francisco Bay Area"];
+  const communityStatsMonthlyByLocation: Record<string, { activeContributors: number; newMembers: number; placesUpdated: number }> = {
+    "San Francisco Bay Area": { activeContributors: 89, newMembers: 18, placesUpdated: 94 },
+    "Oakland": { activeContributors: 52, newMembers: 11, placesUpdated: 48 },
+    "San Jose": { activeContributors: 67, newMembers: 14, placesUpdated: 61 },
+    "Los Angeles": { activeContributors: 156, newMembers: 32, placesUpdated: 142 },
+    "Boston": { activeContributors: 58, newMembers: 9, placesUpdated: 53 },
+  };
+
+  const communityStats = statsView === "monthly" 
+    ? (communityStatsMonthlyByLocation[selectedZone] || communityStatsMonthlyByLocation["San Francisco Bay Area"])
+    : (communityStatsByLocation[selectedZone] || communityStatsByLocation["San Francisco Bay Area"]);
 
   return (
     <motion.div variants={fadeUp}>
@@ -324,8 +335,15 @@ function LeaderboardCard() {
           {/* Community stats */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">This Week</p>
-              <button className="text-xs text-primary hover:underline">View monthly</button>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                {statsView === "monthly" ? "This Month" : "This Week"}
+              </p>
+              <button 
+                className="text-xs text-primary hover:underline"
+                onClick={() => setStatsView(statsView === "monthly" ? "weekly" : "monthly")}
+              >
+                {statsView === "monthly" ? "View weekly" : "View monthly"}
+              </button>
             </div>
             <div className="flex items-center justify-between py-1">
               <span className="text-sm text-foreground">Active contributors</span>
