@@ -16,12 +16,14 @@ interface WalkthroughStep {
     bottom?: string;
     left?: string;
     right?: string;
+    transform?: string;
   };
   pulsePosition: {
     top?: string;
     bottom?: string;
     left?: string;
     right?: string;
+    transform?: string;
   };
   scrollTo?: string; // CSS selector to scroll to
 }
@@ -42,14 +44,14 @@ const WALKTHROUGH_STEPS: WalkthroughStep[] = [
   {
     title: "Track your contributions",
     description: "See all your edits, approvals, and impact on the community. Watch your contributions grow over time.",
-    position: { top: "200px", right: "40px" },
+    position: { bottom: "240px", right: "40px" },
     pulsePosition: { bottom: "200px", right: "180px" },
     scrollTo: "#quick-links-card",
   },
   {
     title: "Compete on the leaderboard",
     description: "See how you rank against other contributors. Climb the leaderboard as you help improve places worldwide.",
-    position: { top: "200px", right: "40px" },
+    position: { top: "620px", right: "40px" },
     pulsePosition: { top: "570px", right: "200px" },
     scrollTo: "#leaderboard-card",
   },
@@ -202,7 +204,7 @@ export function WalkthroughOverlay({ isOpen, onClose }: WalkthroughOverlayProps)
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between border-t border-border bg-muted/30 px-5 py-3">
+            <div className="flex items-center justify-between border-t border-border bg-muted/30 px-5 py-3 rounded-b-xl">
               {/* Progress Dots */}
               <div className="flex gap-1.5">
                 {WALKTHROUGH_STEPS.map((_, index) => (
@@ -223,11 +225,11 @@ export function WalkthroughOverlay({ isOpen, onClose }: WalkthroughOverlayProps)
               {/* Navigation Buttons */}
               <div className="flex gap-2">
                 {currentStep > 0 && (
-                  <Button onClick={handleBack} size="sm" variant="outline">
+                  <Button onClick={handleBack} size="sm" variant="outline" className="rounded-lg">
                     Back
                   </Button>
                 )}
-                <Button onClick={handleNext} size="sm">
+                <Button onClick={handleNext} size="sm" className="rounded-lg">
                   {currentStep === WALKTHROUGH_STEPS.length - 1 ? "Done" : "Next"}
                   <ChevronRight className="size-4" />
                 </Button>
