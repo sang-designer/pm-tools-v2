@@ -32,6 +32,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { LocationProvider, useLocationContext } from "@/lib/location-context";
 import { InviteModal } from "@/components/invite/invite-modal";
+import { WalkthroughOverlay } from "@/components/walkthrough-overlay";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -58,6 +59,7 @@ const slideInRight = {
 
 function WelcomeOnboardingCard() {
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
   const [completed, setCompleted] = useState<Record<string, boolean>>({
     "add-place": false,
     "quick-task": false,
@@ -92,20 +94,28 @@ function WelcomeOnboardingCard() {
     <motion.div variants={fadeUp}>
       <Card className="shadow-lg bg-gradient-to-br from-primary/[0.08] via-primary/[0.03] to-background border-primary/20 overflow-hidden">
         <CardContent className="p-6 space-y-5">
-          <div className="flex items-start gap-3">
-            <motion.div
-              initial={{ rotate: -10, scale: 0 }}
-              animate={{ rotate: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.2 }}
-            >
-              <Sparkles className="h-6 w-6 text-primary mt-0.5" />
-            </motion.div>
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Welcome to Placemaker!</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Help improve your local map. Here&apos;s how to get started:
-              </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 flex-1">
+              <motion.div
+                initial={{ rotate: -10, scale: 0 }}
+                animate={{ rotate: 0, scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.2 }}
+              >
+                <Sparkles className="h-6 w-6 text-primary mt-0.5" />
+              </motion.div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Welcome to Placemaker!</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Help improve your local map. Here&apos;s how to get started:
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => setShowWalkthrough(true)}
+              className="text-sm font-medium text-primary hover:underline shrink-0"
+            >
+              Help
+            </button>
           </div>
 
           <div className="space-y-2">
@@ -199,6 +209,7 @@ function WelcomeOnboardingCard() {
         </CardContent>
       </Card>
       <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} onInviteSent={() => setCompleted((prev) => ({ ...prev, "invite-friend": true }))} />
+      <WalkthroughOverlay isOpen={showWalkthrough} onClose={() => setShowWalkthrough(false)} />
     </motion.div>
   );
 }
@@ -392,7 +403,7 @@ function NewUserCommunityCard() {
   };
 
   return (
-    <motion.div variants={slideInRight}>
+    <motion.div variants={slideInRight} id="leaderboard-card">
       <Card className="overflow-hidden">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold">Leaderboard</CardTitle>
@@ -620,7 +631,7 @@ function QuickLinksCard() {
   ];
 
   return (
-    <motion.div variants={slideInRight}>
+    <motion.div variants={slideInRight} id="quick-links-card">
       <Card className="border-0 shadow-md bg-gradient-to-br from-white via-slate-50/80 to-gray-100/60 dark:from-gray-900 dark:via-gray-900/80 dark:to-gray-800/60 overflow-hidden">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg font-semibold">Quick Links</CardTitle>
