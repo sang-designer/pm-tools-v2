@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game-context";
 import { useIsMobile } from "@/hooks/use-responsive";
 import { MapPin, Users, ArrowRight, Trophy, ChevronRight, ChevronLeft } from "lucide-react";
+import { WalkthroughOverlay } from "@/components/walkthrough-overlay";
 
 const STORAGE_KEY = "placemaker-welcomed";
 const GUIDE_STORAGE_KEY = "placemaker-guide-done";
@@ -533,6 +534,7 @@ export function WelcomeDialog({ onWelcomeStateChange }: WelcomeDialogProps) {
   const { resetGame } = useGame();
   const [open, setOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem(STORAGE_KEY)) {
@@ -548,6 +550,11 @@ export function WelcomeDialog({ onWelcomeStateChange }: WelcomeDialogProps) {
     resetGame();
     setOpen(false);
     onWelcomeStateChange?.(false);
+    setShowWalkthrough(true);
+  }
+
+  function handleCloseWalkthrough() {
+    setShowWalkthrough(false);
     setShowGuide(true);
   }
 
@@ -570,22 +577,39 @@ export function WelcomeDialog({ onWelcomeStateChange }: WelcomeDialogProps) {
                 <AnimatedBanner />
 
                 <div className="-mt-6 relative px-5 pb-2 sm:px-8">
-                  <motion.h2
-                    initial={{ y: 14, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.25, duration: 0.45 }}
-                    className="mb-1.5 text-2xl font-semibold tracking-tight text-foreground"
-                  >
-                    Welcome to Placemaker
-                  </motion.h2>
-                  <motion.p
-                    initial={{ y: 14, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.35, duration: 0.45 }}
-                    className="text-sm text-muted-foreground"
-                  >
-                    Help improve places for millions of people around the world.
-                  </motion.p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <motion.h2
+                        initial={{ y: 14, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.25, duration: 0.45 }}
+                        className="mb-1.5 text-2xl font-semibold tracking-tight text-foreground"
+                      >
+                        Welcome to Placemaker
+                      </motion.h2>
+                      <motion.p
+                        initial={{ y: 14, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.35, duration: 0.45 }}
+                        className="text-sm text-muted-foreground"
+                      >
+                        Help improve places for millions of people around the world.
+                      </motion.p>
+                    </div>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4, duration: 0.3 }}
+                      onClick={() => {
+                        setOpen(false);
+                        onWelcomeStateChange?.(false);
+                        setShowWalkthrough(true);
+                      }}
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      Help
+                    </motion.button>
+                  </div>
                 </div>
 
                 <div className="flex flex-1 flex-col gap-3 px-5 py-5 sm:flex-initial sm:px-8">
@@ -637,6 +661,11 @@ export function WelcomeDialog({ onWelcomeStateChange }: WelcomeDialogProps) {
       <AnimatePresence>
         {showGuide && <OnboardingGuide onDismiss={handleDismissGuide} />}
       </AnimatePresence>
+
+      <WalkthroughOverlay
+        isOpen={showWalkthrough}
+        onClose={handleCloseWalkthrough}
+      />
     </>
   );
 }
