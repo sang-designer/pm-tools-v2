@@ -43,7 +43,7 @@ export default function VenueWoesPage() {
         </Button>
 
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Venue Woes: {venue.name}
           </h1>
           <Badge variant="secondary" className="text-xs">

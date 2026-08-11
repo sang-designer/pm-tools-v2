@@ -46,7 +46,7 @@ export default function AddPlacePage() {
               <ArrowLeft className="size-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 Add a Place
               </h1>
               <p className="text-sm text-muted-foreground">

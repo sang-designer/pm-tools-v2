@@ -983,7 +983,7 @@ export function MyContributions() {
   return (
     <div>
       {/* Header */}
-      <h1 className="text-3xl font-bold tracking-tight text-foreground">
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">
         My Contributions
       </h1>
       <div className="mt-2 flex flex-wrap items-center gap-2">

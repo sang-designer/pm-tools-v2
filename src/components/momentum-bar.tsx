@@ -237,7 +237,7 @@ export function MomentumBar() {
           Lvl {level}
         </motion.span>
         <span className="font-mono text-sm font-bold tabular-nums max-sm:text-xs">
-          {displayPoints}
+          {displayPoints.toLocaleString()}
         </span>
 
         {/* Mini progress arc — hidden on mobile */}
@@ -390,7 +390,7 @@ export function MomentumBar() {
               {/* Stats row */}
               <div className="flex items-center justify-between text-xs">
                 <span className="font-mono font-bold tabular-nums text-foreground">
-                  {displayPoints} XP
+                  {displayPoints.toLocaleString()} XP
                 </span>
                 <span className="text-muted-foreground">
                   {Math.round(100 - progress * 100)}% away from leveling up

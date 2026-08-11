@@ -306,7 +306,7 @@ export function IdentityHeaderVariant({ variant = "default", className, userId }
                   <div className="text-xs text-muted-foreground">Total XP</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">{userStats.approvedCount}</div>
+                  <div className="text-2xl font-bold text-foreground">{userStats.approvedCount.toLocaleString()}</div>
                   <div className="text-xs text-muted-foreground">Approved</div>
                 </div>
                 <div className="text-center">
@@ -347,7 +347,7 @@ export function IdentityHeaderVariant({ variant = "default", className, userId }
               <div className="text-muted-foreground">Weekly Goal</div>
             </div>
             <div className="text-center">
-              <div className="font-semibold">{userStats.approvedCount}</div>
+              <div className="font-semibold">{userStats.approvedCount.toLocaleString()}</div>
               <div className="text-muted-foreground">Approved</div>
             </div>
           </div>
@@ -393,7 +393,7 @@ export function IdentityHeaderVariant({ variant = "default", className, userId }
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Community Impact</p>
                   <p className="text-2xl font-bold text-slate-600">
-                    {userStats.approvedCount}
+                    {userStats.approvedCount.toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground">verified places</p>
                 </div>
@@ -529,11 +529,11 @@ export function IdentityHeaderVariant({ variant = "default", className, userId }
             <div className="flex gap-12 text-right">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Proposed</p>
-                <p className="text-2xl font-bold text-foreground">{userStats.proposedCount}</p>
+                <p className="text-2xl font-bold text-foreground">{userStats.proposedCount.toLocaleString()}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Approved</p>
-                <p className="text-2xl font-bold text-foreground">{userStats.approvedCount}</p>
+                <p className="text-2xl font-bold text-foreground">{userStats.approvedCount.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -564,11 +564,11 @@ export function IdentityHeaderVariant({ variant = "default", className, userId }
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-md bg-muted/40 px-3 py-2.5 text-center">
-                <p className="text-2xl font-bold text-foreground">{userStats.proposedCount}</p>
+                <p className="text-2xl font-bold text-foreground">{userStats.proposedCount.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">Proposed</p>
               </div>
               <div className="rounded-md bg-muted/40 px-3 py-2.5 text-center">
-                <p className="text-2xl font-bold text-foreground">{userStats.approvedCount}</p>
+                <p className="text-2xl font-bold text-foreground">{userStats.approvedCount.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">Approved</p>
               </div>
             </div>
