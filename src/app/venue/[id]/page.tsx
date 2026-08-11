@@ -147,7 +147,7 @@ export default function VenueDetailPage() {
       <div className="w-full px-3 py-6 sm:px-10">
         {/* Compact header */}
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {venue.name}
           </h1>
           {venue.claimed && (

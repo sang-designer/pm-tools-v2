@@ -46,7 +46,7 @@ function HomeContent() {
           <div className="mx-auto max-w-7xl px-4 py-4 pl-14">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground">Task + Community</h1>
+                <h1 className="text-2xl font-bold text-foreground">Task + Community</h1>
                 <p className="text-sm text-muted-foreground">Efficient tasks with community engagement</p>
               </div>
             </div>

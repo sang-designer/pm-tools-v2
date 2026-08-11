@@ -66,12 +66,12 @@ export function UserProfileCard() {
 
         <div className="flex items-center gap-4 self-start" data-guide="stats">
           <div className="flex flex-col items-center">
-            <span className="text-2xl font-normal text-foreground sm:text-3xl">{proposedCount || "—"}</span>
+            <span className="text-2xl font-normal text-foreground sm:text-3xl">{proposedCount ? proposedCount.toLocaleString() : "—"}</span>
             <span className="text-xs text-muted-foreground">Proposed</span>
           </div>
           <Separator orientation="vertical" className="h-10 sm:h-12" />
           <div className="flex flex-col items-center">
-            <span className="text-2xl font-normal text-foreground sm:text-3xl">{approvedCount || "—"}</span>
+            <span className="text-2xl font-normal text-foreground sm:text-3xl">{approvedCount ? approvedCount.toLocaleString() : "—"}</span>
             <span className="text-xs text-muted-foreground">Approved</span>
           </div>
         </div>

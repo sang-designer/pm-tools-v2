@@ -98,13 +98,13 @@ export function IdentityHeader() {
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">Proposed</p>
           <p className="text-2xl font-bold text-foreground">
-            {userStats.proposedCount}
+            {userStats.proposedCount.toLocaleString()}
           </p>
         </div>
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">Approved</p>
           <p className="text-2xl font-bold text-foreground">
-            {userStats.approvedCount}
+            {userStats.approvedCount.toLocaleString()}
           </p>
         </div>
       </div>

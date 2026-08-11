@@ -12,7 +12,7 @@ export default function MockDataDemoPage() {
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Mock Data Demo</h1>
+          <h1 className="text-2xl font-bold mb-2">Mock Data Demo</h1>
           <p className="text-muted-foreground mb-4">
             Explore different user profiles and location scenarios for the Placemaker Dashboard
           </p>
@@ -49,15 +49,15 @@ export default function MockDataDemoPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="font-medium text-green-600">{user.approvedCount}</div>
+                      <div className="font-medium text-green-600">{user.approvedCount.toLocaleString()}</div>
                       <div className="text-muted-foreground">Approved</div>
                     </div>
                     <div>
-                      <div className="font-medium">{user.proposedCount}</div>
+                      <div className="font-medium">{user.proposedCount.toLocaleString()}</div>
                       <div className="text-muted-foreground">Proposed</div>
                     </div>
                     <div>
-                      <div className="font-medium text-blue-600">{user.totalPoints}</div>
+                      <div className="font-medium text-blue-600">{user.totalPoints.toLocaleString()}</div>
                       <div className="text-muted-foreground">Points</div>
                     </div>
                     <div>
