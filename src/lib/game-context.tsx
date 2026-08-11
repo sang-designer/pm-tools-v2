@@ -45,7 +45,7 @@ interface FullState extends GameState {
 
 const freshState: FullState = {
   mode: "classic",
-  totalPoints: 0,
+  totalPoints: 683278,
   currentStreak: 0,
   bestStreak: 0,
   venueProgress: [],

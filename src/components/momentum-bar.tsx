@@ -12,7 +12,13 @@ import {
   animate,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Trophy, ChevronDown } from "lucide-react";
+import { Trophy, ChevronDown, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const SPRING = { type: "spring", stiffness: 120, damping: 18 } as const;
 const CONFETTI_COLORS = [
@@ -223,13 +229,13 @@ export function MomentumBar() {
         onClick={() => setOpen((prev) => !prev)}
         whileTap={{ scale: 0.95 }}
       >
-        <motion.div
-          className="flex size-6 items-center justify-center max-sm:size-5"
+        <motion.span
+          className="text-sm font-semibold max-sm:text-xs"
           animate={lastPointsAwarded ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.3 }}
         >
-          <PlacemakerIcon className="size-5 max-sm:size-4" />
-        </motion.div>
+          Lvl {level}
+        </motion.span>
         <span className="font-mono text-sm font-bold tabular-nums max-sm:text-xs">
           {displayPoints}
         </span>
@@ -313,16 +319,51 @@ export function MomentumBar() {
                     <p className="text-xs text-muted-foreground">Level {level}</p>
                   </div>
                 </div>
-                {leveledUp && (
-                  <motion.span
-                    className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                  >
-                    Level up!
-                  </motion.span>
-                )}
+                <div className="flex items-center gap-2">
+                  {leveledUp && (
+                    <motion.span
+                      className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                    >
+                      Level up!
+                    </motion.span>
+                  )}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          className="flex size-5 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          aria-label="XP Information"
+                        >
+                          <Info className="size-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent 
+                        side="bottom" 
+                        align="end"
+                        className="w-72 bg-black border-black p-4"
+                      >
+                        <p className="text-sm text-white text-center mb-4">
+                          XP (Experience Points) is how we track and reward your contributions to the Placemaker community.
+                        </p>
+                        <a
+                          href="#"
+                          className="block text-sm text-blue-400 hover:underline text-center mb-2"
+                        >
+                          Learn more
+                        </a>
+                        <a
+                          href="#"
+                          className="block text-sm text-blue-400 hover:underline text-center"
+                        >
+                          Join our Discord community!
+                        </a>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
 
               {/* Progress bar */}
