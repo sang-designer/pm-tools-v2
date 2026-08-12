@@ -121,9 +121,6 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
               </span>
             </div>
             <span className="text-sm font-medium text-foreground">/placemaker</span>
-            <span className="rounded bg-primary/10 px-2 py-1 text-xs text-foreground">
-              Beta
-            </span>
           </Link>
           <nav className="hidden h-16 items-end sm:flex" aria-label="Main navigation">
             {tabs.map((tab) =>

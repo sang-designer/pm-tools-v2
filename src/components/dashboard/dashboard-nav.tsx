@@ -75,9 +75,6 @@ export function DashboardNav({ activeTab = "Dashboard", onOpenLeaderboard, onOpe
               </span>
             </div>
             <span className="text-sm font-medium text-foreground">/placemaker</span>
-            <span className="rounded bg-primary/10 px-2 py-1 text-xs text-foreground">
-              Beta
-            </span>
           </Link>
           <nav className="hidden h-16 items-end sm:flex" aria-label="Main navigation">
             <div className="flex h-16 items-center justify-center px-4 text-sm font-semibold text-foreground border-b-2 border-foreground sm:px-6">
