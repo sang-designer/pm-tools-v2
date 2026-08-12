@@ -579,6 +579,7 @@ function ReviewQueueContent() {
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
   const [viewTogether, setViewTogether] = useState(false);
   const [selectedAddressSuggestions, setSelectedAddressSuggestions] = useState<Record<string, string>>({});
+  const [doesNotApply, setDoesNotApply] = useState<Set<string>>(new Set());
 
   const handleSelectAddressSuggestion = (attrId: string, value: string) => {
     const normalizedValue = value.trim();
@@ -588,6 +589,20 @@ function ReviewQueueContent() {
     }));
     console.log(`Selected for ${attrId}:`, normalizedValue);
     console.log('Current state:', { ...selectedAddressSuggestions, [attrId]: normalizedValue });
+  };
+
+  const handleDoesNotApply = (attrId: string) => {
+    setDoesNotApply(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(attrId)) {
+        newSet.delete(attrId);
+        toast("Removed", { description: "Does not apply removed" });
+      } else {
+        newSet.add(attrId);
+        toast.success("Marked", { description: "Marked as does not apply" });
+      }
+      return newSet;
+    });
   };
 
   useEffect(() => {
@@ -609,6 +624,7 @@ function ReviewQueueContent() {
     setAttributes(tasks[nextIndex].attributes.map((a) => ({ ...a })));
     setChainDecisions({});
     setShowMergePreview(false);
+    setDoesNotApply(new Set());
   }, [currentIndex, tasks]);
 
   const handleDone = () => {
@@ -2321,7 +2337,18 @@ function ReviewQueueContent() {
                               <span className="text-xs text-muted-foreground">Other:</span>
                               <button className="text-xs text-primary hover:underline">Make a suggestion</button>
                               <span className="text-xs text-muted-foreground">·</span>
-                              <button className="text-xs text-primary hover:underline">Does not apply</button>
+                              <button 
+                                className={cn(
+                                  "text-xs hover:underline inline-flex items-center gap-1",
+                                  doesNotApply.has(attr.id) 
+                                    ? "text-green-600 font-semibold" 
+                                    : "text-primary"
+                                )}
+                                onClick={() => handleDoesNotApply(attr.id)}
+                              >
+                                {doesNotApply.has(attr.id) && <Check className="h-3 w-3" />}
+                                Does not apply
+                              </button>
                             </div>
                           </div>
                         ) : slug === "review-address-suggestions" ? (
@@ -2389,7 +2416,18 @@ function ReviewQueueContent() {
                               <span className="text-xs text-muted-foreground">Other:</span>
                               <button className="text-xs text-primary hover:underline">Make a suggestion</button>
                               <span className="text-xs text-muted-foreground">·</span>
-                              <button className="text-xs text-primary hover:underline">Does not apply</button>
+                              <button 
+                                className={cn(
+                                  "text-xs hover:underline inline-flex items-center gap-1",
+                                  doesNotApply.has(attr.id) 
+                                    ? "text-green-600 font-semibold" 
+                                    : "text-primary"
+                                )}
+                                onClick={() => handleDoesNotApply(attr.id)}
+                              >
+                                {doesNotApply.has(attr.id) && <Check className="h-3 w-3" />}
+                                Does not apply
+                              </button>
                             </div>
                           </div>
                         ) : attr.currentValue ? (
@@ -2418,7 +2456,18 @@ function ReviewQueueContent() {
                             Suggest
                           </button>
                           <span className="text-xs text-muted-foreground">·</span>
-                          <button className="text-xs text-primary hover:underline">Does not apply</button>
+                          <button 
+                            className={cn(
+                              "text-xs hover:underline inline-flex items-center gap-1",
+                              doesNotApply.has(attr.id) 
+                                ? "text-green-600 font-semibold" 
+                                : "text-primary"
+                            )}
+                            onClick={() => handleDoesNotApply(attr.id)}
+                          >
+                            {doesNotApply.has(attr.id) && <Check className="h-3 w-3" />}
+                            Does not apply
+                          </button>
                         </div>
                         )}
                         {suggestOpenId === attr.id && (slug === "review-category-suggestions" || slug === "suggest-categories") && (
