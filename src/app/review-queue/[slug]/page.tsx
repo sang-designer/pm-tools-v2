@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPreview, DualMapPreview } from "@/components/venue/map-preview";
+import { MapPreview, DualMapPreview, MultiLocationMapPreview } from "@/components/venue/map-preview";
 import { REVIEW_QUEUES } from "@/components/landing/power-user-tasks-card";
 import { toast } from "sonner";
 import {
@@ -250,6 +250,14 @@ interface SuggestedAttribute {
   confirmed: boolean | null;
 }
 
+interface SuggestedLocation {
+  id: string;
+  lat: number;
+  lng: number;
+  source: "bot" | "user";
+  submitter?: string;
+}
+
 interface MockTask {
   id: string;
   venueId: string;
@@ -264,6 +272,7 @@ interface MockTask {
   recentCheckIns: number;
   attributes: SuggestedAttribute[];
   warnings: string[];
+  suggestedLocations?: SuggestedLocation[];
 }
 
 function seededRandom(seed: number): number {
@@ -355,6 +364,20 @@ function generateMockTasks(slug: string, location?: string): MockTask[] {
     const visitors = Math.floor(seededRandom(seed) * 300) + 10;
     const checkIns = Math.floor(seededRandom(seed + 1) * 800) + 20;
     const recent = Math.floor(seededRandom(seed + 2) * 30);
+    
+    // Generate suggested locations for location-suggestions queue
+    let suggestedLocations: SuggestedLocation[] | undefined;
+    if (slug === "review-location-suggestions") {
+      const numSuggestions = i % 2 === 0 ? 3 : 1; // Alternate between single and multiple suggestions
+      suggestedLocations = Array.from({ length: numSuggestions }, (_, idx) => ({
+        id: `loc-${i}-${idx}`,
+        lat: venue.lat + (0.001 * (idx + 1) * (seededRandom(seed + idx + 10) > 0.5 ? 1 : -1)),
+        lng: venue.lng + (0.002 * (idx + 1) * (seededRandom(seed + idx + 20) > 0.5 ? 1 : -1)),
+        source: idx % 2 === 0 ? "bot" : "user",
+        submitter: idx % 2 === 0 ? undefined : "User123",
+      }));
+    }
+    
     return {
       id: `${slug}-${loc}-${i}`,
       venueId: venue.id,
@@ -369,6 +392,7 @@ function generateMockTasks(slug: string, location?: string): MockTask[] {
       recentCheckIns: recent,
       attributes: getAttributesForQueue(slug, venue.name),
       warnings: getWarnings(checkIns),
+      suggestedLocations,
     };
   });
 }
@@ -577,9 +601,10 @@ function ReviewQueueContent() {
   const [showMergePreview, setShowMergePreview] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
-  const [viewTogether, setViewTogether] = useState(false);
+  const [viewTogether, setViewTogether] = useState(true);
   const [selectedAddressSuggestions, setSelectedAddressSuggestions] = useState<Record<string, string>>({});
   const [doesNotApply, setDoesNotApply] = useState<Set<string>>(new Set());
+  const [selectedLocationIds, setSelectedLocationIds] = useState<Set<string>>(new Set());
 
   const handleSelectAddressSuggestion = (attrId: string, value: string) => {
     const normalizedValue = value.trim();
@@ -587,6 +612,12 @@ function ReviewQueueContent() {
       ...prev,
       [attrId]: normalizedValue
     }));
+    // Clear "does not apply" when selecting an option
+    setDoesNotApply(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(attrId);
+      return newSet;
+    });
     console.log(`Selected for ${attrId}:`, normalizedValue);
     console.log('Current state:', { ...selectedAddressSuggestions, [attrId]: normalizedValue });
   };
@@ -599,7 +630,29 @@ function ReviewQueueContent() {
         toast("Removed", { description: "Does not apply removed" });
       } else {
         newSet.add(attrId);
+        // Clear any selections when marking as "does not apply"
+        setSelectedAddressSuggestions(prev => {
+          const newSelections = { ...prev };
+          delete newSelections[attrId];
+          return newSelections;
+        });
+        // Clear confirmed state when marking as "does not apply"
+        setAttributes(prev =>
+          prev.map(a => a.id === attrId ? { ...a, confirmed: null } : a)
+        );
         toast.success("Marked", { description: "Marked as does not apply" });
+      }
+      return newSet;
+    });
+  };
+
+  const handleToggleLocation = (locationId: string) => {
+    setSelectedLocationIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(locationId)) {
+        newSet.delete(locationId);
+      } else {
+        newSet.add(locationId);
       }
       return newSet;
     });
@@ -625,6 +678,7 @@ function ReviewQueueContent() {
     setChainDecisions({});
     setShowMergePreview(false);
     setDoesNotApply(new Set());
+    setSelectedLocationIds(new Set());
   }, [currentIndex, tasks]);
 
   const handleDone = () => {
@@ -687,7 +741,9 @@ function ReviewQueueContent() {
   };
 
   const handleChangeLocation = () => {
-    toast.success("Review submitted", { description: task.venueName });
+    const count = selectedLocationIds.size;
+    const description = count > 0 ? `${count} location${count > 1 ? "s" : ""} selected` : task.venueName;
+    toast.success("Review submitted", { description });
     advance();
   };
 
@@ -710,6 +766,14 @@ function ReviewQueueContent() {
     setAttributes((prev) =>
       prev.map((a) => (a.id === id ? { ...a, confirmed: value } : a))
     );
+    // Clear "does not apply" when confirming an attribute
+    if (value === true) {
+      setDoesNotApply(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   };
 
   const renderPinVisualization = (value: number, maxValue: number = 500) => {
@@ -1910,11 +1974,11 @@ function ReviewQueueContent() {
                   </CardContent>
                 </Card>
 
-                {/* Current vs Suggested Location */}
+                {/* Current & Suggested Locations */}
                 <Card>
                   <CardContent className="p-4 space-y-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-base font-semibold text-foreground">Current & Suggested Location</h3>
+                      <h3 className="text-base font-semibold text-foreground">Current & Suggested Location{task.suggestedLocations && task.suggestedLocations.length > 1 ? "s" : ""}</h3>
                       <Button
                         variant="outline"
                         size="sm"
@@ -1926,37 +1990,164 @@ function ReviewQueueContent() {
                     </div>
 
                     {viewTogether ? (
-                      <div className="rounded-lg overflow-hidden border border-border" style={{ height: "260px" }}>
-                        <DualMapPreview
-                          currentLat={task.lat}
-                          currentLng={task.lng}
-                          suggestedLat={task.lat + 0.002}
-                          suggestedLng={task.lng + 0.003}
-                          name={task.venueName}
-                          className="h-full w-full"
-                        />
+                      <div className="space-y-4">
+                        {/* Combined map view */}
+                        <div className="rounded-lg overflow-hidden border border-border" style={{ height: "320px" }}>
+                          {task.suggestedLocations && task.suggestedLocations.length > 0 ? (
+                            <MultiLocationMapPreview
+                              currentLat={task.lat}
+                              currentLng={task.lng}
+                              suggestedLocations={task.suggestedLocations.map((loc, idx) => ({
+                                id: loc.id,
+                                lat: loc.lat,
+                                lng: loc.lng,
+                                label: `Suggested ${idx + 1}`,
+                              }))}
+                              name={task.venueName}
+                              className="h-full w-full"
+                            />
+                          ) : (
+                            <DualMapPreview
+                              currentLat={task.lat}
+                              currentLng={task.lng}
+                              suggestedLat={task.lat + 0.002}
+                              suggestedLng={task.lng + 0.003}
+                              name={task.venueName}
+                              className="h-full w-full"
+                            />
+                          )}
+                        </div>
+                        
+                        {/* Suggested locations list */}
+                        {task.suggestedLocations && task.suggestedLocations.length > 0 && (
+                          <div className="space-y-3">
+                            {task.suggestedLocations.map((location, idx) => (
+                              <div
+                                key={location.id}
+                                className={cn(
+                                  "flex items-center justify-between p-4 rounded-lg border transition-colors",
+                                  selectedLocationIds.has(location.id)
+                                    ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800"
+                                    : "bg-background border-border"
+                                )}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="text-sm font-medium text-foreground">Suggested {idx + 1}:</span>
+                                  {location.source === "bot" ? (
+                                    <Bot className="h-4 w-4 text-muted-foreground" />
+                                  ) : (
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                  )}
+                                  <span className="text-sm font-mono text-foreground">
+                                    {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleToggleLocation(location.id)}
+                                    className={cn(
+                                      "flex h-10 w-10 items-center justify-center rounded-lg border-2 transition-colors",
+                                      selectedLocationIds.has(location.id)
+                                        ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
+                                        : "border-border text-muted-foreground hover:border-green-300 hover:text-green-600"
+                                    )}
+                                    aria-label="Select location"
+                                  >
+                                    <Check className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-border text-muted-foreground transition-colors hover:border-red-300 hover:text-red-600"
+                                    aria-label="Reject location"
+                                  >
+                                    <X className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4">
+                        {/* Current Location */}
                         <div>
-                          <h4 className="text-sm font-semibold text-foreground mb-1">Current Location</h4>
-                          <p className="text-xs text-primary font-mono">{task.lat.toFixed(6)},{task.lng.toFixed(6)}</p>
-                          <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="size-3 rounded-full bg-red-500" />
+                            <h4 className="text-sm font-semibold text-foreground">Current Location</h4>
+                          </div>
+                          <p className="text-xs text-muted-foreground font-mono mb-2">{task.lat.toFixed(6)}, {task.lng.toFixed(6)}</p>
+                          <div className="rounded-lg overflow-hidden border border-border h-48">
                             <MapPreview lat={task.lat} lng={task.lng} name={task.venueName} className="h-full w-full" />
                           </div>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-semibold text-foreground mb-1">Suggested Location</h4>
-                          <p className="text-xs text-primary font-mono">{(task.lat + 0.002).toFixed(6)},{(task.lng + 0.003).toFixed(6)}</p>
-                          <div className="mt-2 rounded-lg overflow-hidden border border-border h-48">
-                            <MapPreview lat={task.lat + 0.002} lng={task.lng + 0.003} name={`${task.venueName} (suggested)`} className="h-full w-full" pinColor="red" />
+
+                        {/* Suggested Locations */}
+                        {task.suggestedLocations && task.suggestedLocations.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <span className="size-3 rounded-full bg-blue-500" />
+                              <h4 className="text-sm font-semibold text-foreground">Suggested Location{task.suggestedLocations.length > 1 ? "s" : ""}</h4>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              {task.suggestedLocations.map((location, idx) => (
+                                <button
+                                  key={location.id}
+                                  onClick={() => handleToggleLocation(location.id)}
+                                  className={cn(
+                                    "w-full rounded-lg border-2 p-3 text-left transition-all",
+                                    selectedLocationIds.has(location.id)
+                                      ? "border-green-600 bg-green-50 dark:bg-green-950/30"
+                                      : "border-border hover:border-green-300"
+                                  )}
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-sm font-semibold text-foreground">Suggested {idx + 1}</span>
+                                        {location.source === "bot" ? (
+                                          <Bot className="h-3.5 w-3.5 text-muted-foreground" />
+                                        ) : (
+                                          <User className="h-3.5 w-3.5 text-muted-foreground" />
+                                        )}
+                                        {location.submitter && (
+                                          <span className="text-xs text-muted-foreground">by {location.submitter}</span>
+                                        )}
+                                      </div>
+                                      <p className="text-xs font-mono text-muted-foreground">
+                                        {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                                      </p>
+                                      <div className="mt-2 rounded-lg overflow-hidden border border-border h-32">
+                                        <MapPreview
+                                          lat={location.lat}
+                                          lng={location.lng}
+                                          name={`${task.venueName} (suggested)`}
+                                          className="h-full w-full"
+                                          pinColor="red"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div
+                                      className={cn(
+                                        "shrink-0 h-8 w-8 flex items-center justify-center rounded-lg border-2 transition-colors",
+                                        selectedLocationIds.has(location.id)
+                                          ? "border-green-600 bg-green-600 text-white"
+                                          : "border-border text-muted-foreground"
+                                      )}
+                                    >
+                                      {selectedLocationIds.has(location.id) && <Check className="h-4 w-4" />}
+                                    </div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
 
                     <a href={`https://www.google.com/maps?q=${task.lat},${task.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">
-                      View both locations on Google Maps.
+                      View on Google Maps
                     </a>
                   </CardContent>
                 </Card>
@@ -1976,10 +2167,16 @@ function ReviewQueueContent() {
                 {/* Action buttons */}
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <Button variant="outline" size="lg" onClick={handleDontChange}>Don&apos;t change</Button>
-                  <button className="text-xs text-primary hover:underline" onClick={() => setLocationSuggestOpen(true)}>or suggest another location</button>
+                  <button className="text-xs text-primary hover:underline" onClick={() => setLocationSuggestOpen(true)}>Suggest another location</button>
                   <div className="flex-1" />
                   <Button variant="outline" size="lg" onClick={handleSkip}>Skip <SkipForward className="ml-1 h-4 w-4" /></Button>
-                  <Button size="lg" onClick={handleChangeLocation}>Change location</Button>
+                  <Button 
+                    size="lg" 
+                    onClick={handleChangeLocation}
+                    disabled={selectedLocationIds.size === 0}
+                  >
+                    Change location
+                  </Button>
                 </div>
 
                 <p className="text-center text-xs text-muted-foreground pt-1">
