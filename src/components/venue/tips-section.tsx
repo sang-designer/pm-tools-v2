@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown, Flag, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ChevronDown, Flag, Lightbulb, ThumbsDown, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -167,31 +167,34 @@ export function TipsSection({ venueId }: TipsSectionProps) {
             className={`size-5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
           />
         </CollapsibleTrigger>
-        <div className="ml-auto flex rounded-lg border border-border p-0.5">
-          <Button
-            variant={sort === "recent" ? "secondary" : "ghost"}
-            size="sm"
-            aria-pressed={sort === "recent"}
-            onClick={() => setSort("recent")}
-          >
-            Recent
-          </Button>
-          <Button
-            variant={sort === "popular" ? "secondary" : "ghost"}
-            size="sm"
-            aria-pressed={sort === "popular"}
-            onClick={() => setSort("popular")}
-          >
-            Popular
-          </Button>
-        </div>
+        {tips.length > 0 && (
+          <div className="ml-auto flex rounded-lg border border-border p-0.5">
+            <Button
+              variant={sort === "recent" ? "secondary" : "ghost"}
+              size="sm"
+              aria-pressed={sort === "recent"}
+              onClick={() => setSort("recent")}
+            >
+              Recent
+            </Button>
+            <Button
+              variant={sort === "popular" ? "secondary" : "ghost"}
+              size="sm"
+              aria-pressed={sort === "popular"}
+              onClick={() => setSort("popular")}
+            >
+              Popular
+            </Button>
+          </div>
+        )}
       </div>
       <CollapsibleContent>
         {tips.length === 0 ? (
-          <div className="mt-3 rounded-lg border border-dashed border-border px-4 py-8 text-center">
-            <p className="text-sm font-medium text-foreground">No tips yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tips from visitors will show up here.
+          <div className="mt-3 rounded-lg border-2 border-dashed border-border px-4 py-10 text-center">
+            <Lightbulb className="mx-auto size-8 text-muted-foreground/50" />
+            <p className="mt-2 text-sm font-medium text-foreground">No tips yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tips from people who have been here will show up in this section.
             </p>
           </div>
         ) : (
