@@ -22,6 +22,19 @@ interface DualMapPreviewProps {
   className?: string;
 }
 
+interface MultiLocationMapPreviewProps {
+  currentLat: number;
+  currentLng: number;
+  suggestedLocations: Array<{
+    id: string;
+    lat: number;
+    lng: number;
+    label: string;
+  }>;
+  name?: string;
+  className?: string;
+}
+
 const TILE_SIZE = 256;
 
 const PIN_FILLS: Record<"red" | "blue", string> = {
@@ -287,6 +300,136 @@ export function DualMapPreview({
       >
         <PinSvg color={PIN_FILLS.blue} />
       </div>
+
+      <p className="absolute bottom-1 left-1.5 text-[10px] text-muted-foreground/70">
+        Map is in view-only mode
+      </p>
+    </div>
+  );
+}
+
+export function MultiLocationMapPreview({
+  currentLat,
+  currentLng,
+  suggestedLocations,
+  name,
+  className,
+}: MultiLocationMapPreviewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate bounds to fit all locations
+  const allLats = [currentLat, ...suggestedLocations.map(l => l.lat)];
+  const allLngs = [currentLng, ...suggestedLocations.map(l => l.lng)];
+  const minLat = Math.min(...allLats);
+  const maxLat = Math.max(...allLats);
+  const minLng = Math.min(...allLngs);
+  const maxLng = Math.max(...allLngs);
+  
+  const centerLat = (minLat + maxLat) / 2;
+  const centerLng = (minLng + maxLng) / 2;
+
+  const containerWidth = 700;
+  const containerHeight = 320;
+  const zoom = computeZoomToFit(
+    minLat, minLng,
+    maxLat, maxLng,
+    containerWidth, containerHeight
+  );
+
+  const centerTile = latLngToTile(centerLat, centerLng, zoom);
+  const centerTileX = Math.floor(centerTile.x);
+  const centerTileY = Math.floor(centerTile.y);
+  const fracX = centerTile.x - centerTileX;
+  const fracY = centerTile.y - centerTileY;
+
+  const gridRadius = 2;
+  const tiles: { x: number; y: number }[] = [];
+  for (let dy = -gridRadius; dy <= gridRadius; dy++) {
+    for (let dx = -gridRadius; dx <= gridRadius; dx++) {
+      tiles.push({ x: centerTileX + dx, y: centerTileY + dy });
+    }
+  }
+  const gridCols = gridRadius * 2 + 1;
+  const gridPx = TILE_SIZE * gridCols;
+  const gridCenterX = (fracX + gridRadius) * TILE_SIZE;
+  const gridCenterY = (fracY + gridRadius) * TILE_SIZE;
+
+  const currentTile = latLngToTile(currentLat, currentLng, zoom);
+  const pinCurrentX = (currentTile.x - centerTile.x) * TILE_SIZE;
+  const pinCurrentY = (currentTile.y - centerTile.y) * TILE_SIZE;
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn("relative overflow-hidden bg-muted", className)}
+      aria-label={name ? `Map showing locations for ${name}` : "Map showing multiple locations"}
+      role="img"
+    >
+      <div
+        className="absolute"
+        style={{
+          width: gridPx,
+          height: gridPx,
+          left: `calc(50% - ${gridCenterX}px)`,
+          top: `calc(50% - ${gridCenterY}px)`,
+          display: "grid",
+          gridTemplateColumns: `repeat(${gridCols}, ${TILE_SIZE}px)`,
+        }}
+      >
+        {tiles.map((t) => (
+          <img
+            key={`${t.x}-${t.y}`}
+            src={`https://tile.openstreetmap.org/${zoom}/${t.x}/${t.y}.png`}
+            alt=""
+            width={TILE_SIZE}
+            height={TILE_SIZE}
+            className="block"
+            draggable={false}
+            loading="lazy"
+          />
+        ))}
+      </div>
+
+      {/* Current Location Pin */}
+      <div
+        className="absolute z-10 -translate-x-1/2 -translate-y-full"
+        style={{
+          left: `calc(50% + ${pinCurrentX}px)`,
+          top: `calc(50% + ${pinCurrentY}px)`,
+        }}
+      >
+        <PinSvg color={PIN_FILLS.red} />
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 whitespace-nowrap">
+          <span className="text-xs font-semibold text-foreground bg-white dark:bg-gray-900 px-2 py-1 rounded shadow-md border border-border">
+            Current
+          </span>
+        </div>
+      </div>
+
+      {/* Suggested Location Pins */}
+      {suggestedLocations.map((location) => {
+        const suggestedTile = latLngToTile(location.lat, location.lng, zoom);
+        const pinX = (suggestedTile.x - centerTile.x) * TILE_SIZE;
+        const pinY = (suggestedTile.y - centerTile.y) * TILE_SIZE;
+
+        return (
+          <div
+            key={location.id}
+            className="absolute z-10 -translate-x-1/2 -translate-y-full"
+            style={{
+              left: `calc(50% + ${pinX}px)`,
+              top: `calc(50% + ${pinY}px)`,
+            }}
+          >
+            <PinSvg color={PIN_FILLS.blue} />
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 whitespace-nowrap">
+              <span className="text-xs font-semibold text-foreground bg-white dark:bg-gray-900 px-2 py-1 rounded shadow-md border border-border">
+                {location.label}
+              </span>
+            </div>
+          </div>
+        );
+      })}
 
       <p className="absolute bottom-1 left-1.5 text-[10px] text-muted-foreground/70">
         Map is in view-only mode
