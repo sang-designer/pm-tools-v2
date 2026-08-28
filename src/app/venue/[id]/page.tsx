@@ -8,6 +8,7 @@ import { PhotoGallery, PHOTO_SETS } from "@/components/venue/photo-gallery";
 import { VenueInfoCard } from "@/components/venue/venue-info-card";
 import { DetailsTable } from "@/components/venue/details-table";
 import { CategoriesSection } from "@/components/venue/categories-section";
+import { TipsSection } from "@/components/venue/tips-section";
 import { SubvenuesSection } from "@/components/venue/subvenues-section";
 import { VenuePhotos } from "@/components/venue/venue-photos";
 import { VenueAdmin } from "@/components/venue/venue-admin";
@@ -278,6 +279,9 @@ export default function VenueDetailPage() {
                       </div>
                     </>
                   )}
+                  <div className="mt-6">
+                    <TipsSection venueId={venueId} />
+                  </div>
                   <SubvenuesSection venueId={venueId} venueName={venue.name} />
                 </TabsContent>
                 <TabsContent value="photos" className="mt-0">
