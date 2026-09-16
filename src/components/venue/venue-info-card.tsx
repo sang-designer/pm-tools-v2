@@ -11,11 +11,14 @@ import Link from "next/link";
 
 interface VenueInfoCardProps {
   venue: Venue;
+  osmId?: string;
+  onEdit?: () => void;
 }
 
-export function VenueInfoCard({ venue }: VenueInfoCardProps) {
+export function VenueInfoCard({ venue, osmId, onEdit }: VenueInfoCardProps) {
   const d = venue.detail;
   const [copied, setCopied] = useState(false);
+  const [copiedOsm, setCopiedOsm] = useState(false);
   const [hoursOpen, setHoursOpen] = useState(false);
 
   const copyFsqId = () => {
@@ -23,6 +26,14 @@ export function VenueInfoCard({ venue }: VenueInfoCardProps) {
       navigator.clipboard.writeText(d.fsqPlaceId);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const copyOsmId = () => {
+    if (osmId) {
+      navigator.clipboard.writeText(osmId);
+      setCopiedOsm(true);
+      setTimeout(() => setCopiedOsm(false), 2000);
     }
   };
 
@@ -105,7 +116,7 @@ export function VenueInfoCard({ venue }: VenueInfoCardProps) {
               </p>
             )}
           </div>
-          <Button variant="ghost" size="sm" className="gap-1 text-primary">
+          <Button variant="ghost" size="sm" className="gap-1 text-primary" onClick={onEdit}>
             Edit <SquarePen className="size-4" />
           </Button>
         </div>
@@ -175,6 +186,32 @@ export function VenueInfoCard({ venue }: VenueInfoCardProps) {
                 </Button>
               </div>
               {copied && (
+                <p className="mt-1.5 text-xs font-medium text-emerald-600">Copied</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {osmId && (
+          <>
+            <Separator className="my-4" />
+            <div>
+              <h4 className="text-sm font-semibold text-foreground">OpenStreetMap ID</h4>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex-1 rounded-md border border-input bg-background px-3 py-2">
+                  <p className="truncate text-sm text-muted-foreground">{osmId}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={`size-10 shrink-0 sm:size-9 ${copiedOsm ? "border-emerald-500 text-emerald-600" : "border-primary"}`}
+                  onClick={copyOsmId}
+                >
+                  {copiedOsm ? <Check className="size-4" /> : <Copy className="size-4" />}
+                  <span className="sr-only">{copiedOsm ? "Copied" : "Copy OpenStreetMap ID"}</span>
+                </Button>
+              </div>
+              {copiedOsm && (
                 <p className="mt-1.5 text-xs font-medium text-emerald-600">Copied</p>
               )}
             </div>
