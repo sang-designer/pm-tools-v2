@@ -13,6 +13,7 @@ import { SubvenuesSection } from "@/components/venue/subvenues-section";
 import { VenuePhotos } from "@/components/venue/venue-photos";
 import { VenueAdmin } from "@/components/venue/venue-admin";
 import { SuggestEditDrawer } from "@/components/venue/suggest-edit-drawer";
+import { ConnectOsmDialog, type OsmPlace } from "@/components/venue/connect-osm-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -39,6 +40,9 @@ import {
   Briefcase,
   CalendarDays,
   User,
+  Unplug,
+  CircleCheckBig,
+  ExternalLink,
 } from "lucide-react";
 import { useState, useRef } from "react";
 
@@ -115,6 +119,8 @@ export default function VenueDetailPage() {
   const [shareCopied, setShareCopied] = useState(false);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
+  const [osmOpen, setOsmOpen] = useState(false);
+  const [osmByVenue, setOsmByVenue] = useState<Record<string, OsmPlace>>({});
   const { getVenueState, completeTask, venueProgress, skippedTasks } = useGame();
   const justSubmittedRef = useRef(false);
 
@@ -138,6 +144,7 @@ export default function VenueDetailPage() {
   const showEmptyState = !hasPendingTasks && !justSubmittedRef.current;
   const venuePhotos = PHOTO_SETS[venueId] || PHOTO_SETS.default;
   const initialTab = searchParams.get("tab") === "admin" ? "admin" : searchParams.get("tab") === "photos" ? "photos" : "reviews";
+  const osmConnection = osmByVenue[venueId];
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -234,6 +241,33 @@ export default function VenueDetailPage() {
               Copied
             </span>
           )}
+          {osmConnection ? (
+            <TooltipProvider delay={0} closeDelay={150}>
+              <Tooltip>
+                <TooltipTrigger className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+                  <CircleCheckBig className="size-3.5" />
+                  OSM Connected
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <a
+                    href={`https://www.openstreetmap.org/node/${Number(osmConnection.osmId)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 font-medium underline underline-offset-2"
+                  >
+                    View on OpenStreetMap
+                    <ExternalLink className="size-3" />
+                  </a>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <ActionLink
+              icon={<Unplug className="size-3.5" />}
+              label="Connect to OSM"
+              onClick={() => setOsmOpen(true)}
+            />
+          )}
         </div>
 
         {/* Main content area */}
@@ -295,7 +329,7 @@ export default function VenueDetailPage() {
 
           {/* Right: sidebar */}
           <div className="hidden xl:block">
-            <VenueInfoCard venue={venue} />
+            <VenueInfoCard venue={venue} osmId={osmConnection?.osmId} onEdit={() => setEditDrawerOpen(true)} />
           </div>
         </div>
       </div>
@@ -349,11 +383,21 @@ export default function VenueDetailPage() {
         open={editDrawerOpen}
         onOpenChange={setEditDrawerOpen}
         venue={venue}
+        osmLinked={Boolean(osmConnection)}
       />
       <ManageEventsSheet
         open={eventsOpen}
         onOpenChange={setEventsOpen}
         venueName={venue.name}
+      />
+      <ConnectOsmDialog
+        open={osmOpen}
+        onOpenChange={setOsmOpen}
+        venue={venue}
+        onConnect={(place) => {
+          setOsmByVenue((current) => ({ ...current, [venueId]: place }));
+          toast.success("Successfully connected to OSM.");
+        }}
       />
     </div>
   );

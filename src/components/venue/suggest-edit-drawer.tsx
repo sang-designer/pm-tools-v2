@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { X, Copy, Check, Plus } from "lucide-react";
+import { X, Copy, Check, Plus, Info } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -15,6 +15,15 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,12 +33,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { MapPreview } from "@/components/venue/map-preview";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { Venue } from "@/lib/types";
 
 interface SuggestEditDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   venue: Venue;
+  osmLinked?: boolean;
 }
 
 function parseAddress(address: string) {
@@ -555,9 +566,11 @@ export function SuggestEditDrawer({
   open,
   onOpenChange,
   venue,
+  osmLinked = false,
 }: SuggestEditDrawerProps) {
   const [openSections, setOpenSections] = useState<(string | null)[]>(["details"]);
   const [isDirty, setIsDirty] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
   const markDirty = useCallback(() => {
@@ -566,11 +579,32 @@ export function SuggestEditDrawer({
 
   const handleClose = () => {
     setIsDirty(false);
+    setConfirmOpen(false);
     setOpenSections(["details"]);
     onOpenChange(false);
   };
 
+  const submitFoursquareOnly = () => {
+    toast.success("Thank you for your help! You might not see your suggested edits right away, but they’re in the queue and we’ll review them shortly.");
+    handleClose();
+  };
+
+  const submitWithOsm = () => {
+    toast.success("Changes applied to OpenStreetMap.");
+    handleClose();
+  };
+
+  const handleApply = () => {
+    if (!isDirty) return;
+    if (osmLinked) {
+      setConfirmOpen(true);
+      return;
+    }
+    submitFoursquareOnly();
+  };
+
   return (
+    <>
     <Sheet open={open} onOpenChange={(o) => { if (!o) handleClose(); else onOpenChange(o); }}>
       <SheetContent
         side="right"
@@ -609,6 +643,19 @@ export function SuggestEditDrawer({
             }
           }}
         >
+          {osmLinked && (
+            <div className="px-5 pt-4">
+              <div
+                role="status"
+                className="flex items-center gap-2 rounded-md border border-blue-900 bg-blue-50 p-2 text-blue-900 shadow-sm dark:border-blue-400 dark:bg-blue-950/40 dark:text-blue-200"
+              >
+                <Info className="size-4 shrink-0" />
+                <p className="text-xs font-medium leading-4">
+                  This place is linked to OpenStreetMap.
+                </p>
+              </div>
+            </div>
+          )}
           <Accordion
             multiple
             value={openSections}
@@ -671,7 +718,7 @@ export function SuggestEditDrawer({
         </div>
 
         <div className="flex items-center gap-3 border-t border-border px-5 py-4">
-          <Button size="default" disabled={!isDirty}>Apply</Button>
+          <Button size="default" disabled={!isDirty} onClick={handleApply}>Apply</Button>
           <Button
             variant="ghost"
             size="default"
@@ -682,5 +729,30 @@ export function SuggestEditDrawer({
         </div>
       </SheetContent>
     </Sheet>
+    <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[519px]">
+        <DialogHeader className="gap-1.5 px-6 py-4 pr-12">
+          <DialogTitle className="text-xl font-semibold leading-7">
+            This place is linked to OpenStreetMap
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription className="px-6 pb-8 text-base text-foreground">
+          Do you want to apply your changes to the OpenStreetMap place as well?
+        </DialogDescription>
+        <DialogFooter className="mx-0 mb-0 gap-6 rounded-none border-0 bg-transparent px-6 pb-6 pt-0 sm:justify-end">
+          <Button
+            variant="outline"
+            className="min-w-20 text-primary"
+            onClick={submitFoursquareOnly}
+          >
+            Don&apos;t Apply
+          </Button>
+          <Button className="min-w-20" onClick={submitWithOsm}>
+            Apply to OpenStreetMap
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

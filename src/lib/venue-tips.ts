@@ -18,6 +18,7 @@ export const TIP_FLAG_REASONS: { value: TipFlagReason; label: string }[] = [
 ];
 
 const MOCK_TIPS: Record<string, VenueTip[]> = {
+  v5: [],
   v1: [
     {
       id: "tip-v1-1",
@@ -136,7 +137,9 @@ const FALLBACK_TIPS: Omit<VenueTip, "id" | "venueId">[] = [
 ];
 
 export function getVenueTips(venueId: string): VenueTip[] {
-  if (MOCK_TIPS[venueId]) return MOCK_TIPS[venueId];
+  if (Object.prototype.hasOwnProperty.call(MOCK_TIPS, venueId)) {
+    return MOCK_TIPS[venueId];
+  }
   return FALLBACK_TIPS.map((tip, index) => ({
     ...tip,
     id: `tip-${venueId}-${index + 1}`,
