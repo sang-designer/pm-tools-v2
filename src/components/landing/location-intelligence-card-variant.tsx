@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -44,6 +45,8 @@ interface LocationStats {
   verifiedCount: number;
   pendingCount: number;
   recentActivity: string;
+  completed30d: number;
+  tasksAdded30d: number;
   topContributors: Array<{ name: string; contributions: number }>;
   weeklyStats: { locationsAdded: number; verificationsCompleted: number; issuesResolved: number };
   regionChallenges: Array<{ title: string; description: string; priority: string }>;
@@ -51,7 +54,16 @@ interface LocationStats {
 
 function CommunityHealthVariant({ locationStats, className }: { locationStats: LocationStats; className?: string }) {
   const router = useRouter();
-  const healthPercent = Math.round(locationStats.regionHealth * 100);
+  const [showLifetime, setShowLifetime] = useState(false);
+  
+  // Calculate health based on 30-day momentum or lifetime
+  const total30d = locationStats.completed30d + locationStats.tasksAdded30d;
+  const totalLifetime = locationStats.totalLocations;
+  const healthPercent30d = total30d > 0 ? Math.round((locationStats.completed30d / total30d) * 100) : 0;
+  const healthPercentLifetime = Math.round(locationStats.regionHealth * 100);
+  
+  const healthPercent = showLifetime ? healthPercentLifetime : healthPercent30d;
+  const totalTasks = showLifetime ? totalLifetime : total30d;
   const isEmptyState = healthPercent < 5;
 
   if (isEmptyState) {
@@ -125,10 +137,34 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
     <div className={cn("space-y-6", className)}>
       <Card className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/20 dark:to-gray-900/20 overflow-hidden">
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold text-slate-700 dark:text-slate-300">
               Community Health
             </CardTitle>
+            <div className="flex items-center gap-1 bg-muted/50 rounded-full p-0.5">
+              <button
+                onClick={() => setShowLifetime(false)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-medium rounded-full transition-all",
+                  !showLifetime
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                30 Days
+              </button>
+              <button
+                onClick={() => setShowLifetime(true)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-medium rounded-full transition-all",
+                  showLifetime
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                All Time
+              </button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -142,8 +178,10 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
               </div>
             </div>
             <div className="text-right">
-              <div className="text-lg font-semibold">{locationStats.totalLocations.toLocaleString()}</div>
-              <div className="text-sm text-muted-foreground">total places</div>
+              <div className="text-lg font-semibold">{totalTasks.toLocaleString()}</div>
+              <div className="text-sm text-muted-foreground">
+                {showLifetime ? "total places" : "total tasks"}
+              </div>
             </div>
           </div>
 
@@ -157,9 +195,14 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30">
               <div className="text-xl font-bold text-foreground">
-                {locationStats.verifiedCount.toLocaleString()}
+                {showLifetime 
+                  ? locationStats.verifiedCount.toLocaleString()
+                  : locationStats.completed30d.toLocaleString()
+                }
               </div>
-              <div className="text-xs text-muted-foreground">Tasks completed</div>
+              <div className="text-xs text-muted-foreground">
+                {showLifetime ? "Completed" : "Completed (30 days)"}
+              </div>
             </div>
 
             <div
@@ -168,9 +211,14 @@ function CommunityHealthVariant({ locationStats, className }: { locationStats: L
             >
               <div>
                 <div className="text-xl font-bold text-foreground">
-                  {locationStats.pendingCount}
+                  {showLifetime
+                    ? (locationStats.verifiedCount + locationStats.pendingCount).toLocaleString()
+                    : locationStats.tasksAdded30d.toLocaleString()
+                  }
                 </div>
-                <div className="text-xs text-muted-foreground">Tasks remaining</div>
+                <div className="text-xs text-muted-foreground">
+                  {showLifetime ? "Tasks added (lifetime)" : "Tasks added (30 days)"}
+                </div>
               </div>
               <span className="text-xs font-medium text-foreground underline underline-offset-2 decoration-muted-foreground/50">
                 Help out &rarr;
