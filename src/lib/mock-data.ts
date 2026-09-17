@@ -1538,6 +1538,8 @@ export interface LocationStats {
   verifiedCount: number;
   regionHealth: number;
   recentActivity: string;
+  completed30d: number; // Tasks completed in last 30 days
+  tasksAdded30d: number; // Tasks added in last 30 days
   topContributors: Array<{
     name: string;
     contributions: number;
@@ -1642,6 +1644,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 2705,
     regionHealth: 0.85,
     recentActivity: "3 places verified today",
+    completed30d: 456,
+    tasksAdded30d: 523,
     topContributors: [
       { name: "Sam Taylor", contributions: 89 },
       { name: "Maria Rodriguez", contributions: 67 },
@@ -1684,6 +1688,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 1156,
     regionHealth: 0.79,
     recentActivity: "5 places verified today",
+    completed30d: 267,
+    tasksAdded30d: 298,
     topContributors: [
       { name: "Sam Taylor", contributions: 42 },
       { name: "Kenji Watanabe", contributions: 36 },
@@ -1721,6 +1727,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 1771,
     regionHealth: 0.82,
     recentActivity: "2 places verified today",
+    completed30d: 336,
+    tasksAdded30d: 378,
     topContributors: [
       { name: "Sam Taylor", contributions: 28 },
       { name: "Rajesh Kumar", contributions: 52 },
@@ -1763,6 +1771,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 3869,
     regionHealth: 0.78,
     recentActivity: "12 places verified today",
+    completed30d: 702,
+    tasksAdded30d: 891,
     topContributors: [
       { name: "Carlos Mendoza", contributions: 134 },
       { name: "Jenny Park", contributions: 98 },
@@ -1793,6 +1803,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 5178,
     regionHealth: 0.72,
     recentActivity: "8 places verified today",
+    completed30d: 567,
+    tasksAdded30d: 789,
     topContributors: [
       { name: "Ashley Brown", contributions: 156 },
       { name: "David Liu", contributions: 123 },
@@ -1828,6 +1840,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 1189,
     regionHealth: 0.92,
     recentActivity: "5 places verified today",
+    completed30d: 234,
+    tasksAdded30d: 198,
     topContributors: [
       { name: "Tyler Williams", contributions: 67 },
       { name: "Emma Davis", contributions: 45 },
@@ -1853,6 +1867,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 1853,
     regionHealth: 0.81,
     recentActivity: "4 places verified today",
+    completed30d: 294,
+    tasksAdded30d: 342,
     topContributors: [
       { name: "Patrick Sullivan", contributions: 78 },
       { name: "Mei-Ling Zhang", contributions: 62 },
@@ -1895,6 +1911,8 @@ export const MOCK_LOCATION_PROFILES: LocationStats[] = [
     verifiedCount: 4,
     regionHealth: 0.01,
     recentActivity: "No activity yet",
+    completed30d: 127,
+    tasksAdded30d: 23,
     topContributors: [],
     weeklyStats: {
       locationsAdded: 0,
