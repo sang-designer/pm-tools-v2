@@ -30,8 +30,13 @@ import {
 import {
   ArrowLeft,
   ChevronDown,
+  Facebook,
+  Globe,
   History,
+  Instagram,
+  Twitter,
   Users,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { TablePagination } from "@/components/ui/table-pagination";
@@ -155,6 +160,13 @@ function titleFromId(id: string) {
     .join(" ");
 }
 
+const CHAIN_LINK_ICONS: Record<string, LucideIcon> = {
+  "On The Web": Globe,
+  "On X": Twitter,
+  "On Facebook": Facebook,
+  "On Instagram": Instagram,
+};
+
 function getChainDetail(chainId: string): ChainDetail {
   const override = CHAIN_OVERRIDES[chainId];
   return {
@@ -208,21 +220,21 @@ function ChainIdentity({
           )}
         </div>
 
-        <nav
-          aria-label="Chain links"
-          className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground"
-        >
-          {chain.links.map((link, i) => (
-            <span key={link.label} className="inline-flex items-center gap-x-1.5">
-              {i > 0 && <span aria-hidden className="text-border">·</span>}
+        <nav aria-label="Chain links" className="flex items-center gap-0.5">
+          {chain.links.map((link) => {
+            const Icon = CHAIN_LINK_ICONS[link.label] ?? Globe;
+            return (
               <a
+                key={link.label}
                 href={link.url}
-                className="hover:text-foreground hover:underline underline-offset-2"
+                aria-label={link.label}
+                title={link.label}
+                className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
               >
-                {link.label.replace(/^On\s+/i, "")}
+                <Icon className="size-4" aria-hidden />
               </a>
-            </span>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="flex flex-wrap gap-2 pt-1">
