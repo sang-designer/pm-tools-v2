@@ -1,27 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { GlobalNav } from "@/components/global-nav";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Facebook,
+  Globe,
+  History,
+  Instagram,
+  Twitter,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { cn } from "@/lib/utils";
 
 interface VenueNameEntry {
   name: string;
   count: number;
-  sampleVenues: string[];
+  sampleVenues: { id: string; label: string }[];
 }
 
-const CHAIN_DATA = {
-  name: "McDonald's",
-  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/120px-McDonald%27s_Golden_Arches.svg.png",
+interface ChainCategory {
+  name: string;
+  count: number;
+}
+
+interface ChainTranslation {
+  lang: string;
+  name: string;
+}
+
+interface ChainDetail {
+  id: string;
+  name: string;
+  logo: string;
+  links: { label: string; url: string }[];
+  categories: ChainCategory[];
+  translations: ChainTranslation[];
+  venueNames: VenueNameEntry[];
+}
+
+const COUNTRIES = [
+  { value: "us", label: "United States" },
+  { value: "jp", label: "Japan" },
+  { value: "kr", label: "South Korea" },
+  { value: "cn", label: "China" },
+  { value: "de", label: "Germany" },
+  { value: "fr", label: "France" },
+] as const;
+
+const SAMPLE = (n: number) =>
+  Array.from({ length: n }, (_, i) => ({
+    id: `v${50 + i}`,
+    label: "Sample venue",
+  }));
+
+const DEFAULT_CHAIN: Omit<ChainDetail, "id" | "name" | "logo"> = {
   links: [
     { label: "On The Web", url: "#" },
     { label: "On X", url: "#" },
@@ -39,168 +101,481 @@ const CHAIN_DATA = {
     { lang: "ar", name: "ماكدونالدز" },
     { lang: "ko", name: "맥도날드" },
     { lang: "ja", name: "マクドナルド" },
-    { lang: "ar", name: "ماكدونالدز" },
     { lang: "zh", name: "麦当劳" },
   ],
   venueNames: [
-    { name: "McDonald's", count: 38537, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's 麦当劳...", count: 2356, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "マクドナルド", count: 2100, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "McDonald's 麦当劳...", count: 467, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's...", count: 351, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's (ماكدونالدز)...", count: 182, sampleVenues: ["Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's & McCafé...", count: 166, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "McCafé", count: 142, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "Mcdonald's", count: 101, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's 麦当劳...", count: 95, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue"] },
-  ] as VenueNameEntry[],
+    { name: "McDonald's", count: 38537, sampleVenues: SAMPLE(4) },
+    { name: "McDonald's 麦当劳...", count: 2356, sampleVenues: SAMPLE(4) },
+    { name: "マクドナルド", count: 2100, sampleVenues: SAMPLE(2) },
+    { name: "McDonald's 麦当劳...", count: 467, sampleVenues: SAMPLE(4) },
+    { name: "McDonald's...", count: 351, sampleVenues: SAMPLE(4) },
+    { name: "McDonald's (ماكدونالدز)...", count: 182, sampleVenues: SAMPLE(3) },
+    { name: "McDonald's & McCafé...", count: 166, sampleVenues: SAMPLE(2) },
+    { name: "McCafé", count: 142, sampleVenues: SAMPLE(2) },
+    { name: "Mcdonald's", count: 101, sampleVenues: SAMPLE(4) },
+    { name: "McDonald's 麦当劳...", count: 95, sampleVenues: SAMPLE(4) },
+    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(2) },
+    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(3) },
+    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(2) },
+    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(3) },
+    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(2) },
+  ],
 };
 
-export default function ChainDetailPage() {
-  const [page, setPage] = useState(1);
-  const [country, setCountry] = useState("");
-  const totalPages = 6;
+const CHAIN_OVERRIDES: Record<string, Partial<ChainDetail>> = {
+  mcdonalds: {
+    id: "mcdonalds",
+    name: "McDonald's",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/120px-McDonald%27s_Golden_Arches.svg.png",
+  },
+  starbucks: {
+    id: "starbucks",
+    name: "Starbucks",
+    logo: "https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Starbucks_Corporation_Logo_2011.svg/120px-Starbucks_Corporation_Logo_2011.svg.png",
+    categories: [
+      { name: "Coffee Shops", count: 34012 },
+      { name: "Cafés", count: 1204 },
+      { name: "Bakeries", count: 88 },
+    ],
+    translations: [
+      { lang: "en", name: "Starbucks" },
+      { lang: "ja", name: "スターバックス" },
+      { lang: "zh", name: "星巴克" },
+      { lang: "ko", name: "스타벅스" },
+      { lang: "ar", name: "ستاربكس" },
+    ],
+    venueNames: [
+      { name: "Starbucks", count: 30112, sampleVenues: SAMPLE(4) },
+      { name: "Starbucks Coffee", count: 2840, sampleVenues: SAMPLE(3) },
+      { name: "スターバックス", count: 1902, sampleVenues: SAMPLE(2) },
+      { name: "Starbucks Reserve", count: 412, sampleVenues: SAMPLE(2) },
+    ],
+  },
+};
 
-  const maxCount = Math.max(...CHAIN_DATA.categories.map((c) => c.count));
+function titleFromId(id: string) {
+  return id
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+const CHAIN_LINK_ICONS: Record<string, LucideIcon> = {
+  "On The Web": Globe,
+  "On X": Twitter,
+  "On Facebook": Facebook,
+  "On Instagram": Instagram,
+};
+
+function getChainDetail(chainId: string): ChainDetail {
+  const override = CHAIN_OVERRIDES[chainId];
+  return {
+    ...DEFAULT_CHAIN,
+    id: chainId,
+    name: override?.name ?? titleFromId(chainId),
+    logo:
+      override?.logo ??
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/120px-McDonald%27s_Golden_Arches.svg.png",
+    ...override,
+  };
+}
+
+function ChainIdentity({
+  chain,
+  compact = false,
+}: {
+  chain: ChainDetail;
+  compact?: boolean;
+}) {
+  const primaryCategory = chain.categories[0];
+
+  return (
+    <div className={cn("flex", compact ? "items-start gap-4" : "flex-col gap-4")}>
+      <div
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-lg border border-border bg-card p-2",
+          compact ? "size-14" : "size-16"
+        )}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={chain.logo}
+          alt=""
+          className="max-h-full max-w-full object-contain"
+        />
+      </div>
+
+      <div className="min-w-0 space-y-2">
+        <div className="space-y-1">
+          <h1
+            className={cn(
+              "font-semibold tracking-tight text-foreground",
+              compact ? "text-xl" : "text-xl sm:text-2xl"
+            )}
+          >
+            {chain.name}
+          </h1>
+          {!compact && primaryCategory && (
+            <p className="text-sm text-muted-foreground">{primaryCategory.name}</p>
+          )}
+        </div>
+
+        <nav aria-label="Chain links" className="flex items-center gap-0.5">
+          {chain.links.map((link) => {
+            const Icon = CHAIN_LINK_ICONS[link.label] ?? Globe;
+            return (
+              <a
+                key={link.label}
+                href={link.url}
+                aria-label={link.label}
+                title={link.label}
+                className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+              >
+                <Icon className="size-4" aria-hidden />
+              </a>
+            );
+          })}
+        </nav>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button variant="outline" className="min-h-10">
+            <Users data-icon="inline-start" />
+            Manage users
+          </Button>
+          <Button variant="outline" className="min-h-10">
+            <History data-icon="inline-start" />
+            History
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChainMetaSections({
+  chain,
+  country,
+  onCountryChange,
+}: {
+  chain: ChainDetail;
+  country: string | undefined;
+  onCountryChange: (value: string | null | undefined) => void;
+}) {
+  const maxCategoryCount = Math.max(...chain.categories.map((c) => c.count), 1);
+  const primaryCategory = chain.categories[0];
+
+  return (
+    <div className="space-y-6">
+      <section aria-labelledby="category-breakdown-heading" className="space-y-3">
+        <div className="space-y-1">
+          <h2
+            id="category-breakdown-heading"
+            className="text-sm font-semibold text-foreground"
+          >
+            Category breakdown
+          </h2>
+          {primaryCategory && (
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Most venues in this chain are{" "}
+              <span className="font-medium text-foreground">
+                {primaryCategory.name}
+              </span>
+            </p>
+          )}
+        </div>
+        <ul className="space-y-3">
+          {chain.categories.map((cat) => {
+            const pct = Math.round((cat.count / maxCategoryCount) * 100);
+            return (
+              <li key={cat.name} className="space-y-1.5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="truncate text-sm text-foreground">{cat.name}</span>
+                  <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+                    {cat.count.toLocaleString()}
+                  </span>
+                </div>
+                <Progress
+                  value={pct}
+                  className="h-1.5"
+                  aria-label={`${cat.name}: ${cat.count.toLocaleString()} venues`}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <Separator />
+
+      <section aria-labelledby="translated-names-heading" className="space-y-3">
+        <div className="space-y-1">
+          <h2
+            id="translated-names-heading"
+            className="text-sm font-semibold text-foreground"
+          >
+            Translated names
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Localized brand names seen across venues in this chain.
+          </p>
+        </div>
+        {chain.translations.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No translations available.</p>
+        ) : (
+          <ul className="space-y-2">
+            {chain.translations.map((t, i) => (
+              <li
+                key={`${t.lang}-${i}`}
+                className="flex min-h-9 items-center gap-3 text-sm"
+              >
+                <Badge
+                  variant="secondary"
+                  className="w-10 shrink-0 justify-center font-mono text-[0.7rem] uppercase"
+                >
+                  {t.lang}
+                </Badge>
+                <span className="text-foreground">{t.name}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <Separator />
+
+      <section aria-labelledby="country-filter-heading" className="space-y-3">
+        <h2
+          id="country-filter-heading"
+          className="text-sm font-semibold text-foreground"
+        >
+          See this chain in
+        </h2>
+        <div className="flex items-center gap-2">
+          <Select value={country} onValueChange={onCountryChange}>
+            <SelectTrigger className="min-h-10 w-full flex-1">
+              <SelectValue placeholder="Select a country" />
+            </SelectTrigger>
+            <SelectContent>
+              {COUNTRIES.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            className="min-h-10 shrink-0"
+            disabled={!country}
+          >
+            Go
+          </Button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function VenueNameFrequencyList({
+  entries,
+  maxCount,
+}: {
+  entries: VenueNameEntry[];
+  maxCount: number;
+}) {
+  if (entries.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-6 py-16 text-center">
+        <p className="text-sm font-medium text-foreground">No venue names found</p>
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Venue name frequencies for this chain will appear here once data is
+          available.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Mobile: stacked, touch-friendly list */}
+      <ul className="divide-y divide-border rounded-lg border border-border md:hidden">
+        {entries.map((entry, i) => {
+          const pct = Math.max(4, Math.round((entry.count / maxCount) * 100));
+          return (
+            <li key={`${entry.name}-${i}`} className="space-y-3 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <p className="min-w-0 text-sm font-medium leading-snug text-foreground">
+                  {entry.name}
+                </p>
+                <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+                  {entry.count.toLocaleString()}
+                </span>
+              </div>
+              <Progress value={pct} className="h-1.5" aria-hidden />
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                <span className="sr-only">Sample venues</span>
+                {entry.sampleVenues.map((venue, j) => (
+                  <Link
+                    key={`${venue.id}-${j}`}
+                    href={`/venue/${venue.id}`}
+                    className="inline-flex min-h-10 items-center text-sm text-primary underline-offset-4 hover:underline"
+                  >
+                    {venue.label}
+                  </Link>
+                ))}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Desktop: accessible table */}
+      <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
+        <Table>
+          <caption className="sr-only">
+            Most frequently occurring venue names for this chain
+          </caption>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="w-[42%]">Name</TableHead>
+              <TableHead className="w-[18%]">Frequency</TableHead>
+              <TableHead className="w-[10%] text-right">Count</TableHead>
+              <TableHead>Sample venues</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {entries.map((entry, i) => {
+              const pct = Math.max(4, Math.round((entry.count / maxCount) * 100));
+              return (
+                <TableRow key={`${entry.name}-${i}`}>
+                  <TableCell className="align-middle text-sm font-medium text-foreground">
+                    {entry.name}
+                  </TableCell>
+                  <TableCell className="align-middle">
+                    <Progress
+                      value={pct}
+                      className="h-1.5 max-w-[140px]"
+                      aria-label={`Relative frequency ${pct}%`}
+                    />
+                  </TableCell>
+                  <TableCell className="align-middle text-right text-sm tabular-nums text-foreground">
+                    {entry.count.toLocaleString()}
+                  </TableCell>
+                  <TableCell className="align-middle">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                      {entry.sampleVenues.map((venue, j) => (
+                        <Link
+                          key={`${venue.id}-${j}`}
+                          href={`/venue/${venue.id}`}
+                          className="text-sm text-primary underline-offset-4 hover:underline"
+                        >
+                          {venue.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </>
+  );
+}
+
+export default function ChainDetailPage() {
+  const params = useParams();
+  const chainId = String(params.chainId ?? "mcdonalds");
+  const chain = useMemo(() => getChainDetail(chainId), [chainId]);
+
+  const [page, setPage] = useState(1);
+  const [country, setCountry] = useState<string | undefined>(undefined);
+  const [metaOpen, setMetaOpen] = useState(false);
+
+  const perPage = 10;
+  const totalPages = Math.max(1, Math.ceil(chain.venueNames.length / perPage));
+  const pageEntries = chain.venueNames.slice((page - 1) * perPage, page * perPage);
+  const maxVenueCount = Math.max(...chain.venueNames.map((v) => v.count), 1);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <GlobalNav activeTab="Home" />
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+
+      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-6">
           <Link href="/admin/chains">
-            <Button variant="ghost" className="gap-2 mb-4">
-              <ArrowLeft className="size-4" /> Back to Chains
+            <Button variant="ghost" size="sm" className="mb-0 min-h-10 gap-2 px-2">
+              <ArrowLeft className="size-4" />
+              Back to Chains
             </Button>
           </Link>
         </div>
 
-        {/* Chain Header */}
-        <Card className="mb-8">
-          <CardContent className="flex flex-col items-center py-8">
-            <h1 className="text-2xl font-bold text-foreground mb-4">{CHAIN_DATA.name}</h1>
-            <img
-              src={CHAIN_DATA.logo}
-              alt={CHAIN_DATA.name}
-              className="h-16 w-16 object-contain mb-4"
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] lg:gap-10">
+          {/* Desktop sidebar */}
+          <aside className="hidden space-y-6 rounded-lg border border-border/60 bg-muted/40 p-5 lg:block">
+            <ChainIdentity chain={chain} />
+            <Separator />
+            <ChainMetaSections
+              chain={chain}
+              country={country}
+              onCountryChange={(v) => setCountry(v ?? undefined)}
             />
-            <div className="flex items-center gap-4 mb-4">
-              {CHAIN_DATA.links.map((link) => (
-                <a key={link.label} href={link.url} className="flex items-center gap-1 text-sm text-primary hover:underline">
-                  {link.label} <ExternalLink className="size-3" />
-                </a>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline">Manage users</Button>
-              <Button variant="outline">History</Button>
-            </div>
-          </CardContent>
-        </Card>
+          </aside>
 
-        {/* Main content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left sidebar */}
-          <div className="space-y-6">
-            {/* Category breakdown */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-bold">Category breakdown for this chain</CardTitle>
-                <p className="text-xs text-muted-foreground">Most venues in this chain are <span className="font-semibold text-foreground">Fast Food Restaurants</span></p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {CHAIN_DATA.categories.map((cat) => (
-                  <div key={cat.name} className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-foreground truncate">{cat.name}</span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="h-3 rounded-sm bg-primary/70" style={{ width: `${Math.max(8, (cat.count / maxCount) * 60)}px` }} />
-                      <span className="text-sm font-medium tabular-nums text-foreground">{cat.count}</span>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+          {/* Mobile brand + collapsible meta */}
+          <div className="space-y-4 lg:hidden">
+            <ChainIdentity chain={chain} compact />
 
-            {/* Translated Names */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-bold">Translated Names</CardTitle>
-                <p className="text-xs text-muted-foreground">Most venues in this chain are <span className="font-semibold text-foreground">Fast Food Restaurants</span></p>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {CHAIN_DATA.translations.map((t, i) => (
-                  <div key={`${t.lang}-${i}`} className="flex items-center gap-4">
-                    <span className="text-sm text-muted-foreground w-6">{t.lang}</span>
-                    <span className="text-sm text-foreground">{t.name}</span>
-                  </div>
-                ))}
-
-                <Separator className="my-4" />
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">See this chain in</p>
-                  <div className="flex items-center gap-2">
-                    <Select value={country} onValueChange={setCountry}>
-                      <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Select a country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="us">United States</SelectItem>
-                        <SelectItem value="jp">Japan</SelectItem>
-                        <SelectItem value="kr">South Korea</SelectItem>
-                        <SelectItem value="cn">China</SelectItem>
-                        <SelectItem value="de">Germany</SelectItem>
-                        <SelectItem value="fr">France</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline">Go</Button>
-                  </div>
+            <Collapsible open={metaOpen} onOpenChange={setMetaOpen}>
+              <CollapsibleTrigger className="flex min-h-11 w-full items-center justify-between rounded-lg border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                <span>Chain details</span>
+                <ChevronDown
+                  className={cn(
+                    "size-4 text-muted-foreground transition-transform",
+                    metaOpen && "rotate-180"
+                  )}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4">
+                <div className="rounded-lg border border-border bg-muted/20 p-4">
+                  <ChainMetaSections
+                    chain={chain}
+                    country={country}
+                    onCountryChange={(v) => setCountry(v ?? undefined)}
+                  />
                 </div>
-              </CardContent>
-            </Card>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
-          {/* Right content - Venue names table */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-bold">Most frequently occurring venue names for this chain</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="w-[80px] text-right">Count</TableHead>
-                      <TableHead>Sample Venues</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {CHAIN_DATA.venueNames.map((entry, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium text-sm">{entry.name}</TableCell>
-                        <TableCell className="text-right tabular-nums text-sm">{entry.count.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                            {entry.sampleVenues.map((v, j) => (
-                              <Link key={j} href="/venue/v50" className="text-xs text-primary hover:underline">{v}</Link>
-                            ))}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+          {/* Main content */}
+          <main className="min-w-0 space-y-4">
+            <header className="space-y-1">
+              <h2 className="text-base font-semibold text-foreground sm:text-lg">
+                Most frequently occurring venue names
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {chain.venueNames.length.toLocaleString()} name variants · page{" "}
+                {page} of {totalPages}
+              </p>
+            </header>
 
-                <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
-              </CardContent>
-            </Card>
-          </div>
+            <VenueNameFrequencyList
+              entries={pageEntries}
+              maxCount={maxVenueCount}
+            />
+
+            {chain.venueNames.length > 0 && (
+              <TablePagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                className="mt-2"
+              />
+            )}
+          </main>
         </div>
       </div>
     </div>
