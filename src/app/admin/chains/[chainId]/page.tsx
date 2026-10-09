@@ -502,7 +502,7 @@ export default function ChainDetailPage() {
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] lg:gap-10">
           {/* Desktop sidebar */}
-          <aside className="hidden space-y-6 lg:block">
+          <aside className="hidden space-y-6 rounded-lg border border-border/60 bg-muted/40 p-5 lg:block">
             <ChainIdentity chain={chain} />
             <Separator />
             <ChainMetaSections
