@@ -30,7 +30,6 @@ import {
 import {
   ArrowLeft,
   ChevronDown,
-  ExternalLink,
   History,
   Users,
 } from "lucide-react";
@@ -209,16 +208,20 @@ function ChainIdentity({
           )}
         </div>
 
-        <nav aria-label="Chain links" className="flex flex-wrap gap-x-3 gap-y-1">
-          {chain.links.map((link) => (
-            <a
-              key={link.label}
-              href={link.url}
-              className="inline-flex min-h-10 items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
-            >
-              {link.label}
-              <ExternalLink className="size-3.5 shrink-0" aria-hidden />
-            </a>
+        <nav
+          aria-label="Chain links"
+          className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground"
+        >
+          {chain.links.map((link, i) => (
+            <span key={link.label} className="inline-flex items-center gap-x-1.5">
+              {i > 0 && <span aria-hidden className="text-border">·</span>}
+              <a
+                href={link.url}
+                className="hover:text-foreground hover:underline underline-offset-2"
+              >
+                {link.label.replace(/^On\s+/i, "")}
+              </a>
+            </span>
           ))}
         </nav>
 
