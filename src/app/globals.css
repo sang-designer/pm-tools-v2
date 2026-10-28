@@ -5,50 +5,66 @@
 @import "./map-styles.css";
 @import "../styles/achievements.css";
 
+/* Semantic tokens mapped from Tile2 (Figma Tile Colors - Swatches) */
 @layer base {
   :root {
+    /* brand-primary-white / gray-950 */
     --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --foreground: 0 0% 13%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 0 0% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 0 0% 13%;
+    /* brand-primary-cobalt */
     --primary: 240 100% 60%;
     --primary-foreground: 0 0% 100%;
+    /* brand-primary-offwhite / gray-950 */
     --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84% 60%;
+    --secondary-foreground: 0 0% 13%;
+    /* gray-100 / gray-900 */
+    --muted: 0 0% 98%;
+    --muted-foreground: 0 0% 39%;
+    /* primary-50 / primary-900 */
+    --accent: 222 100% 98%;
+    --accent-foreground: 240 96% 21%;
+    /* status-red-600 */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    /* gray-300 */
+    --border: 0 0% 91%;
+    --input: 0 0% 91%;
     --ring: 240 100% 60%;
     --radius: 0.625rem;
   }
 
   .dark {
-    --background: 220 20% 10%;
-    --foreground: 0 0% 93%;
-    --card: 220 18% 13%;
-    --card-foreground: 0 0% 93%;
-    --popover: 220 18% 13%;
-    --popover-foreground: 0 0% 93%;
-    --primary: 240 100% 65%;
+    /* brand-primary-midnight / offwhite */
+    --background: 240 100% 7%;
+    --foreground: 0 0% 96%;
+    /* brand-primary-indigo */
+    --card: 235 70% 18%;
+    --card-foreground: 0 0% 96%;
+    --popover: 235 70% 18%;
+    --popover-foreground: 0 0% 96%;
+    /* primary-400 for contrast on navy */
+    --primary: 231 95% 70%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 18%;
-    --secondary-foreground: 0 0% 93%;
-    --muted: 220 14% 18%;
-    --muted-foreground: 0 0% 55%;
-    --accent: 220 14% 20%;
-    --accent-foreground: 0 0% 93%;
-    --destructive: 0 84% 60%;
+    /* brand-primary-indigo / offwhite */
+    --secondary: 235 70% 18%;
+    --secondary-foreground: 0 0% 96%;
+    /* brand-primary-navy / gray-700 */
+    --muted: 240 79% 26%;
+    --muted-foreground: 0 0% 73%;
+    /* brand-primary-navy / white */
+    --accent: 240 79% 26%;
+    --accent-foreground: 0 0% 100%;
+    /* status-red-600 */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 14% 22%;
-    --input: 220 14% 22%;
-    --ring: 240 100% 65%;
+    /* navy-tinted border between midnight and indigo */
+    --border: 235 45% 28%;
+    --input: 235 45% 28%;
+    --ring: 231 95% 70%;
   }
 
   * {
