@@ -9,15 +9,68 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { cn } from "@/lib/utils";
+
+interface ChainVenue {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+}
 
 interface VenueNameEntry {
   name: string;
   count: number;
-  sampleVenues: string[];
+  venues: ChainVenue[];
 }
+
+// Mock venue data generator
+const generateVenues = (name: string, count: number): ChainVenue[] => {
+  const addresses = [
+    { street: "1100 Fillmore St", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "2001 Market St", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "3600 16th St", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "1201 Ocean Ave", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "598 Bryant St", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "5001 Geary Blvd", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "2145 Chestnut St", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "4011 Balboa St", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "1 Embarcadero Center", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "845 Market St", city: "San Francisco", state: "CA", country: "United States" },
+    { street: "1535 Broadway", city: "New York", state: "NY", country: "United States" },
+    { street: "160 W 42nd St", city: "New York", state: "NY", country: "United States" },
+    { street: "1560 Broadway", city: "New York", state: "NY", country: "United States" },
+    { street: "5101 Wilshire Blvd", city: "Los Angeles", state: "CA", country: "United States" },
+    { street: "6350 Hollywood Blvd", city: "Los Angeles", state: "CA", country: "United States" },
+    { street: "201 N State St", city: "Chicago", state: "IL", country: "United States" },
+    { street: "600 N Clark St", city: "Chicago", state: "IL", country: "United States" },
+    { street: "1-3-2 Shinjuku", city: "Tokyo", state: "Tokyo", country: "Japan" },
+    { street: "2-14-5 Shibuya", city: "Tokyo", state: "Tokyo", country: "Japan" },
+    { street: "3-8-16 Ikebukuro", city: "Tokyo", state: "Tokyo", country: "Japan" },
+    { street: "Wangfujing St 138", city: "Beijing", state: "Beijing", country: "China" },
+    { street: "Nanjing Rd E 638", city: "Shanghai", state: "Shanghai", country: "China" },
+    { street: "Gangnam-daero 156", city: "Seoul", state: "Seoul", country: "South Korea" },
+    { street: "Jongno 1-ga 1", city: "Seoul", state: "Seoul", country: "South Korea" },
+    { street: "King Fahd Rd", city: "Riyadh", state: "Riyadh Province", country: "Saudi Arabia" },
+  ];
+
+  return Array.from({ length: Math.min(count, 8) }, (_, i) => {
+    const addr = addresses[i % addresses.length];
+    return {
+      id: `venue-${name}-${i}`,
+      name,
+      address: addr.street,
+      city: addr.city,
+      state: addr.state,
+      country: addr.country,
+    };
+  });
+};
 
 const CHAIN_DATA = {
   name: "McDonald's",
@@ -43,30 +96,38 @@ const CHAIN_DATA = {
     { lang: "zh", name: "麦当劳" },
   ],
   venueNames: [
-    { name: "McDonald's", count: 38537, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's 麦当劳...", count: 2356, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "マクドナルド", count: 2100, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "McDonald's 麦当劳...", count: 467, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's...", count: 351, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's (ماكدونالدز)...", count: 182, sampleVenues: ["Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's & McCafé...", count: 166, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "McCafé", count: 142, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "Mcdonald's", count: 101, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "McDonald's 麦当劳...", count: 95, sampleVenues: ["Sample venue", "Sample venue", "Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue", "Sample venue"] },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: ["Sample venue", "Sample venue"] },
+    { name: "McDonald's", count: 38537, venues: generateVenues("McDonald's", 8) },
+    { name: "McDonald's 麦当劳", count: 2356, venues: generateVenues("McDonald's 麦当劳", 6) },
+    { name: "マクドナルド", count: 2100, venues: generateVenues("マクドナルド", 5) },
+    { name: "McDonald's & McCafé", count: 467, venues: generateVenues("McDonald's & McCafé", 4) },
+    { name: "McDonald's Express", count: 351, venues: generateVenues("McDonald's Express", 5) },
+    { name: "McDonald's (ماكدونالدز)", count: 182, venues: generateVenues("McDonald's (ماكدونالدز)", 3) },
+    { name: "McCafé", count: 166, venues: generateVenues("McCafé", 4) },
+    { name: "Mcdonald's", count: 101, venues: generateVenues("Mcdonald's", 3) },
+    { name: "McDonald's 24/7", count: 95, venues: generateVenues("McDonald's 24/7", 4) },
+    { name: "맥도날드", count: 82, venues: generateVenues("맥도날드", 3) },
   ] as VenueNameEntry[],
 };
 
 export default function ChainDetailPage() {
   const [page, setPage] = useState(1);
   const [country, setCountry] = useState("");
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const totalPages = 6;
 
   const maxCount = Math.max(...CHAIN_DATA.categories.map((c) => c.count));
+
+  const toggleRow = (index: number) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -175,25 +236,51 @@ export default function ChainDetailPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[40px]"></TableHead>
                       <TableHead>Name</TableHead>
-                      <TableHead className="w-[80px] text-right">Count</TableHead>
-                      <TableHead>Sample Venues</TableHead>
+                      <TableHead className="w-[100px] text-right">Count</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {CHAIN_DATA.venueNames.map((entry, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium text-sm">{entry.name}</TableCell>
-                        <TableCell className="text-right tabular-nums text-sm">{entry.count.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                            {entry.sampleVenues.map((v, j) => (
-                              <Link key={j} href="/venue/v50" className="text-xs text-primary hover:underline">{v}</Link>
-                            ))}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {CHAIN_DATA.venueNames.map((entry, i) => {
+                      const isExpanded = expandedRows.has(i);
+                      return (
+                        <>
+                          <TableRow 
+                            key={i} 
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => toggleRow(i)}
+                          >
+                            <TableCell>
+                              {isExpanded ? (
+                                <ChevronDown className="size-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="size-4 text-muted-foreground" />
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium text-sm">{entry.name}</TableCell>
+                            <TableCell className="text-right tabular-nums text-sm">{entry.count.toLocaleString()}</TableCell>
+                          </TableRow>
+                          {isExpanded && entry.venues.map((venue, j) => (
+                            <TableRow key={`${i}-venue-${j}`} className="bg-muted/20">
+                              <TableCell></TableCell>
+                              <TableCell colSpan={2} className="pl-8">
+                                <Link 
+                                  href={`/venue/${venue.id}`}
+                                  className="block py-1 hover:text-primary"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <div className="text-sm font-medium">{venue.name}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {venue.address}, {venue.city}, {venue.state}, {venue.country}
+                                  </div>
+                                </Link>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </>
+                      );
+                    })}
                   </TableBody>
                 </Table>
 
