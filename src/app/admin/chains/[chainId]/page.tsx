@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { GlobalNav } from "@/components/global-nav";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
 import {
   ArrowLeft,
   ChevronDown,
+  ChevronRight,
   Facebook,
   Globe,
   History,
@@ -45,7 +46,16 @@ import { cn } from "@/lib/utils";
 interface VenueNameEntry {
   name: string;
   count: number;
-  sampleVenues: { id: string; label: string }[];
+  venues: ChainVenue[];
+}
+
+interface ChainVenue {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
 }
 
 interface ChainCategory {
@@ -77,11 +87,34 @@ const COUNTRIES = [
   { value: "fr", label: "France" },
 ] as const;
 
-const SAMPLE = (n: number) =>
-  Array.from({ length: n }, (_, i) => ({
-    id: `v${50 + i}`,
-    label: "Sample venue",
-  }));
+const generateVenues = (name: string, count: number): ChainVenue[] => {
+  const addresses = [
+    { address: "1100 Fillmore St", city: "San Francisco", state: "CA", country: "United States" },
+    { address: "2001 Market St", city: "San Francisco", state: "CA", country: "United States" },
+    { address: "3600 16th St", city: "San Francisco", state: "CA", country: "United States" },
+    { address: "1201 Ocean Ave", city: "San Francisco", state: "CA", country: "United States" },
+    { address: "598 Bryant St", city: "San Francisco", state: "CA", country: "United States" },
+    { address: "5001 Geary Blvd", city: "San Francisco", state: "CA", country: "United States" },
+    { address: "1535 Broadway", city: "New York", state: "NY", country: "United States" },
+    { address: "160 W 42nd St", city: "New York", state: "NY", country: "United States" },
+    { address: "5101 Wilshire Blvd", city: "Los Angeles", state: "CA", country: "United States" },
+    { address: "201 N State St", city: "Chicago", state: "IL", country: "United States" },
+    { address: "1-3-2 Shinjuku", city: "Tokyo", state: "Tokyo", country: "Japan" },
+    { address: "2-14-5 Shibuya", city: "Tokyo", state: "Tokyo", country: "Japan" },
+    { address: "Wangfujing St 138", city: "Beijing", state: "Beijing", country: "China" },
+    { address: "Gangnam-daero 156", city: "Seoul", state: "Seoul", country: "South Korea" },
+    { address: "King Fahd Rd", city: "Riyadh", state: "Riyadh Province", country: "Saudi Arabia" },
+  ];
+
+  return Array.from({ length: count }, (_, i) => {
+    const venue = addresses[i % addresses.length];
+    return {
+      id: `${name}-${i}`,
+      name,
+      ...venue,
+    };
+  });
+};
 
 const DEFAULT_CHAIN: Omit<ChainDetail, "id" | "name" | "logo"> = {
   links: [
@@ -104,21 +137,21 @@ const DEFAULT_CHAIN: Omit<ChainDetail, "id" | "name" | "logo"> = {
     { lang: "zh", name: "麦当劳" },
   ],
   venueNames: [
-    { name: "McDonald's", count: 38537, sampleVenues: SAMPLE(4) },
-    { name: "McDonald's 麦当劳...", count: 2356, sampleVenues: SAMPLE(4) },
-    { name: "マクドナルド", count: 2100, sampleVenues: SAMPLE(2) },
-    { name: "McDonald's 麦当劳...", count: 467, sampleVenues: SAMPLE(4) },
-    { name: "McDonald's...", count: 351, sampleVenues: SAMPLE(4) },
-    { name: "McDonald's (ماكدونالدز)...", count: 182, sampleVenues: SAMPLE(3) },
-    { name: "McDonald's & McCafé...", count: 166, sampleVenues: SAMPLE(2) },
-    { name: "McCafé", count: 142, sampleVenues: SAMPLE(2) },
-    { name: "Mcdonald's", count: 101, sampleVenues: SAMPLE(4) },
-    { name: "McDonald's 麦当劳...", count: 95, sampleVenues: SAMPLE(4) },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(2) },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(3) },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(2) },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(3) },
-    { name: "맥도날드 (McDonald's)...", count: 82, sampleVenues: SAMPLE(2) },
+    { name: "McDonald's", count: 38537, venues: generateVenues("McDonald's", 4) },
+    { name: "McDonald's 麦当劳...", count: 2356, venues: generateVenues("McDonald's 麦当劳...", 4) },
+    { name: "マクドナルド", count: 2100, venues: generateVenues("マクドナルド", 2) },
+    { name: "McDonald's 麦当劳...", count: 467, venues: generateVenues("McDonald's 麦当劳...", 4) },
+    { name: "McDonald's...", count: 351, venues: generateVenues("McDonald's...", 4) },
+    { name: "McDonald's (ماكدونالدز)...", count: 182, venues: generateVenues("McDonald's (ماكدونالدز)...", 3) },
+    { name: "McDonald's & McCafé...", count: 166, venues: generateVenues("McDonald's & McCafé...", 2) },
+    { name: "McCafé", count: 142, venues: generateVenues("McCafé", 2) },
+    { name: "Mcdonald's", count: 101, venues: generateVenues("Mcdonald's", 4) },
+    { name: "McDonald's 麦当劳...", count: 95, venues: generateVenues("McDonald's 麦当劳...", 4) },
+    { name: "맥도날드 (McDonald's)...", count: 82, venues: generateVenues("맥도날드 (McDonald's)...", 2) },
+    { name: "맥도날드 (McDonald's)...", count: 82, venues: generateVenues("맥도날드 (McDonald's)...", 3) },
+    { name: "맥도날드 (McDonald's)...", count: 82, venues: generateVenues("맥도날드 (McDonald's)...", 2) },
+    { name: "맥도날드 (McDonald's)...", count: 82, venues: generateVenues("맥도날드 (McDonald's)...", 3) },
+    { name: "맥도날드 (McDonald's)...", count: 82, venues: generateVenues("맥도날드 (McDonald's)...", 2) },
   ],
 };
 
@@ -145,10 +178,10 @@ const CHAIN_OVERRIDES: Record<string, Partial<ChainDetail>> = {
       { lang: "ar", name: "ستاربكس" },
     ],
     venueNames: [
-      { name: "Starbucks", count: 30112, sampleVenues: SAMPLE(4) },
-      { name: "Starbucks Coffee", count: 2840, sampleVenues: SAMPLE(3) },
-      { name: "スターバックス", count: 1902, sampleVenues: SAMPLE(2) },
-      { name: "Starbucks Reserve", count: 412, sampleVenues: SAMPLE(2) },
+      { name: "Starbucks", count: 30112, venues: generateVenues("Starbucks", 4) },
+      { name: "Starbucks Coffee", count: 2840, venues: generateVenues("Starbucks Coffee", 3) },
+      { name: "スターバックス", count: 1902, venues: generateVenues("スターバックス", 2) },
+      { name: "Starbucks Reserve", count: 412, venues: generateVenues("Starbucks Reserve", 2) },
     ],
   },
 };
@@ -379,10 +412,26 @@ function ChainMetaSections({
 function VenueNameFrequencyList({
   entries,
   maxCount,
+  entryOffset,
 }: {
   entries: VenueNameEntry[];
   maxCount: number;
+  entryOffset: number;
 }) {
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+
+  const toggleRow = (index: number) => {
+    setExpandedRows((previous) => {
+      const next = new Set(previous);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  };
+
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-6 py-16 text-center">
@@ -401,29 +450,50 @@ function VenueNameFrequencyList({
       <ul className="divide-y divide-border rounded-lg border border-border md:hidden">
         {entries.map((entry, i) => {
           const pct = Math.max(4, Math.round((entry.count / maxCount) * 100));
+          const index = entryOffset + i;
+          const isExpanded = expandedRows.has(index);
           return (
             <li key={`${entry.name}-${i}`} className="space-y-3 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <p className="min-w-0 text-sm font-medium leading-snug text-foreground">
-                  {entry.name}
-                </p>
+              <button
+                type="button"
+                aria-expanded={isExpanded}
+                aria-controls={`mobile-venue-list-${index}`}
+                onClick={() => toggleRow(index)}
+                className="flex min-h-10 w-full items-start justify-between gap-3 rounded-sm text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="flex min-w-0 items-start gap-2">
+                  {isExpanded ? (
+                    <ChevronDown className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  )}
+                  <span className="text-sm font-medium leading-snug text-foreground">
+                    {entry.name}
+                  </span>
+                </span>
                 <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
                   {entry.count.toLocaleString()}
                 </span>
-              </div>
+              </button>
               <Progress value={pct} className="h-1.5" aria-hidden />
-              <div className="flex flex-wrap gap-x-3 gap-y-1">
-                <span className="sr-only">Sample venues</span>
-                {entry.sampleVenues.map((venue, j) => (
-                  <Link
-                    key={`${venue.id}-${j}`}
-                    href={`/venue/${venue.id}`}
-                    className="inline-flex min-h-10 items-center text-sm text-primary underline-offset-4 hover:underline"
-                  >
-                    {venue.label}
-                  </Link>
-                ))}
-              </div>
+              {isExpanded && (
+                <div id={`mobile-venue-list-${index}`} className="space-y-2 pl-6">
+                  {entry.venues.map((venue, j) => (
+                    <Link
+                      key={`${venue.id}-${j}`}
+                      href={`/venue/${encodeURIComponent(venue.id)}`}
+                      className="block rounded-md bg-muted/40 p-3 transition-colors hover:bg-muted"
+                    >
+                      <span className="block text-sm font-medium text-foreground">
+                        {venue.name}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        {venue.address}, {venue.city}, {venue.state}, {venue.country}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </li>
           );
         })}
@@ -437,17 +507,38 @@ function VenueNameFrequencyList({
           </caption>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[42%]">Name</TableHead>
+              <TableHead className="w-10">
+                <span className="sr-only">Expand</span>
+              </TableHead>
+              <TableHead className="w-[32%]">Name</TableHead>
               <TableHead className="w-[18%]">Frequency</TableHead>
               <TableHead className="w-[10%] text-right">Count</TableHead>
-              <TableHead>Sample venues</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {entries.map((entry, i) => {
               const pct = Math.max(4, Math.round((entry.count / maxCount) * 100));
+              const index = entryOffset + i;
+              const isExpanded = expandedRows.has(index);
               return (
-                <TableRow key={`${entry.name}-${i}`}>
+                <Fragment key={`${entry.name}-${i}`}>
+                <TableRow>
+                  <TableCell className="align-middle">
+                    <button
+                      type="button"
+                      aria-label={`${isExpanded ? "Collapse" : "Expand"} venues for ${entry.name}`}
+                      aria-expanded={isExpanded}
+                      aria-controls={`desktop-venue-list-${index}`}
+                      onClick={() => toggleRow(index)}
+                      className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="size-4" />
+                      ) : (
+                        <ChevronRight className="size-4" />
+                      )}
+                    </button>
+                  </TableCell>
                   <TableCell className="align-middle text-sm font-medium text-foreground">
                     {entry.name}
                   </TableCell>
@@ -461,20 +552,28 @@ function VenueNameFrequencyList({
                   <TableCell className="align-middle text-right text-sm tabular-nums text-foreground">
                     {entry.count.toLocaleString()}
                   </TableCell>
-                  <TableCell className="align-middle">
-                    <div className="flex flex-wrap gap-x-3 gap-y-1">
-                      {entry.sampleVenues.map((venue, j) => (
-                        <Link
-                          key={`${venue.id}-${j}`}
-                          href={`/venue/${venue.id}`}
-                          className="text-sm text-primary underline-offset-4 hover:underline"
-                        >
-                          {venue.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </TableCell>
                 </TableRow>
+                {isExpanded && entry.venues.map((venue, j) => (
+                  <TableRow
+                    key={`${index}-${venue.id}-${j}`}
+                    id={j === 0 ? `desktop-venue-list-${index}` : undefined}
+                    className="bg-muted/20 hover:bg-muted/40"
+                  >
+                    <TableCell />
+                    <TableCell colSpan={3} className="pl-4">
+                      <Link
+                        href={`/venue/${encodeURIComponent(venue.id)}`}
+                        className="block rounded-md py-2 transition-colors hover:text-primary"
+                      >
+                        <span className="block text-sm font-medium">{venue.name}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {venue.address}, {venue.city}, {venue.state}, {venue.country}
+                        </span>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                </Fragment>
               );
             })}
           </TableBody>
@@ -565,6 +664,7 @@ export default function ChainDetailPage() {
             <VenueNameFrequencyList
               entries={pageEntries}
               maxCount={maxVenueCount}
+              entryOffset={(page - 1) * perPage}
             />
 
             {chain.venueNames.length > 0 && (
