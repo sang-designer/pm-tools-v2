@@ -35,8 +35,8 @@ import {
   Globe,
   History,
   Instagram,
+  MapPinCheck,
   Twitter,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -118,10 +118,10 @@ function ChainIdentity({
         </nav>
 
         <div className="flex flex-wrap gap-2 pt-1">
-          <Link href={`/admin/chains/${chain.id}/manage-users`}>
+          <Link href={`/admin/chains/${chain.id}/manage-confirmed-places`}>
             <Button variant="outline" className="min-h-10">
-              <Users data-icon="inline-start" />
-              Manage users
+              <MapPinCheck data-icon="inline-start" />
+              Manage Confirmed Places
             </Button>
           </Link>
           <Link href={`/admin/chains/${chain.id}/history`}>
