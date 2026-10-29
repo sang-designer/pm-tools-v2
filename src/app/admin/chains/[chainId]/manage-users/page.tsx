@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { ChevronRight } from "lucide-react";
+import { getChainDetail } from "@/lib/chain-data";
 
 interface SuggestedVenue {
   id: string;
@@ -25,31 +26,56 @@ interface SuggestedVenue {
   confirmed: boolean;
 }
 
-const CHAIN_NAME = "McDonald's";
-const TOTAL_VENUES = 38537;
-
-const INITIAL_SUGGESTED_VENUES: SuggestedVenue[] = [
-  { id: "sv-1", name: "McDonald's", address: "1549 North State St", city: "Orem", state: "UT", country: "United States", category: "Fast Food Restaurant", checkIns: 19, uniqueVisitors: 13, confirmed: true },
-  { id: "sv-2", name: "Mcdonalds", address: "2304 S Kirkman Rd", city: "Orlando", state: "FL", country: "United States", category: "Fast Food Restaurant", checkIns: 118, uniqueVisitors: 66, confirmed: true },
-  { id: "sv-3", name: "McDonald's", address: "3240 Gratiot Ave", city: "Marysville", state: "MI", country: "United States", category: "Fast Food Restaurant", checkIns: 513, uniqueVisitors: 55, confirmed: true },
-  { id: "sv-4", name: "McDonald's", address: "2239 N Telegraph Rd", city: "Monroe", state: "MI", country: "United States", category: "Fast Food Restaurant", checkIns: 79, uniqueVisitors: 22, confirmed: true },
-  { id: "sv-5", name: "McDonald's", address: "314 Baldwin St", city: "Jenison", state: "MI", country: "United States", category: "Fast Food Restaurant", checkIns: 590, uniqueVisitors: 85, confirmed: true },
-  { id: "sv-6", name: "McDonald's", address: "51074 Romeo Plank Rd", city: "Macomb", state: "MI", country: "United States", category: "Fast Food Restaurant", checkIns: 227, uniqueVisitors: 77, confirmed: true },
-  { id: "sv-7", name: "McDonald's", address: "6900 Silver Star Rd", city: "Ocoee", state: "FL", country: "United States", category: "Fast Food Restaurant", checkIns: 24, uniqueVisitors: 14, confirmed: true },
-  { id: "sv-8", name: "McDonald's", address: "555 Seven Mile Rd", city: "Northville", state: "MI", country: "United States", category: "Fast Food Restaurant", checkIns: 237, uniqueVisitors: 47, confirmed: true },
-  { id: "sv-9", name: "McDonald's", address: "200 South Clinton St", city: "Stockbridge", state: "MI", country: "United States", category: "Fast Food Restaurant", checkIns: 43, uniqueVisitors: 19, confirmed: true },
-  { id: "sv-10", name: "McDonald's", address: "654 Fairview Rd", city: "Simpsonville", state: "SC", country: "United States", category: "Fast Food Restaurant", checkIns: 42, uniqueVisitors: 20, confirmed: true },
-  { id: "sv-11", name: "McDonald's & McCafé", address: "1100 Fillmore St", city: "San Francisco", state: "CA", country: "United States", category: "Café", checkIns: 156, uniqueVisitors: 61, confirmed: false },
-  { id: "sv-12", name: "McDonald's Express", address: "2001 Market St", city: "San Francisco", state: "CA", country: "United States", category: "Fast Food Restaurant", checkIns: 88, uniqueVisitors: 31, confirmed: false },
+// Address/activity template used to seed suggested venues for any chain.
+const SUGGESTED_VENUE_TEMPLATE = [
+  { address: "1549 North State St", city: "Orem", state: "UT", country: "United States", nameSuffix: "", checkIns: 19, uniqueVisitors: 13, confirmed: true },
+  { address: "2304 S Kirkman Rd", city: "Orlando", state: "FL", country: "United States", nameSuffix: "", checkIns: 118, uniqueVisitors: 66, confirmed: true },
+  { address: "3240 Gratiot Ave", city: "Marysville", state: "MI", country: "United States", nameSuffix: "", checkIns: 513, uniqueVisitors: 55, confirmed: true },
+  { address: "2239 N Telegraph Rd", city: "Monroe", state: "MI", country: "United States", nameSuffix: "", checkIns: 79, uniqueVisitors: 22, confirmed: true },
+  { address: "314 Baldwin St", city: "Jenison", state: "MI", country: "United States", nameSuffix: "", checkIns: 590, uniqueVisitors: 85, confirmed: true },
+  { address: "51074 Romeo Plank Rd", city: "Macomb", state: "MI", country: "United States", nameSuffix: "", checkIns: 227, uniqueVisitors: 77, confirmed: true },
+  { address: "6900 Silver Star Rd", city: "Ocoee", state: "FL", country: "United States", nameSuffix: "", checkIns: 24, uniqueVisitors: 14, confirmed: true },
+  { address: "555 Seven Mile Rd", city: "Northville", state: "MI", country: "United States", nameSuffix: "", checkIns: 237, uniqueVisitors: 47, confirmed: true },
+  { address: "200 South Clinton St", city: "Stockbridge", state: "MI", country: "United States", nameSuffix: "", checkIns: 43, uniqueVisitors: 19, confirmed: true },
+  { address: "654 Fairview Rd", city: "Simpsonville", state: "SC", country: "United States", nameSuffix: "", checkIns: 42, uniqueVisitors: 20, confirmed: true },
+  { address: "1100 Fillmore St", city: "San Francisco", state: "CA", country: "United States", nameSuffix: " Reserve", checkIns: 156, uniqueVisitors: 61, confirmed: false },
+  { address: "2001 Market St", city: "San Francisco", state: "CA", country: "United States", nameSuffix: " Express", checkIns: 88, uniqueVisitors: 31, confirmed: false },
 ];
+
+function buildSuggestedVenues(chainName: string, category: string): SuggestedVenue[] {
+  return SUGGESTED_VENUE_TEMPLATE.map((v, i) => ({
+    id: `sv-${i + 1}`,
+    name: `${chainName}${v.nameSuffix}`,
+    address: v.address,
+    city: v.city,
+    state: v.state,
+    country: v.country,
+    category,
+    checkIns: v.checkIns,
+    uniqueVisitors: v.uniqueVisitors,
+    confirmed: v.confirmed,
+  }));
+}
 
 const PAGE_SIZE = 20;
 
 export default function ChainManageUsersPage() {
   const params = useParams();
   const chainId = params.chainId as string;
+  const chain = getChainDetail(chainId);
+  const totalVenues = chain.venueNames[0]?.count ?? 0;
   const [page, setPage] = useState(1);
-  const [venues, setVenues] = useState(INITIAL_SUGGESTED_VENUES);
+  const [venues, setVenues] = useState(() =>
+    buildSuggestedVenues(chain.name, chain.categories[0]?.name ?? "")
+  );
+
+  // Re-seed if the chain changes without a full page remount (e.g. navigating
+  // directly between two chains' Manage users pages).
+  useEffect(() => {
+    setVenues(buildSuggestedVenues(chain.name, chain.categories[0]?.name ?? ""));
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId]);
 
   const totalPages = Math.max(1, Math.ceil(venues.length / PAGE_SIZE));
   const pageVenues = venues.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -77,16 +103,16 @@ export default function ChainManageUsersPage() {
           <ChevronRight className="size-3" />
           <Link href="/admin/chains" className="hover:text-foreground transition-colors">Chains</Link>
           <ChevronRight className="size-3" />
-          <Link href={`/admin/chains/${chainId}`} className="hover:text-foreground transition-colors">{CHAIN_NAME}</Link>
+          <Link href={`/admin/chains/${chainId}`} className="hover:text-foreground transition-colors">{chain.name}</Link>
           <ChevronRight className="size-3" />
           <span className="text-foreground font-medium">Manage users</span>
         </nav>
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Manage users: {CHAIN_NAME}</h1>
+          <h1 className="text-2xl font-bold text-foreground">Manage users: {chain.name}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {TOTAL_VENUES.toLocaleString()} venues in this chain worldwide currently
+            {totalVenues.toLocaleString()} venues in this chain worldwide currently
           </p>
           <p className="text-sm text-muted-foreground">
             {venues.length.toLocaleString()} suggested venues
