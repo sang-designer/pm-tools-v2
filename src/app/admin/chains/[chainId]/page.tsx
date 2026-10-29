@@ -110,6 +110,8 @@ const CHAIN_DATA = {
 };
 
 export default function ChainDetailPage() {
+  const params = useParams();
+  const chainId = params.chainId as string;
   const [page, setPage] = useState(1);
   const [country, setCountry] = useState("");
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
@@ -158,8 +160,12 @@ export default function ChainDetailPage() {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline">Manage users</Button>
-              <Button variant="outline">History</Button>
+              <Link href={`/admin/chains/${chainId}/manage-users`}>
+                <Button variant="outline">Manage users</Button>
+              </Link>
+              <Link href={`/admin/chains/${chainId}/history`}>
+                <Button variant="outline">History</Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
