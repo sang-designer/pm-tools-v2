@@ -22,13 +22,10 @@ import {
   LogOut,
   Bell,
   CheckCheck,
-  Vote,
-  MapPin,
-  Megaphone,
 } from "lucide-react";
 import Link from "next/link";
 import { useNotifications } from "@/lib/notification-context";
-import type { AppNotification, NotificationType } from "@/lib/notification-data";
+import { NotificationRow } from "@/components/notifications/notification-row";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
@@ -594,14 +591,12 @@ function ProductsMenu() {
 }
 
 function MobileNotificationsEntry({ onNavigate }: { onNavigate: () => void }) {
-  const { unreadCount, markAllAsRead } = useNotifications();
+  const { unreadCount } = useNotifications();
   return (
-    <button
+    <Link
+      href="/notifications"
       className="flex h-11 items-center gap-3 rounded-lg px-3 text-sm text-foreground transition-colors hover:bg-accent"
-      onClick={() => {
-        markAllAsRead();
-        onNavigate();
-      }}
+      onClick={onNavigate}
     >
       <Bell className="size-4 text-muted-foreground" />
       Notifications
@@ -610,7 +605,7 @@ function MobileNotificationsEntry({ onNavigate }: { onNavigate: () => void }) {
           {unreadCount}
         </span>
       )}
-    </button>
+    </Link>
   );
 }
 
@@ -622,22 +617,9 @@ function NotificationBadge() {
   );
 }
 
-const NOTIFICATION_TYPE_ICON: Record<NotificationType, React.ComponentType<{ className?: string }>> = {
-  vote_status: Vote,
-  new_location: MapPin,
-  product_news: Megaphone,
-};
-
-function timeAgo(iso: string) {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const hours = Math.round(diffMs / 3600000);
-  if (hours < 1) return "just now";
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
-}
-
 function NotificationPanel() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const recent = notifications.slice(0, 5);
 
   return (
     <div className="flex max-h-[28rem] flex-col">
@@ -655,52 +637,21 @@ function NotificationPanel() {
       </div>
       <Separator />
       <div className="flex-1 overflow-y-auto">
-        {notifications.length === 0 ? (
+        {recent.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-muted-foreground">You&rsquo;re all caught up.</p>
         ) : (
-          notifications.map((n) => <NotificationRow key={n.id} notification={n} onRead={markAsRead} />)
+          recent.map((n) => <NotificationRow key={n.id} notification={n} onRead={markAsRead} />)
         )}
       </div>
-    </div>
-  );
-}
-
-function NotificationRow({
-  notification,
-  onRead,
-}: {
-  notification: AppNotification;
-  onRead: (id: string) => void;
-}) {
-  const Icon = NOTIFICATION_TYPE_ICON[notification.type];
-  const content = (
-    <div
-      className={cn(
-        "flex gap-3 px-4 py-3 text-left transition-colors hover:bg-accent",
-        !notification.read && "bg-primary/5"
-      )}
-      onClick={() => onRead(notification.id)}
-    >
-      <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-accent">
-        <Icon className="size-4 text-foreground" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-foreground">{notification.title}</p>
-        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{notification.body}</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">{timeAgo(notification.createdAt)}</p>
-      </div>
-      {!notification.read && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
-    </div>
-  );
-
-  if (notification.href) {
-    return (
-      <Link href={notification.href} className="block">
-        {content}
+      <Separator />
+      <Link
+        href="/notifications"
+        className="flex items-center justify-center px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-accent"
+      >
+        View all notifications
       </Link>
-    );
-  }
-  return <button className="block w-full">{content}</button>;
+    </div>
+  );
 }
 
 const NavIcon = forwardRef<

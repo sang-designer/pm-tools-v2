@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/combobox";
 import { toast } from "sonner";
 import { useNotifications } from "@/lib/notification-context";
+import { buildOutcomeNotification } from "@/lib/notification-data";
 import { MapPreview } from "@/components/venue/map-preview";
 import {
   Clock,
@@ -575,6 +576,9 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
       body: `"${name}" is in review. We'll notify you once it's approved or rejected.`,
       href: "/my-contributions",
     });
+    setTimeout(() => {
+      pushNotification(buildOutcomeNotification(name, "/my-contributions"));
+    }, 8000);
     setSubmitting(false);
     router.push("/");
   };

@@ -50,3 +50,24 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
     read: true,
   },
 ];
+
+/** Simulates a reviewer resolving a pending submission as approved or rejected. */
+export function buildOutcomeNotification(
+  name: string,
+  href: string
+): Omit<AppNotification, "id" | "createdAt" | "read"> {
+  const approved = Math.random() > 0.35;
+  return approved
+    ? {
+        type: "vote_status",
+        title: "Your submission was approved",
+        body: `"${name}" was approved. Thanks for contributing!`,
+        href,
+      }
+    : {
+        type: "vote_status",
+        title: "Your submission was rejected",
+        body: `Your submission for "${name}" needs more details before it can be approved.`,
+        href,
+      };
+}
