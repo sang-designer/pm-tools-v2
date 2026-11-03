@@ -20,8 +20,15 @@ import {
   ArrowRight,
   ExternalLink,
   LogOut,
+  Bell,
+  CheckCheck,
+  Vote,
+  MapPin,
+  Megaphone,
 } from "lucide-react";
 import Link from "next/link";
+import { useNotifications } from "@/lib/notification-context";
+import type { AppNotification, NotificationType } from "@/lib/notification-data";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
@@ -306,6 +313,30 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                     <PopoverTrigger
                       render={
                         <button
+                          className="relative flex size-10 items-center justify-center rounded-lg bg-transparent transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                          aria-label="Notifications"
+                        >
+                          <Bell className="size-5 text-foreground" />
+                          <NotificationBadge />
+                        </button>
+                      }
+                    />
+                  }
+                />
+                <TooltipContent side="bottom">Notifications</TooltipContent>
+                <PopoverContent align="end" className="w-80 p-0" sideOffset={8}>
+                  <NotificationPanel />
+                </PopoverContent>
+              </Popover>
+            </Tooltip>
+
+            <Tooltip>
+              <Popover>
+                <TooltipTrigger
+                  render={
+                    <PopoverTrigger
+                      render={
+                        <button
                           className="flex size-10 items-center justify-center rounded-lg bg-transparent transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                           aria-label="Profile"
                         >
@@ -490,6 +521,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                 <User className="size-4 text-muted-foreground" />
                 Account
               </button>
+              <MobileNotificationsEntry onNavigate={() => setMenuOpen(false)} />
             </div>
           </div>
         </SheetContent>
@@ -559,6 +591,116 @@ function ProductsMenu() {
       ))}
     </div>
   );
+}
+
+function MobileNotificationsEntry({ onNavigate }: { onNavigate: () => void }) {
+  const { unreadCount, markAllAsRead } = useNotifications();
+  return (
+    <button
+      className="flex h-11 items-center gap-3 rounded-lg px-3 text-sm text-foreground transition-colors hover:bg-accent"
+      onClick={() => {
+        markAllAsRead();
+        onNavigate();
+      }}
+    >
+      <Bell className="size-4 text-muted-foreground" />
+      Notifications
+      {unreadCount > 0 && (
+        <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-destructive text-[11px] font-medium text-destructive-foreground">
+          {unreadCount}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function NotificationBadge() {
+  const { unreadCount } = useNotifications();
+  if (unreadCount === 0) return null;
+  return (
+    <span className="absolute right-1 top-1 flex size-2 rounded-full bg-destructive" aria-hidden="true" />
+  );
+}
+
+const NOTIFICATION_TYPE_ICON: Record<NotificationType, React.ComponentType<{ className?: string }>> = {
+  vote_status: Vote,
+  new_location: MapPin,
+  product_news: Megaphone,
+};
+
+function timeAgo(iso: string) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const hours = Math.round(diffMs / 3600000);
+  if (hours < 1) return "just now";
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
+}
+
+function NotificationPanel() {
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
+  return (
+    <div className="flex max-h-[28rem] flex-col">
+      <div className="flex items-center justify-between px-4 py-3">
+        <p className="text-sm font-semibold text-foreground">Notifications</p>
+        {unreadCount > 0 && (
+          <button
+            className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            onClick={markAllAsRead}
+          >
+            <CheckCheck className="size-3.5" />
+            Mark all as read
+          </button>
+        )}
+      </div>
+      <Separator />
+      <div className="flex-1 overflow-y-auto">
+        {notifications.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">You&rsquo;re all caught up.</p>
+        ) : (
+          notifications.map((n) => <NotificationRow key={n.id} notification={n} onRead={markAsRead} />)
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NotificationRow({
+  notification,
+  onRead,
+}: {
+  notification: AppNotification;
+  onRead: (id: string) => void;
+}) {
+  const Icon = NOTIFICATION_TYPE_ICON[notification.type];
+  const content = (
+    <div
+      className={cn(
+        "flex gap-3 px-4 py-3 text-left transition-colors hover:bg-accent",
+        !notification.read && "bg-primary/5"
+      )}
+      onClick={() => onRead(notification.id)}
+    >
+      <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-accent">
+        <Icon className="size-4 text-foreground" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-foreground">{notification.title}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{notification.body}</p>
+        <p className="mt-1 text-[11px] text-muted-foreground">{timeAgo(notification.createdAt)}</p>
+      </div>
+      {!notification.read && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
+    </div>
+  );
+
+  if (notification.href) {
+    return (
+      <Link href={notification.href} className="block">
+        {content}
+      </Link>
+    );
+  }
+  return <button className="block w-full">{content}</button>;
 }
 
 const NavIcon = forwardRef<

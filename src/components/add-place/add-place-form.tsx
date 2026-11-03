@@ -30,6 +30,7 @@ import {
   ComboboxTrigger,
 } from "@/components/ui/combobox";
 import { toast } from "sonner";
+import { useNotifications } from "@/lib/notification-context";
 import { MapPreview } from "@/components/venue/map-preview";
 import {
   Clock,
@@ -419,6 +420,7 @@ interface AddPlaceFormProps {
 
 export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPlaceFormProps) {
   const router = useRouter();
+  const { pushNotification } = useNotifications();
   const [submitting, setSubmitting] = useState(false);
 
   const [name, setName] = useState("");
@@ -566,6 +568,12 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
     await new Promise((r) => setTimeout(r, 1200));
     toast.success("Place submitted successfully!", {
       description: `"${name}" has been added for review.`,
+    });
+    pushNotification({
+      type: "vote_status",
+      title: "Submission received",
+      body: `"${name}" is in review. We'll notify you once it's approved or rejected.`,
+      href: "/my-contributions",
     });
     setSubmitting(false);
     router.push("/");
