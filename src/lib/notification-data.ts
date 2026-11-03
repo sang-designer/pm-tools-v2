@@ -1,8 +1,12 @@
-export type NotificationType = "vote_status" | "new_location" | "product_news";
+export type NotificationType = "vote_status" | "new_location" | "product_news" | "leaderboard";
+
+export type VoteStatus = "pending" | "approved" | "rejected";
 
 export interface AppNotification {
   id: string;
   type: NotificationType;
+  /** Only set (and relevant) for type "vote_status"; picks the icon/color. */
+  status?: VoteStatus;
   title: string;
   body: string;
   href?: string;
@@ -16,6 +20,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   {
     id: "n-1",
     type: "vote_status",
+    status: "approved",
     title: "Your edit was approved",
     body: "Your suggested hours change for McDonald's on Fillmore St was approved.",
     href: "/my-contributions",
@@ -33,9 +38,9 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: "n-3",
-    type: "product_news",
-    title: "Leaderboard season 2 is live",
-    body: "Compete for the top spot this month and earn bonus points.",
+    type: "leaderboard",
+    title: "You moved up on the leaderboard",
+    body: "You're now #8, up 3 spots this week. You passed Sam Taylor in San Francisco Bay Area.",
     href: "/leaderboard",
     createdAt: hoursAgo(30),
     read: false,
@@ -43,6 +48,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   {
     id: "n-4",
     type: "vote_status",
+    status: "rejected",
     title: "Your submission was rejected",
     body: "Your proposed new place \"Starbucks Reserve\" needs more details before it can be approved.",
     href: "/my-contributions",
@@ -60,12 +66,14 @@ export function buildOutcomeNotification(
   return approved
     ? {
         type: "vote_status",
+        status: "approved",
         title: "Your submission was approved",
         body: `"${name}" was approved. Thanks for contributing!`,
         href,
       }
     : {
         type: "vote_status",
+        status: "rejected",
         title: "Your submission was rejected",
         body: `Your submission for "${name}" needs more details before it can be approved.`,
         href,

@@ -601,7 +601,7 @@ function MobileNotificationsEntry({ onNavigate }: { onNavigate: () => void }) {
       <Bell className="size-4 text-muted-foreground" />
       Notifications
       {unreadCount > 0 && (
-        <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-destructive text-[11px] font-medium text-destructive-foreground">
+        <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground">
           {unreadCount}
         </span>
       )}
@@ -613,7 +613,7 @@ function NotificationBadge() {
   const { unreadCount } = useNotifications();
   if (unreadCount === 0) return null;
   return (
-    <span className="absolute right-1 top-1 flex size-2 rounded-full bg-destructive" aria-hidden="true" />
+    <span className="absolute right-1 top-1 flex size-2 rounded-full bg-primary" aria-hidden="true" />
   );
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Vote, MapPin, Megaphone } from "lucide-react";
+import { Vote, MapPin, Megaphone, CheckCircle2, XCircle, Clock, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AppNotification, NotificationType } from "@/lib/notification-data";
 
@@ -9,13 +9,24 @@ export const NOTIFICATION_TYPE_ICON: Record<NotificationType, React.ComponentTyp
   vote_status: Vote,
   new_location: MapPin,
   product_news: Megaphone,
+  leaderboard: TrendingUp,
 };
 
 export const NOTIFICATION_TYPE_LABEL: Record<NotificationType, string> = {
   vote_status: "Vote/Review status",
   new_location: "New location",
   product_news: "Product news",
+  leaderboard: "Leaderboard",
 };
+
+function getIcon(notification: AppNotification) {
+  if (notification.type === "vote_status") {
+    if (notification.status === "approved") return CheckCircle2;
+    if (notification.status === "rejected") return XCircle;
+    if (notification.status === "pending") return Clock;
+  }
+  return NOTIFICATION_TYPE_ICON[notification.type];
+}
 
 export function timeAgo(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -34,7 +45,7 @@ export function NotificationRow({
   onRead: (id: string) => void;
   compact?: boolean;
 }) {
-  const Icon = NOTIFICATION_TYPE_ICON[notification.type];
+  const Icon = getIcon(notification);
   const content = (
     <div
       className={cn(

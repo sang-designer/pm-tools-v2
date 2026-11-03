@@ -15,6 +15,7 @@ const FILTERS: Array<{ value: NotificationType | "all"; label: string }> = [
   { value: "all", label: "All" },
   { value: "vote_status", label: NOTIFICATION_TYPE_LABEL.vote_status },
   { value: "new_location", label: NOTIFICATION_TYPE_LABEL.new_location },
+  { value: "leaderboard", label: NOTIFICATION_TYPE_LABEL.leaderboard },
   { value: "product_news", label: NOTIFICATION_TYPE_LABEL.product_news },
 ];
 

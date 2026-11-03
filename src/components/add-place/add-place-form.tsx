@@ -572,6 +572,7 @@ export function AddPlaceForm({ onQueryChange, selectedEpw, onEpwApplied }: AddPl
     });
     pushNotification({
       type: "vote_status",
+      status: "pending",
       title: "Submission received",
       body: `"${name}" is in review. We'll notify you once it's approved or rejected.`,
       href: "/my-contributions",
