@@ -34,6 +34,8 @@ import { Separator } from "@/components/ui/separator";
 import { MapPreview } from "@/components/venue/map-preview";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useNotifications } from "@/lib/notification-context";
+import { buildOutcomeNotification } from "@/lib/notification-data";
 import type { Venue } from "@/lib/types";
 
 interface SuggestEditDrawerProps {
@@ -572,6 +574,7 @@ export function SuggestEditDrawer({
   const [isDirty, setIsDirty] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
+  const { pushNotification } = useNotifications();
 
   const markDirty = useCallback(() => {
     if (!isDirty) setIsDirty(true);
@@ -586,6 +589,16 @@ export function SuggestEditDrawer({
 
   const submitFoursquareOnly = () => {
     toast.success("Thank you for your help! You might not see your suggested edits right away, but they’re in the queue and we’ll review them shortly.");
+    pushNotification({
+      type: "vote_status",
+      status: "pending",
+      title: "Edit submitted for review",
+      body: `Your suggested edit for ${venue.name} is in the queue. We'll notify you once it's reviewed.`,
+      href: "/my-contributions",
+    });
+    setTimeout(() => {
+      pushNotification(buildOutcomeNotification(venue.name, "/my-contributions"));
+    }, 8000);
     handleClose();
   };
 

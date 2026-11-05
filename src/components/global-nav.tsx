@@ -20,8 +20,12 @@ import {
   ArrowRight,
   ExternalLink,
   LogOut,
+  Bell,
+  CheckCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { useNotifications } from "@/lib/notification-context";
+import { NotificationRow } from "@/components/notifications/notification-row";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
@@ -306,6 +310,30 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                     <PopoverTrigger
                       render={
                         <button
+                          className="relative flex size-10 items-center justify-center rounded-lg bg-transparent transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                          aria-label="Notifications"
+                        >
+                          <Bell className="size-5 text-foreground" />
+                          <NotificationBadge />
+                        </button>
+                      }
+                    />
+                  }
+                />
+                <TooltipContent side="bottom">Notifications</TooltipContent>
+                <PopoverContent align="end" className="w-80 p-0" sideOffset={8}>
+                  <NotificationPanel />
+                </PopoverContent>
+              </Popover>
+            </Tooltip>
+
+            <Tooltip>
+              <Popover>
+                <TooltipTrigger
+                  render={
+                    <PopoverTrigger
+                      render={
+                        <button
                           className="flex size-10 items-center justify-center rounded-lg bg-transparent transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                           aria-label="Profile"
                         >
@@ -490,6 +518,7 @@ export function GlobalNav({ activeTab = "Home", mode, onModeSwitch, onOpenLeader
                 <User className="size-4 text-muted-foreground" />
                 Account
               </button>
+              <MobileNotificationsEntry onNavigate={() => setMenuOpen(false)} />
             </div>
           </div>
         </SheetContent>
@@ -557,6 +586,70 @@ function ProductsMenu() {
           ))}
         </div>
       ))}
+    </div>
+  );
+}
+
+function MobileNotificationsEntry({ onNavigate }: { onNavigate: () => void }) {
+  const { unreadCount } = useNotifications();
+  return (
+    <Link
+      href="/notifications"
+      className="flex h-11 items-center gap-3 rounded-lg px-3 text-sm text-foreground transition-colors hover:bg-accent"
+      onClick={onNavigate}
+    >
+      <Bell className="size-4 text-muted-foreground" />
+      Notifications
+      {unreadCount > 0 && (
+        <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground">
+          {unreadCount}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function NotificationBadge() {
+  const { unreadCount } = useNotifications();
+  if (unreadCount === 0) return null;
+  return (
+    <span className="absolute right-1 top-1 flex size-2 rounded-full bg-primary" aria-hidden="true" />
+  );
+}
+
+function NotificationPanel() {
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const recent = notifications.slice(0, 5);
+
+  return (
+    <div className="flex max-h-[28rem] flex-col">
+      <div className="flex items-center justify-between px-4 py-3">
+        <p className="text-sm font-semibold text-foreground">Notifications</p>
+        {unreadCount > 0 && (
+          <button
+            className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            onClick={markAllAsRead}
+          >
+            <CheckCheck className="size-3.5" />
+            Mark all as read
+          </button>
+        )}
+      </div>
+      <Separator />
+      <div className="flex-1 overflow-y-auto">
+        {recent.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">You&rsquo;re all caught up.</p>
+        ) : (
+          recent.map((n) => <NotificationRow key={n.id} notification={n} onRead={markAsRead} />)
+        )}
+      </div>
+      <Separator />
+      <Link
+        href="/notifications"
+        className="flex items-center justify-center px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-accent"
+      >
+        View all notifications
+      </Link>
     </div>
   );
 }

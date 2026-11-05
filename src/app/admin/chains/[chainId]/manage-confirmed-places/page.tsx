@@ -59,7 +59,7 @@ function buildSuggestedVenues(chainName: string, category: string): SuggestedVen
 
 const PAGE_SIZE = 20;
 
-export default function ChainManageUsersPage() {
+export default function ChainManageConfirmedPlacesPage() {
   const params = useParams();
   const chainId = params.chainId as string;
   const chain = getChainDetail(chainId);
@@ -70,7 +70,7 @@ export default function ChainManageUsersPage() {
   );
 
   // Re-seed if the chain changes without a full page remount (e.g. navigating
-  // directly between two chains' Manage users pages).
+  // directly between two chains' Manage Confirmed Places pages).
   useEffect(() => {
     setVenues(buildSuggestedVenues(chain.name, chain.categories[0]?.name ?? ""));
     setPage(1);
@@ -80,14 +80,16 @@ export default function ChainManageUsersPage() {
   const totalPages = Math.max(1, Math.ceil(venues.length / PAGE_SIZE));
   const pageVenues = venues.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // Selecting a venue adds this chain's ID to it; unselecting removes it.
   const toggleConfirmed = (id: string) => {
     setVenues((prev) =>
       prev.map((v) => {
         if (v.id !== id) return v;
         const next = { ...v, confirmed: !v.confirmed };
-        toast.success(next.confirmed ? "Marked as confirmed member" : "Removed as confirmed member", {
-          description: next.name,
-        });
+        toast.success(
+          next.confirmed ? `Added ${chain.name} to this place` : `Removed ${chain.name} from this place`,
+          { description: next.name }
+        );
         return next;
       })
     );
@@ -105,17 +107,20 @@ export default function ChainManageUsersPage() {
           <ChevronRight className="size-3" />
           <Link href={`/admin/chains/${chainId}`} className="hover:text-foreground transition-colors">{chain.name}</Link>
           <ChevronRight className="size-3" />
-          <span className="text-foreground font-medium">Manage users</span>
+          <span className="text-foreground font-medium">Manage Confirmed Places</span>
         </nav>
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Manage users: {chain.name}</h1>
+          <h1 className="text-2xl font-bold text-foreground">Manage Confirmed Places: {chain.name}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {totalVenues.toLocaleString()} venues in this chain worldwide currently
+            Add or remove {chain.name}&rsquo;s chain ID from the venues below by selecting or unselecting them.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {totalVenues.toLocaleString()} confirmed places in this chain worldwide
           </p>
           <p className="text-sm text-muted-foreground">
-            {venues.length.toLocaleString()} suggested venues
+            {venues.length.toLocaleString()} places suggested for review
           </p>
         </div>
 
@@ -126,7 +131,7 @@ export default function ChainManageUsersPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[70px]">Confirmed Member</TableHead>
+                    <TableHead className="w-[70px]">Confirmed Place</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Address</TableHead>
                     <TableHead className="w-[160px]">Categories</TableHead>
