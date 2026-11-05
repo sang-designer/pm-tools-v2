@@ -10,6 +10,7 @@ import { DetailsTable } from "@/components/venue/details-table";
 import { CategoriesSection } from "@/components/venue/categories-section";
 import { TipsSection } from "@/components/venue/tips-section";
 import { SubvenuesSection } from "@/components/venue/subvenues-section";
+import { VenueOverview } from "@/components/venue/venue-overview";
 import { VenuePhotos } from "@/components/venue/venue-photos";
 import { VenueAdmin } from "@/components/venue/venue-admin";
 import { SuggestEditDrawer } from "@/components/venue/suggest-edit-drawer";
@@ -48,7 +49,7 @@ import { useState, useRef } from "react";
 
 function CelebrationIllustration() {
   return (
-    <svg width="96" height="96" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="mx-auto" aria-hidden="true">
+    <svg width="64" height="64" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="mx-auto" aria-hidden="true">
       <rect x="47.421" y="138.055" style={{ fill: "#EBEBEC" }} width="417.427" height="365.248" />
       <rect x="47.421" y="138.055" style={{ fill: "#D7D8D9" }} width="26.089" height="365.248" />
       <path style={{ fill: "#CF442B" }} d="M47.421,242.412c19.211,0,34.786-15.574,34.786-34.786H12.636C12.636,226.838,28.209,242.412,47.421,242.412z" />
@@ -88,17 +89,19 @@ function VenueEmptyState({
   onBackToHome: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-border bg-card px-6 py-10 text-center sm:px-12 sm:py-12">
-      <CelebrationIllustration />
-
-      <h2 className="mt-6 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-        No pending tasks for {venueName}
-      </h2>
-      <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-        This place is all set — the community has verified everything. Head back to the map or jump to another spot that needs your help.
-      </p>
-
-      <div className="mt-8">
+    <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-6 text-center sm:flex-row sm:gap-5 sm:px-8 sm:text-left">
+      <div className="shrink-0">
+        <CelebrationIllustration />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
+          No pending tasks for {venueName}
+        </h2>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          This place is all set — the community has verified everything. Head back to the map or jump to another spot that needs your help.
+        </p>
+      </div>
+      <div className="shrink-0">
         <Button variant="outline" className="gap-2" onClick={onBackToHome}>
           <ArrowLeft className="size-4" />
           Back to main page
@@ -304,7 +307,12 @@ export default function VenueDetailPage() {
 
                 <TabsContent value="reviews" className="mt-0">
                   {showEmptyState ? (
-                    <VenueEmptyState venueName={venue.name} onBackToHome={() => router.push("/")} />
+                    <>
+                      <VenueEmptyState venueName={venue.name} onBackToHome={() => router.push("/")} />
+                      <div className="mt-6">
+                        <VenueOverview venue={venue} />
+                      </div>
+                    </>
                   ) : (
                     <>
                       <DetailsTable venue={venue} />
