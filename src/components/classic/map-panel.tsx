@@ -7,9 +7,9 @@ import { useTheme } from "next-themes";
 import { useGame } from "@/lib/game-context";
 import { Venue, VENUE_STATE_COLORS, VenueState } from "@/lib/types";
 
-const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-const TILE_DARK = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+const TILE_LIGHT = "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png";
+const TILE_DARK = "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png";
+const TILE_ATTR = '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>';
 
 function createPinIcon(color: string) {
   return L.divIcon({
@@ -41,7 +41,6 @@ export function MapPanel({ venues: venuesProp }: { venues?: Venue[] }) {
     tileLayerRef.current = L.tileLayer(tileUrl, {
       attribution: TILE_ATTR,
       maxZoom: 20,
-      subdomains: "abcd",
     }).addTo(map);
     L.control.zoom({ position: "topright" }).addTo(map);
 
